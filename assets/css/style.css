@@ -1279,3 +1279,7 @@ h6 {
 .cursor-select{
   cursor: pointer;
 }
+
+.none{
+  display: none;
+}
