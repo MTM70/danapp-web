@@ -60,7 +60,24 @@ class ApiModel extends Mysql
                     INNER JOIN products AS p ON p.id = o.id_product 
                     INNER JOIN varieties AS v ON v.id = od.id_variety 
                     INNER JOIN crops AS c ON c.id = v.id_crop 
-                    WHERE finished = 0 
+                    WHERE o.state = 0 
+                    ORDER BY id_order";
+
+        return $this->select($sql);
+    }
+
+    public function getOrders2()
+    {
+        $sql = "SELECT od.id_order, od.id_variety, tot_quantity, tot_price, remarks, 
+                        o.order_no, o.id_sec_cust, sc.sec_cust, id_type, o.id_product, o.year, o.week, o.destination, 
+                        product, crop, variety 
+                    FROM orders_details AS od 
+                    INNER JOIN orders AS o ON o.id = od.id_order 
+                    INNER JOIN sec_customers AS sc ON sc.id = o.id_sec_cust 
+                    INNER JOIN products AS p ON p.id = o.id_product 
+                    INNER JOIN varieties AS v ON v.id = od.id_variety 
+                    INNER JOIN crops AS c ON c.id = v.id_crop 
+                    WHERE o.state = 0 
                     ORDER BY id_order";
 
         return $this->select($sql);
@@ -87,6 +104,13 @@ class ApiModel extends Mysql
         return $this->select($sql);
     }
 
+    public function getParametersCrops()
+    {
+        $sql = "SELECT * FROM parameters_crops";
+
+        return $this->select($sql);
+    }
+
     public function getOrderParameter(int $idOder, int $idVariety, int $idParameter)
     {
         $sql = "SELECT id FROM orders_parameters WHERE id_order = :value0 AND id_variety = :value1 AND id_parameter = :value2";
@@ -107,6 +131,14 @@ class ApiModel extends Mysql
     {
         $sql = "UPDATE orders_parameters SET value = :value1, obs = :value2 WHERE id = :value0";
         $array = array($id, $value, $obs);
+
+        return $this->update($sql, $array);
+    }
+
+    public function updateOrderState(int $id)
+    {
+        $sql = "UPDATE orders SET state = 1 WHERE id = :value0";
+        $array = array($id);
 
         return $this->update($sql, $array);
     }

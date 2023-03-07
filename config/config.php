@@ -6,7 +6,7 @@
     const DB_HOST = "localhost";
     const DB_USER = "root";
     const DB_PASS = "";
-    const DB_NAME = "plataf_dzgr";
+    const DB_NAME = "danapp";
     const DB_CHARSET = "utf8";
 
     //Others

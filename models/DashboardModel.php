@@ -183,7 +183,7 @@
         public function getDataBetweenWeeks(int $year1, int $week1, int $year2, int $week2)
         {
             $sql = 'SELECT op.year, op.week, order_no, destination, cust_no, cust, sec_cust_no, sec_cust, 
-                        ot.type, product, crop_general, crop, variety_code, variety, parameter, value, obs 
+                        ot.type AS order_type, product, crop_general, crop, variety_code, variety, p.type, parameter, value, obs 
                     FROM orders_parameters AS op 
                     INNER JOIN orders AS o ON o.id = op.id_order 
                     INNER JOIN sec_customers AS sc ON sc.id = o.id_sec_cust 
@@ -194,7 +194,8 @@
                     INNER JOIN parameters AS p ON p.id = op.id_parameter 
                     INNER JOIN orders_types AS ot ON ot.id = o.id_type 
                     INNER JOIN products AS pr ON pr.id = o.id_product 
-                    WHERE (op.year BETWEEN :value0 AND :value2) AND (op.week BETWEEN :value1 AND :value3)';
+                    WHERE (op.year BETWEEN :value0 AND :value2) AND (op.week BETWEEN :value1 AND :value3) 
+                    ORDER BY order_no';
 
             $array = array($year1, $week1, $year2, $week2);
             return $this->select($sql, $array);

@@ -172,7 +172,7 @@
 
                     if (!$crop) { //Si no existe se crea
 
-                        $cropGeneral = (trim($data[$i][25]) == 20) ? 1 : 2 ;
+                        $cropGeneral = (trim($data[$i][25]) == 20) ? 2 : 3 ;
 
                         $insert = $this->model->setCrop($cropGeneral, trim($data[$i][25]), trim($data[$i][26]));
                         if (!$insert) {
@@ -276,21 +276,21 @@
 
                 $spreadsheet = new Spreadsheet();
                 $sheet = $spreadsheet->getActiveSheet();
-                $sheet->setCellValue('A1', 'order_number');
-                $sheet->setCellValue('B1', 'year');
-                $sheet->setCellValue('C1', 'week');
-                $sheet->setCellValue('D1', 'customer_number');
-                $sheet->setCellValue('E1', 'customer_name');
-                $sheet->setCellValue('F1', 'secondary_customer_number');
-                $sheet->setCellValue('G1', 'secondary_customer_name');
-                $sheet->setCellValue('H1', 'order_type');
-                $sheet->setCellValue('I1', 'product');
-                $sheet->setCellValue('J1', 'destination');
-                $sheet->setCellValue('K1', 'variety_number');
-                $sheet->setCellValue('L1', 'variety_name');
-                $sheet->setCellValue('M1', 'parameter');
-                $sheet->setCellValue('N1', 'parameter_value');
-                $sheet->setCellValue('O1', 'parameter_obs');
+                $sheet->setCellValue('A1', 'Order number');
+                $sheet->setCellValue('B1', 'Year');
+                $sheet->setCellValue('C1', 'Week');
+                $sheet->setCellValue('D1', 'Customer number');
+                $sheet->setCellValue('E1', 'Customer name');
+                $sheet->setCellValue('F1', 'Secondary customer number');
+                $sheet->setCellValue('G1', 'Secondary customer name');
+                $sheet->setCellValue('H1', 'Order type');
+                $sheet->setCellValue('I1', 'Product');
+                $sheet->setCellValue('J1', 'Destination');
+                $sheet->setCellValue('K1', 'Variety number');
+                $sheet->setCellValue('L1', 'Variety name');
+                $sheet->setCellValue('M1', 'Parameter');
+                $sheet->setCellValue('N1', 'Parameter value');
+                $sheet->setCellValue('O1', 'Parameter obs');
 
 
                 if (isset($response)) {
@@ -298,6 +298,7 @@
                     $f = 2;
 
                     foreach ($response as $k) {
+
                         $sheet->setCellValue('A'.$f, $k["order_no"]);
                         $sheet->setCellValue('B'.$f, $k["year"]);
                         $sheet->setCellValue('C'.$f, $k["week"]);
@@ -305,20 +306,96 @@
                         $sheet->setCellValue('E'.$f, $k["cust"]);
                         $sheet->setCellValue('F'.$f, $k["sec_cust_no"]);
                         $sheet->setCellValue('G'.$f, $k["sec_cust"]);
-                        $sheet->setCellValue('H'.$f, $k["type"]);
+                        $sheet->setCellValue('H'.$f, $k["order_type"]);
                         $sheet->setCellValue('I'.$f, $k["product"]);
                         $sheet->setCellValue('J'.$f, $k["destination"]);
                         $sheet->setCellValue('K'.$f, $k["variety_code"]);
                         $sheet->setCellValue('L'.$f, $k["variety"]);
                         $sheet->setCellValue('M'.$f, $k["parameter"]);
-                        $sheet->setCellValue('N'.$f, $k["value"]);
+
+                        if ($k["type"] != 4) {
+                            $sheet->setCellValue('N'.$f, $k["value"]);
+                        }else{
+                            $sheet->getStyle('N'.$f)->getFont()->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_BLUE);
+                            $sheet->getCell('N'.$f)->getStyle()->getFont()->setUnderline(true);
+                            $sheet->setCellValue('N'.$f, "View image");
+                            $sheet->getCell('N'.$f)->getHyperlink()->setUrl("https://danapp.co/uploads/".$k["value"]);
+                        }
+
                         $sheet->setCellValue('O'.$f, $k["obs"]);
 
                         $f++;
                     }
                 }
 
+                $sheet->getColumnDimension('A')->setWidth(10.14);
+                $sheet->getRowDimension(1)->setRowHeight(54.75);
+                $sheet->getColumnDimension('B')->setWidth(5.57);
+                $sheet->getColumnDimension('C')->setWidth(6.14);
+                $sheet->getColumnDimension('D')->setWidth(9.50);
+                $sheet->getColumnDimension('E')->setWidth(20.43);
+                $sheet->getColumnDimension('F')->setWidth(13.2);
+                $sheet->getColumnDimension('G')->setWidth(21.57);
+                //$sheet->getColumnDimension('H')->setWidth();
+                $sheet->getColumnDimension('I')->setWidth(8.57);
+                $sheet->getColumnDimension('J')->setWidth(12);
+                $sheet->getColumnDimension('K')->setWidth(9);
+                $sheet->getColumnDimension('L')->setWidth(18);
+                $sheet->getColumnDimension('M')->setWidth(32.57);
+                $sheet->getColumnDimension('N')->setWidth(45);
+                $sheet->getStyle('N')->getAlignment()->setHorizontal('left');
+                $sheet->getColumnDimension('O')->setAutoSize(true);
 
+                $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('A1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $sheet->getStyle('A1')->getAlignment()->setWrapText(true);
+                $sheet->getStyle('B1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('B1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $sheet->getStyle('B1')->getAlignment()->setWrapText(true);
+                $sheet->getStyle('C1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('C1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $sheet->getStyle('C1')->getAlignment()->setWrapText(true);
+                $sheet->getStyle('D1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('D1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $sheet->getStyle('D1')->getAlignment()->setWrapText(true);
+                $sheet->getStyle('E1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('E1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $sheet->getStyle('E1')->getAlignment()->setWrapText(true);
+                $sheet->getStyle('F1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('F1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $sheet->getStyle('F1')->getAlignment()->setWrapText(true);
+                $sheet->getStyle('G1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('G1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $sheet->getStyle('G1')->getAlignment()->setWrapText(true);
+                $sheet->getStyle('H1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('H1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $sheet->getStyle('H1')->getAlignment()->setWrapText(true);
+                $sheet->getStyle('I1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('I1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $sheet->getStyle('I1')->getAlignment()->setWrapText(true);
+                $sheet->getStyle('J1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('J1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $sheet->getStyle('J1')->getAlignment()->setWrapText(true);
+                $sheet->getStyle('K1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('K1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $sheet->getStyle('K1')->getAlignment()->setWrapText(true);
+                $sheet->getStyle('L1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('L1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $sheet->getStyle('L1')->getAlignment()->setWrapText(true);
+                $sheet->getStyle('M1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('M1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $sheet->getStyle('M1')->getAlignment()->setWrapText(true);
+                $sheet->getStyle('N1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('N1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $sheet->getStyle('N1')->getAlignment()->setWrapText(true);
+                $sheet->getStyle('O1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('O1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $sheet->getStyle('O1')->getAlignment()->setWrapText(true);
+
+                $spreadsheet->getActiveSheet()->setAutoFilter('A1:O20');
+                $spreadsheet->getActiveSheet()->freezePane('B2');
+
+                
                 $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
                 $writer->save('php://output');
                 //$writer->save('hello world.xlsx');

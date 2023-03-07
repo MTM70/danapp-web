@@ -88,6 +88,46 @@ class Api extends Controllers
         }
     }
 
+    public function getOrders2()
+    {
+        $res = $this->model->getOrders2();
+
+        if (!empty($res)) {
+
+            foreach ($res as $key => $values) {
+
+                $year = $values["year"];
+                $week = $values["week"];
+
+                //Obtener semanas del ano
+                $date = new DateTime;
+                $date->setISODate($year, 53);
+                $weeks = $date->format("W") === "53" ? 53 : 52;
+                //////////////////////////////////////////////////
+                
+                $cycle = ($values["destination"] == "BOG") ? 14 : 12 ;
+
+                $week = $week + ($cycle - 1);
+                if ($week > $weeks) {
+                    $week = $week - $weeks;
+                    $year++;
+                }
+
+                $week = ($week > 9) ? $week : "0".$week ;
+
+                $lunes = date('Y-m-d', strtotime("Y".$year."W".$week."1"));
+                $viernes = date('Y-m-d', strtotime("Y".$year."W".$week."5"));
+
+                $res[$key]["notify"] = $year.",".$week.",".$lunes." 07:00:00,".$viernes." 07:00:00";
+                //$res[$key]["notify"] = "2023-02-27 21:18:00,2023-02-27 21:18:00";
+            }
+
+            echo json_encode(array("error" => false, "datos" => $res));
+        } else {
+            echo json_encode(array("error" => "No se encontraron ordenes, para este usuario!"));
+        }
+    }
+
     public function getOrdersTypes()
     {
         $res = $this->model->getOrdersTypes();
@@ -118,6 +158,17 @@ class Api extends Controllers
             echo json_encode(array("error" => false, "datos" => $res));
         } else {
             echo json_encode(array("error" => "No se encontraron parametros!"));
+        }
+    }
+
+    public function getParametersCrops()
+    {
+        $res = $this->model->getParametersCrops();
+
+        if (!empty($res)) {
+            echo json_encode(array("error" => false, "datos" => $res));
+        } else {
+            echo json_encode(array("error" => "No se encontraron parametros cultivos!"));
         }
     }
 
@@ -156,7 +207,7 @@ class Api extends Controllers
         if (isset($_POST['file']) AND isset($_POST['data'])) {
 
             $data = json_decode($_POST["data"], true);
-                
+            
             $base64_string = $_POST['file'];
             $name = $data["id_order"]."_".$data["id_variety"]."_".$data["id_parameter"].".jpg";
             $outputfile = "uploads/$name";
@@ -190,6 +241,24 @@ class Api extends Controllers
             echo json_encode(array("error" => false));
         }else{
             echo json_encode(array("error" => "Al recebir datos!"));
+        }
+    }
+
+    public function updateOrderState()
+    {
+        if (isset($_POST['data'])) {
+
+            $data = json_decode($_POST["data"], true);
+            
+            $res = $this->model->updateOrderState($data["idOrder"]);
+            if (!$res) {
+                echo json_encode(array("error" => "Al actualizar estado!"));
+                exit();
+            }
+            
+            echo json_encode(array("error" => false));
+        }else{
+            echo json_encode(array("error" => "Al recibir datos!"));
         }
     }
 }
