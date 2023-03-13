@@ -435,11 +435,63 @@
                         <tbody>';
 
                 foreach ($response as $k) {
+
+                    $type = "Undefined";
+                    $category = "Undefined";
+
+                    switch ($k["type"]) {
+                        case 0:
+                            $type = "Radio";
+                            break;
+
+                        case 1:
+                            $type = "Number";
+                            break;
+
+                        case 2:
+                            $type = "Date";
+                            break;
+
+                        case 3:
+                            $type = "Text";
+                            break;
+
+                        case 4:
+                            $type = "Image";
+                            break;
+
+                        case 5:
+                            $type = "Select";
+                            break;
+
+                        case 6:
+                            $type = "Radio";
+                            break;
+
+                        case 7:
+                            $type = "Image";
+                            break;
+                    }
+
+                    switch ($k["category"]) {
+                        case 1:
+                            $category = "Client";
+                            break;
+                        
+                        case 2:
+                            $category = "Technical";
+                            break;
+
+                        case 3:
+                            $category = "All";
+                            break;
+                    }
+
                     $this->html .= '
                         <tr class="cursor-select">
                             <td scope="row">'.$k["parameter"].'</td>
-                            <td>'.$k["type"].'</td>
-                            <td>'.$k["category"].'</td>
+                            <td>'.$type.'</td>
+                            <td>'.$category.'</td>
                             <td>'.$k["label"].'</td>
                             <td>'.$k["position"].'</td>
                             <td>'.$k["remark"].'</td>

@@ -143,4 +143,12 @@ class ApiModel extends Mysql
         return $this->update($sql, $array);
     }
 
+    public function deleteOrderParameter(int $idOder, int $idVariety, int $idParameter)
+    {
+        $sql = "DELETE FROM orders_parameters WHERE id_order = :value0 AND id_variety = :value1 AND id_parameter = :value2";
+        $array = array($idOder, $idVariety, $idParameter);
+
+        return $this->delete($sql, $array);
+    }
+
 }

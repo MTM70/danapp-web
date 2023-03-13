@@ -261,4 +261,29 @@ class Api extends Controllers
             echo json_encode(array("error" => "Al recibir datos!"));
         }
     }
+
+    public function deleteImage()
+    {
+        if (isset($_POST['data'])) {
+
+            $data = json_decode($_POST["data"], true);
+
+            $path = "uploads/".$data["idOrder"]."_".$data["idVariety"]."_".$data["idParameter"].".jpg";
+
+            if (!unlink($path)) {
+                echo json_encode(array("error" => "Error deleting image on server, please try again!"));
+                exit();
+            }
+            
+            $res = $this->model->deleteOrderParameter($data["idOrder"], $data["idVariety"], $data["idParameter"]);
+            if (!$res) {
+                echo json_encode(array("error" => "Error deleting server record, please try again!"));
+                exit();
+            }
+            
+            echo json_encode(array("error" => false));
+        }else{
+            echo json_encode(array("error" => "Al recibir datos!"));
+        }
+    }
 }
