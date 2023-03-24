@@ -286,4 +286,46 @@ class Api extends Controllers
             echo json_encode(array("error" => "Al recibir datos!"));
         }
     }
+
+    public function addOrder()
+    {
+        if (isset($_POST['data'])) {
+
+            $data = json_decode($_POST["data"], true);
+
+            $date = new DateTime($data["date"]);
+            $year = $date -> format("Y");
+            $week = $date -> format("W");
+
+            $orderNo = $this->model->getIdAddOrder();
+
+            if (empty($orderNo)) {
+                echo json_encode(array("error" => "Error al asignar No.!"));
+                exit();
+            }
+            
+            $res = $this->model->setOrder($orderNo["order_no"], $data["idSecCust"], $data["idOrderType"], $data["idProduct"], $year, $week, $data["destination"]);
+            if (!$res) {
+                echo json_encode(array("error" => "Al crear orden!"));
+                exit();
+            }else{
+                foreach (explode(",", $data["varieties"]) as $key => $value) {
+                    $insert = $this->model->setOrderDetail($res, $value);
+
+                    if (!$insert) {
+
+                        $this->model->deleteOrder($res);
+                        $this->model->deleteOrdersDetails($res);
+
+                        echo json_encode(array("error" => "Error al agregar order detail!"));
+                        exit();
+                    }
+                }
+            }
+            
+            echo json_encode(array("error" => false, "id_order" => $res, "order_no" => $orderNo["order_no"], "year" => $year, "week" => $week));
+        }else{
+            echo json_encode(array("error" => "Al recibir datos!"));
+        }
+    }
 }

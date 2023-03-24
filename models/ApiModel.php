@@ -151,4 +151,46 @@ class ApiModel extends Mysql
         return $this->delete($sql, $array);
     }
 
+    public function getIdAddOrder()
+        {
+            $sql = 'SELECT (order_no - 1) AS order_no 
+                    FROM orders 
+                    ORDER BY order_no 
+                    LIMIT 1';
+
+            return $this->selectOne($sql);
+        }
+
+    public function setOrder(int $orderNo, int $idSecCust, int $idType, int $idProduct, int $year, int $week, String $destination)
+    {
+        $sql = "INSERT INTO orders (order_no, id_sec_cust, id_type, id_product, year, week, destination) VALUES (:value0, :value1, :value2, :value3, :value4, :value5, :value6)";
+        $array = array($orderNo, $idSecCust, $idType, $idProduct, $year, $week, $destination);
+
+        return $this->insert($sql, $array);
+    }
+
+    public function setOrderDetail(int $idOrder, int $idVariety, int $totQuantity = 0, float $totPrice = 0)
+    {
+        $sql = 'INSERT INTO orders_details (id_order, id_variety, tot_quantity, tot_price) VALUES (:value0, :value1, :value2, :value3)';
+
+        $array = array($idOrder, $idVariety, $totQuantity, $totPrice);
+        return $this->insert($sql, $array);
+    }
+
+    public function deleteOrder(int $idOrder)
+    {
+        $sql = 'DELETE FROM orders WHERE id = :value0';
+
+        $array = array($idOrder);
+        return $this->delete($sql, $array);
+    }
+
+    public function deleteOrdersDetails(int $idOrder)
+    {
+        $sql = 'DELETE FROM orders_details WHERE id_order = :value0';
+
+        $array = array($idOrder);
+        return $this->delete($sql, $array);
+    }
+
 }
