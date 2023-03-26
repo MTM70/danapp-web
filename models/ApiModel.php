@@ -83,6 +83,23 @@ class ApiModel extends Mysql
         return $this->select($sql);
     }
 
+    public function getOrdersParameters()
+    {
+        $path = BASE_URL."uploads/";
+        $sql = "SELECT id_order, id_variety, id_parameter, 
+                        CASE p.type 
+                            WHEN 4 THEN CONCAT('$path', value) 
+                            ELSE value 
+                        END AS value, 
+                        obs 
+                    FROM orders_parameters AS op 
+                    INNER JOIN orders AS o ON o.id = id_order 
+                    INNER JOIN parameters AS p ON p.id = id_parameter 
+                    WHERE o.state = 0";
+
+        return $this->select($sql);
+    }
+
     public function getOrdersTypes()
     {
         $sql = "SELECT * FROM orders_types";

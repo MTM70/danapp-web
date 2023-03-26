@@ -50,7 +50,7 @@ $(document).ready(function() {
     $("#form-download").on("submit", function(e){
         e.preventDefault();
 
-        window.open(base_url+'/Dashboard/downloadData/'+$('#week-from').val()+'/'+$('#week-to').val(), '_blank');
+        window.open(base_url+'/Dashboard/downloadData2/'+$('#week-from').val()+'/'+$('#week-to').val(), '_blank');
     });
 });
 
