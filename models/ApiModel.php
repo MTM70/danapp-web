@@ -109,6 +109,13 @@ class ApiModel extends Mysql
 
     public function getParameters()
     {
+        $sql = "SELECT id, parameter, type, category, label, position, remark FROM parameters";
+
+        return $this->select($sql);
+    }
+
+    public function getParameters2()
+    {
         $sql = "SELECT * FROM parameters";
 
         return $this->select($sql);
