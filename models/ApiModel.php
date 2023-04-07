@@ -15,7 +15,7 @@ class ApiModel extends Mysql
                     INNER JOIN users_details AS ud ON ud.id_user = u.id 
                     INNER JOIN customers AS c ON c.id = u.id_cust 
                     INNER JOIN roles AS r ON r.id = u.id_rol 
-                    WHERE user = :value0 AND pass = :value1";
+                    WHERE user = :value0 AND pass = :value1 AND state = 1";
 
         $array = array($user, $pass);
 
@@ -83,6 +83,29 @@ class ApiModel extends Mysql
         return $this->select($sql);
     }
 
+    public function getOrders3(int $id)
+    {
+        $sql = "SELECT od.id_order, od.id_variety, tot_quantity, tot_price, remarks, 
+                        o.order_no, o.id_sec_cust, sc.sec_cust, id_type, o.id_product, o.year, o.week, o.destination, 
+                        product, crop, variety 
+                    FROM orders_details AS od 
+                    INNER JOIN orders AS o ON o.id = od.id_order 
+                    INNER JOIN sec_customers AS sc ON sc.id = o.id_sec_cust 
+                    INNER JOIN products AS p ON p.id = o.id_product 
+                    INNER JOIN varieties AS v ON v.id = od.id_variety 
+                    INNER JOIN crops AS c ON c.id = v.id_crop 
+                    INNER JOIN users AS u ON u.id = :value0 
+                    WHERE o.state = 0 AND 
+                        CASE 
+                            WHEN id_rol != 1 THEN id_sec_cust IN (SELECT id_sec_cust FROM users_sec_customers WHERE id_user = u.id) 
+                            ELSE id_sec_cust > 0 
+                        END
+                    ORDER BY id_order";
+
+        $array = array($id);
+        return $this->select($sql, $array);
+    }
+
     public function getOrdersParameters()
     {
         $path = BASE_URL."uploads/";
@@ -109,21 +132,21 @@ class ApiModel extends Mysql
 
     public function getParameters()
     {
-        $sql = "SELECT id, parameter, type, category, label, position, remark FROM parameters";
+        $sql = "SELECT id, parameter, type, category, label, position, remark FROM parameters WHERE state = 1";
 
         return $this->select($sql);
     }
 
     public function getParameters2()
     {
-        $sql = "SELECT * FROM parameters";
+        $sql = "SELECT * FROM parameters WHERE state = 1";
 
         return $this->select($sql);
     }
 
     public function getParametersOptions()
     {
-        $sql = "SELECT * FROM parameters_options";
+        $sql = "SELECT * FROM parameters_options WHERE state = 1";
 
         return $this->select($sql);
     }

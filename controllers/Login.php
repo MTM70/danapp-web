@@ -40,6 +40,7 @@
                             $_SESSION['user'] = $response['user'];
                             $_SESSION['name'] = $response['name'];
                             $_SESSION['last_name'] = $response['last_name'];
+                            $_SESSION['idRol'] = $response['id_rol'];
                             $_SESSION['rol'] = $response['rol'];
                             //$_SESSION['cust'] = $response['cust'];
                             $_SESSION['login'] = true;

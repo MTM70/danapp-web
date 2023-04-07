@@ -1,8 +1,12 @@
-let stateParameters = false;
-let stateUsers = false;
+var stateParameters = false;
+var stateUsers = false;
 
 $(document).ready(function() {
-    //upload data
+
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+
+    //TODO upload data
     $("#form-upload").on("submit", function(e){
         e.preventDefault();
 
@@ -46,7 +50,7 @@ $(document).ready(function() {
     });
 
 
-    //download data
+    //TODO download data
     $("#form-download").on("submit", function(e){
         e.preventDefault();
 
@@ -54,67 +58,7 @@ $(document).ready(function() {
     });
 });
 
-function loadParameters() {
-
-    stateParameters = true;
-
-    $.ajax({
-        url: base_url+"dashboard/loadParameters",
-        cache: false,
-
-        success:  function(response) {
-            var objData = JSON.parse(response);
-
-            if(objData.status == true){
-                $('#parameters').html(objData.res);
-                let table = new DataTable('#table-parameters', {
-                    "processing": true,
-                    "scrollY": false,
-                    "iDisplayLength": 10,
-                    "stateSave": true,
-                }).page();
-
-                $(".dataTables_paginate").bind( "click", '.paginate_button', function() {
-                    window.scrollTo(0, 0);
-                });
-            }else{
-                alert(objData.res);
-            }
-        }
-    })
-}
-
-function loadUsers() {
-
-    stateUsers = true;
-
-    $.ajax({
-        url: base_url+"dashboard/loadUsers",
-        cache: false,
-
-        success:  function(response) {
-            var objData = JSON.parse(response);
-
-            if(objData.status == true){
-                $('#users').html(objData.res);
-                let table = new DataTable('#table-users', {
-                    "processing": true,
-                    "scrollY": false,
-                    "iDisplayLength": 10,
-                    "stateSave": true,
-                }).page();
-
-                $(".dataTables_paginate").bind( "click", '.paginate_button', function() {
-                    window.scrollTo(0, 0);
-                });
-            }else{
-                alert(objData.res);
-            }
-        }
-    })
-}
-
-function showOption($this, container){
+async function showOption($this, container){
     $('.main').fadeOut(0);
     $('.nav-link').addClass('collapsed');
 
@@ -125,7 +69,8 @@ function showOption($this, container){
         case 'main-parameters':
             
             if (!stateParameters) {
-                loadParameters();
+                await loadParameters();
+                loadCrops();
             }
 
             break;
@@ -133,9 +78,25 @@ function showOption($this, container){
         case 'main-users':
             
             if (!stateUsers) {
-                loadUsers();
+                await loadUsers();
+                await loadCusts();
+                loadRoles();
             }
 
             break;
     }
+}
+
+function toogleModal(id, action) {
+    if (action) {
+        modal = new bootstrap.Modal(document.getElementById(id));
+        modal.show();
+    } else {
+        modal = bootstrap.Modal.getInstance(document.getElementById(id));
+        modal.hide();
+    }
+}
+
+function hasDuplicates(arr) {
+    return new Set(arr).size !== arr.length;
 }

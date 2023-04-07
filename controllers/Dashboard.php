@@ -22,6 +22,8 @@
             $data['page_title'] = "Dashboard";
             $data['page_js'] = array("dashboard.js");
 
+            if ($_SESSION['idRol'] == 1) array_push($data["page_js"], "parameters.js", "users.js");
+
             $this->views->getView($this,"dashboard", $data);
         }
 
@@ -583,6 +585,7 @@
             //echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
         }
 
+        //TODO Parameters --------------------------------------------------------------------
         public function loadParameters()
         {
             $response = $this->model->getParameters();
@@ -605,64 +608,19 @@
 
                 foreach ($response as $k) {
 
-                    $type = "Undefined";
-                    $category = "Undefined";
+                    $type = array("Yes/No", "Number", "Date", "Text", "Image", "Select", "Select Radio", "Switch");
+                    $position = array("Top", "Middle", "Bottom");
+                    $category = array("Client", "Technical", "All");
 
-                    switch ($k["type"]) {
-                        case 0:
-                            $type = "Radio";
-                            break;
-
-                        case 1:
-                            $type = "Number";
-                            break;
-
-                        case 2:
-                            $type = "Date";
-                            break;
-
-                        case 3:
-                            $type = "Text";
-                            break;
-
-                        case 4:
-                            $type = "Image";
-                            break;
-
-                        case 5:
-                            $type = "Select";
-                            break;
-
-                        case 6:
-                            $type = "Radio";
-                            break;
-
-                        case 7:
-                            $type = "Image";
-                            break;
-                    }
-
-                    switch ($k["category"]) {
-                        case 1:
-                            $category = "Client";
-                            break;
-                        
-                        case 2:
-                            $category = "Technical";
-                            break;
-
-                        case 3:
-                            $category = "All";
-                            break;
-                    }
+                    $state = ($k["state"]) ? '' : 'bg-danger bg-opacity-10 text-decoration-line-through' ;
 
                     $this->html .= '
-                        <tr class="cursor-select">
+                        <tr class="cursor-select '.$state.'" onclick="loadParameterEdit('.$k["id"].')" data-bs-toggle="modal" data-bs-target="#modalAddParamter">
                             <td scope="row">'.$k["parameter"].'</td>
-                            <td>'.$type.'</td>
-                            <td>'.$category.'</td>
+                            <td>'.$type[$k["type"]].'</td>
+                            <td>'.$category[$k["category"]-1].'</td>
                             <td>'.$k["label"].'</td>
-                            <td>'.$k["position"].'</td>
+                            <td>'.$position[$k["position"]-1].'</td>
                             <td>'.$k["remark"].'</td>
                         </tr>
                     ';
@@ -686,8 +644,257 @@
 
             echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
         }
+        public function loadCrops()
+        {
+            $response = $this->model->getCrops();
 
+            if (!empty($response)) {
 
+                $this->html.='
+                    <div class="col-md-3 p-1">
+                        <div class="form-check">
+                            <input class="form-check-input cursor-select" type="checkbox" value="17" id="flexCheckChecked" onclick="selectCrops(this)">
+                            <label class="form-check-label cursor-select" for="flexCheckChecked">
+                                All
+                            </label>
+                        </div>
+                    </div>
+                ';
+
+                foreach ($response as $k) {
+                    $this->html .= '
+                        <div class="col-md-3 p-1">
+                            <div class="form-check">
+                                <input class="form-check-input cursor-select" type="checkbox" value="'.$k["id"].'" id="flexCheckChecked'.$k["id"].'" onclick="selectCrops(this)">
+                                <label class="form-check-label cursor-select" for="flexCheckChecked'.$k["id"].'">
+                                    '.$k["crop"].' <i class="text-muted">('.$k["crop_no"].')</i>
+                                </label>
+                            </div>
+                        </div>
+                    ';
+                }
+
+                $this->arrResponse = array(
+                    'status' => true, 
+                    'res' => $this->html
+                );
+            }else{
+                $this->arrResponse = array(
+                    'status' => false, 
+                    'res' => 'No data!'
+                );
+            }
+
+            echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
+        }
+
+        public function loadParameterEdit()
+        {
+            if (isset($_GET["id"]) AND $_GET["id"]) {
+                $response = $this->model->getParameter($_GET["id"]);
+
+                if (!empty($response)) {
+
+                    $this->html = json_encode($response);
+
+                    $this->arrResponse = array(
+                        'status' => true, 
+                        'res' => $this->html
+                    );
+                }else{
+                    $this->arrResponse = array(
+                        'status' => false, 
+                        'res' => 'No data!'
+                    );
+                }
+            }else{
+
+            }
+
+            echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
+        }
+
+        public function setParameter()
+        {
+            if ($_POST AND isset($_POST["process"]) AND $_POST["process"]) {
+
+                if ($_POST["process"] == 1) {
+                    if (isset($_POST["parameter-name"]) AND isset($_POST["parameter-type"]) AND isset($_POST["parameter-category"]) AND isset($_POST["parameter-label"]) 
+                        AND isset($_POST["parameter-remark"]) AND isset($_POST["crops"]) AND isset($_POST["parameter-position"]) AND isset($_POST["options"]) AND $_POST["parameter-name"] 
+                        AND $_POST["parameter-category"] AND $_POST["crops"] AND $_POST["parameter-position"] AND $_POST["options"]) {
+
+                        $all = (isset($_POST["parameter-all"])) ? 1 : 0 ;
+
+                        if ($this->model->getParameterByNameAndType(str_ucfirst($_POST["parameter-name"]), $_POST["parameter-type"])) {
+                            $this->arrResponse = array(
+                                'status' => false, 
+                                'res' => 'Parameter exist!'
+                            );
+
+                            exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
+                        }
+                        
+                        $id = $this->model->setParameter(str_ucfirst($_POST["parameter-name"]), $_POST["parameter-type"], $_POST["parameter-category"], str_ucfirst($_POST["parameter-label"]), $_POST["parameter-position"], str_ucfirst($_POST["parameter-remark"]), $all);
+
+                        if (!$id) {
+                            $this->arrResponse = array(
+                                'status' => false, 
+                                'res' => 'Add parameter fail!'
+                            );
+
+                            exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
+                        }
+
+                        foreach (json_decode(stripslashes($_POST["options"])) as $key => $value) {
+                            if (!$this->model->setParameterOption($id, str_ucfirst($value))) {
+
+                                $this->model->deleteParameter($id);
+                                $this->model->deleteParametersOptions($id);
+
+                                $this->arrResponse = array(
+                                    'status' => false, 
+                                    'res' => 'Add parameter option fail!'
+                                );
+        
+                                exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
+                            }
+                        }
+
+                        foreach (json_decode(stripslashes($_POST["crops"])) as $key => $value) {
+                            if (!$this->model->setParameterCrop($id, $value)) {
+                                
+                                $this->model->deleteParameter($id);
+                                $this->model->deleteParametersOptions($id);
+                                $this->model->deleteParametersCrops($id);
+
+                                $this->arrResponse = array(
+                                    'status' => false, 
+                                    'res' => 'Add parameter crop fail!'
+                                );
+        
+                                exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
+                            }
+                        }
+
+                        $this->arrResponse = array(
+                            'status' => true, 
+                            'res' => 'Add parameter success'
+                        );
+                    }else{
+                        $this->arrResponse = array(
+                            'status' => false, 
+                            'res' => 'No data!'
+                        );
+                    }
+                }else {
+                    if (isset($_POST["parameter-id"]) AND isset($_POST["parameter-name"]) AND isset($_POST["parameter-type"]) AND isset($_POST["parameter-category"]) AND isset($_POST["parameter-label"]) 
+                        AND isset($_POST["parameter-remark"]) AND isset($_POST["crops"]) AND isset($_POST["parameter-position"]) AND isset($_POST["options"]) AND $_POST["parameter-id"] 
+                        AND $_POST["parameter-name"] AND $_POST["parameter-type"] AND $_POST["parameter-category"] AND $_POST["crops"] AND $_POST["parameter-position"] AND $_POST["options"]) {
+
+                        $all = (isset($_POST["parameter-all"])) ? 1 : 0 ;
+
+                        if ($this->model->getParameterByNameAndType(str_ucfirst($_POST["parameter-name"]), $_POST["parameter-type"], $_POST["parameter-id"])) {
+                            $this->arrResponse = array(
+                                'status' => false, 
+                                'res' => 'Parameter exist!'
+                            );
+
+                            exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
+                        }
+                        
+                        $update = $this->model->updateParameter($_POST["parameter-id"], str_ucfirst($_POST["parameter-name"]), $_POST["parameter-type"], $_POST["parameter-category"], str_ucfirst($_POST["parameter-label"]), $_POST["parameter-position"], str_ucfirst($_POST["parameter-remark"]), $all, $_POST["parameter-state"]);
+
+                        if (!$update) {
+                            $this->arrResponse = array(
+                                'status' => false, 
+                                'res' => 'Update parameter fail!'
+                            );
+
+                            exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
+                        }
+
+                        foreach (json_decode(stripslashes($_POST["options"])) as $key => $value) {
+
+                            $data = explode(',', $value);
+
+                            if (!$data[0]) {
+                                if(!$this->model->setParameterOption($_POST["parameter-id"], $data[1])){
+                                    $this->arrResponse = array(
+                                        'status' => false, 
+                                        'res' => 'Add parameter option fail!'
+                                    );
+            
+                                    exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
+                                }
+                            }else{
+
+                                if (!$this->model->updateParameterOption($data[0], str_ucfirst($data[1]), $data[2])) {
+
+                                    $this->arrResponse = array(
+                                        'status' => false, 
+                                        'res' => 'Update parameter option fail!'
+                                    );
+            
+                                    exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
+                                }
+                            }
+                        }
+
+                        $this->model->deleteParametersCrops($_POST["parameter-id"]);
+
+                        foreach (json_decode(stripslashes($_POST["crops"])) as $key => $value) {
+                            if (!$this->model->setParameterCrop($_POST["parameter-id"], $value)) {
+
+                                $this->arrResponse = array(
+                                    'status' => false, 
+                                    'res' => 'Add parameter crop fail!'
+                                );
+        
+                                exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
+                            }
+                        }
+
+                        $this->arrResponse = array(
+                            'status' => true, 
+                            'res' => 'Update parameter success'
+                        );
+                    }else{
+                        $this->arrResponse = array(
+                            'status' => false, 
+                            'res' => 'No data!'
+                        );
+                    }
+                }
+
+            }else{
+                $this->arrResponse = array(
+                    'status' => false, 
+                    'res' => 'No data!'
+                );
+            }
+
+            echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
+        }
+
+        public function updateParameter()
+        {
+            if ($_POST) {
+                $this->arrResponse = array(
+                    'status' => true, 
+                    'res' => $_POST
+                );
+            }else{
+                $this->arrResponse = array(
+                    'status' => false, 
+                    'res' => 'No data!'
+                );
+            }
+
+            echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
+        }
+        //TODO Parameters --------------------------------------------------------------------
+
+        //TODO Users --------------------------------------------------------------------
         public function loadUsers()
         {
             $response = $this->model->getUsers();
@@ -707,8 +914,11 @@
                         <tbody>';
 
                 foreach ($response as $k) {
+
+                    $state = ($k["state"]) ? '' : 'bg-danger bg-opacity-10 text-decoration-line-through' ;
+
                     $this->html .= '
-                        <tr class="cursor-select">
+                        <tr class="cursor-select '.$state.'" onclick="loadUserEdit('.$k["id"].')" data-bs-toggle="modal" data-bs-target="#modalAddUser">
                             <td scope="row">'.$k["user"].'</td>
                             <td>'.$k["name"].'</td>
                             <td>'.$k["last_name"].'</td>
@@ -735,5 +945,276 @@
 
             echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
         }
+
+        public function loadUserEdit()
+        {
+            if (isset($_GET["id"]) AND $_GET["id"]) {
+                $response = $this->model->getUser($_GET["id"]);
+
+                if (!empty($response)) {
+
+                    $this->html = json_encode($response);
+
+                    $this->arrResponse = array(
+                        'status' => true, 
+                        'res' => $this->html
+                    );
+                }else{
+                    $this->arrResponse = array(
+                        'status' => false, 
+                        'res' => 'No data!'
+                    );
+                }
+            }else{
+
+            }
+
+            echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
+        }
+        public function setUser()
+        {
+            if ($_POST AND isset($_POST["process"]) AND $_POST["process"]) {
+
+                if ($_POST["process"] == 1) {
+                    if (isset($_POST["user-name"]) AND isset($_POST["user-new-password"]) AND isset($_POST["name"]) AND isset($_POST["user-last-name"]) 
+                        AND isset($_POST["user-rol"]) AND $_POST["user-name"] AND $_POST["user-new-password"] 
+                        AND $_POST["name"] AND $_POST["user-last-name"] AND $_POST["user-rol"] AND $_POST["secCusts"]) {
+
+                        if ($this->model->getUserByUser($_POST["user-name"])) {
+                            $this->arrResponse = array(
+                                'status' => false, 
+                                'res' => 'User exist!'
+                            );
+
+                            exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
+                        }
+                        
+                        $id = $this->model->setUser($_POST["user-rol"], $_POST["user-name"], md5($_POST["user-new-password"]));
+
+                        if (!$id) {
+                            $this->arrResponse = array(
+                                'status' => false, 
+                                'res' => 'Add user fail!'
+                            );
+
+                            exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
+                        }
+
+                        if (!$this->model->setUserDetail($id, str_ucfirst($_POST["name"]), str_ucfirst($_POST["user-last-name"]))) {
+
+                            $this->model->deleteUser($id);
+
+                            $this->arrResponse = array(
+                                'status' => false, 
+                                'res' => 'Add user details fail!'
+                            );
+
+                            exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
+                        }
+
+                        foreach (json_decode(stripslashes($_POST["secCusts"])) as $key => $value) {
+                            if (!$this->model->setUserSecCustomer($id, $value)) {
+                                
+                                $this->model->deleteUser($id);
+                                $this->model->deleteUserDetail($id);
+                                $this->model->deleteUserSecCustomer($id);
+
+                                $this->arrResponse = array(
+                                    'status' => false, 
+                                    'res' => 'Add user sec cust fail!'
+                                );
+        
+                                exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
+                            }
+                        }
+
+                        $this->arrResponse = array(
+                            'status' => true, 
+                            'res' => 'Add user success'
+                        );
+                    }else{
+                        $this->arrResponse = array(
+                            'status' => false, 
+                            'res' => 'No data!'
+                        );
+                    }
+                }else{
+                    if (isset($_POST["user-id"]) AND isset($_POST["user-name"]) AND isset($_POST["user-password"]) AND isset($_POST["name"]) AND isset($_POST["user-last-name"]) 
+                        AND isset($_POST["user-rol"]) AND $_POST["user-id"] AND $_POST["user-name"] AND $_POST["user-password"] 
+                        AND $_POST["name"] AND $_POST["user-last-name"] AND $_POST["user-rol"] AND $_POST["secCusts"]) {
+
+                        if ($this->model->getUserByUser($_POST["user-name"], $_POST["user-id"])) {
+                            $this->arrResponse = array(
+                                'status' => false, 
+                                'res' => 'User exist!'
+                            );
+
+                            exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
+                        }
+                        
+                        $password = $_POST["user-password"];
+                        if (isset($_POST["user-new-password"]) AND $_POST["user-new-password"]) {
+                            $password = md5($_POST["user-new-password"]);
+                        }
+                        
+                        if (!$this->model->updateUser($_POST["user-id"], $_POST["user-rol"], $_POST["user-name"], $password, $_POST["user-state"])) {
+                            $this->arrResponse = array(
+                                'status' => false, 
+                                'res' => 'Update user fail!'
+                            );
+
+                            exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
+                        }
+
+                        if (!$this->model->updateUserDetail($_POST["user-id"], str_ucfirst($_POST["name"]), str_ucfirst($_POST["user-last-name"]))) {
+
+                            $this->arrResponse = array(
+                                'status' => false, 
+                                'res' => 'Update user details fail!'
+                            );
+
+                            exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
+                        }
+
+                        $this->model->deleteUserSecCustomer($_POST["user-id"]);
+
+                        foreach (json_decode(stripslashes($_POST["secCusts"])) as $key => $value) {
+                            if (!$this->model->setUserSecCustomer($_POST["user-id"], $value)) {
+
+                                $this->arrResponse = array(
+                                    'status' => false, 
+                                    'res' => 'Add user sec cust fail!'
+                                );
+        
+                                exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
+                            }
+                        }
+
+                        $this->arrResponse = array(
+                            'status' => true, 
+                            'res' => 'Update user success'
+                        );
+                    }else{
+                        $this->arrResponse = array(
+                            'status' => false, 
+                            'res' => 'No data!'
+                        );
+                    }
+                }
+
+            }else{
+                $this->arrResponse = array(
+                    'status' => false, 
+                    'res' => 'No data!'
+                );
+            }
+
+            echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
+        }
+
+        public function loadSecCusts()
+        {
+            $response = $this->model->getSecCusts();
+
+            if (!empty($response)) {
+
+                $idCust = null;
+
+                foreach ($response as $k) {
+
+                    if ($idCust != $k["id_cust"]) {
+
+                        if ($idCust) {
+                            $this->html .= '
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ';
+                        }
+
+                        $this->html .= '
+                            <div class="col-md-3 mb-2">
+                                <div class="accordion">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header" id="panelsStayOpen-heading'.$k["id_cust"].'">
+                                            <button class="accordion-button collapsed bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapse'.$k["id_cust"].'" aria-expanded="true" aria-controls="panelsStayOpen-collapse'.$k["id_cust"].'">
+                                                <div class="form-check">
+                                                    <input class="form-check-input cursor-select" type="checkbox" id="checkCust'.$k["id_cust"].'" onclick="checkCust(this, '."'".'panelsStayOpen-collapse'.$k["id_cust"]."'".');">
+                                                </div>'.$k["cust"].'<i class="text-muted mx-2">('.$k["cust_no"].')</i>
+                                            </button>
+                                        </h2>
+                                        <div id="panelsStayOpen-collapse'.$k["id_cust"].'" class="accordion-collapse collapse" aria-labelledby="panelsStayOpen-headingOne">
+                                            <div class="accordion-body">
+                        ';
+                    }
+
+                    $secCustNo = ($k["sec_cust_no"] != 0) ? '<i class="text-muted">('.$k["sec_cust_no"].')</i>' : '' ;
+
+                    $this->html .= '
+                        <div class="form-check">
+                            <input class="form-check-input cursor-select" type="checkbox" value="'.$k["id"].'" id="checkSecCust'.$k["id"].'" onclick="checkSecCust(this, '."'".'panelsStayOpen-collapse'.$k["id_cust"].''."'".', '."'".'checkCust'.$k["id_cust"]."'".');">
+                            <label class="form-check-label cursor-select" for="checkSecCust'.$k["id"].'">
+                                '.$k["sec_cust"].' '.$secCustNo.'
+                            </label>
+                        </div>
+                    ';
+
+                    $idCust = $k["id_cust"];
+                }
+
+                $this->html .= '
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                ';
+
+                $this->arrResponse = array(
+                    'status' => true, 
+                    'res' => $this->html
+                );
+            }else{
+                $this->arrResponse = array(
+                    'status' => false, 
+                    'res' => 'No data!'
+                );
+            }
+
+            echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
+        }
+
+        public function loadRoles()
+        {
+            $response = $this->model->getRoles();
+
+            if (!empty($response)) {
+
+                $this->html.='
+                    <option value="">Choose...</option>
+                ';
+
+                foreach ($response as $k) {
+                    $this->html .= '
+                        <option value="'.$k["id"].'">'.$k["rol"].'</option>
+                    ';
+                }
+
+                $this->arrResponse = array(
+                    'status' => true, 
+                    'res' => $this->html
+                );
+            }else{
+                $this->arrResponse = array(
+                    'status' => false, 
+                    'res' => 'No data!'
+                );
+            }
+
+            echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
+        }
+        //TODO Users --------------------------------------------------------------------
 
     }

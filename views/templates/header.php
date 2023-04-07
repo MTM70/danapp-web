@@ -7,8 +7,8 @@
   <meta content="" name="keywords">
 
   <!-- Favicons -->
-  <link href="<?= media() ?>/img/favicon.png" rel="icon">
-  <link href="<?= media() ?>/img/favicon.png" rel="apple-touch-icon">
+  <link href="<?= media() ?>/img/favicon.ico" rel="icon">
+  <link href="<?= media() ?>/img/apple-touch-icon.png" rel="apple-touch-icon">
 
   <!-- Google Fonts -->
   <link href="https://fonts.gstatic.com" rel="preconnect">

@@ -17,11 +17,11 @@
             $sql = "SELECT 
                         u.id, u.user, u.pass, 
                         name, last_name, 
-                        rol 
+                        id_rol, rol 
                     FROM users AS u 
                     INNER JOIN users_details AS ud ON ud.id_user = u.id 
                     INNER JOIN roles AS r ON r.id = u.id_rol 
-                    WHERE u.user = '$this->user' AND u.pass = '$this->password' 
+                    WHERE u.user = '$this->user' AND u.pass = '$this->password' AND state = 1 
                     LIMIT 1";
 
             return $this->selectOne($sql);

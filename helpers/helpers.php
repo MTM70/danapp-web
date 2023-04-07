@@ -35,3 +35,8 @@
         $token = $r1.'-'.$r2.'-'.$r3.'-'.$r4;
         return $token;
     }
+
+    function str_ucfirst(string $value)
+    {
+        return ucfirst(strtolower($value));
+    }

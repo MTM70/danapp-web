@@ -7,6 +7,7 @@
             parent::__construct();
         }
 
+        //TODO Home--------------------------------------------------------------------------
         public function getOrderByNo(int $orderNo)
         {
             $sql = 'SELECT id, order_no 
@@ -233,23 +234,240 @@
             $array = array($year1, $week1, $year2, $week2);
             return $this->select($sql, $array);
         }
+        //TODO Home--------------------------------------------------------------------------
 
+        //TODO Parameters--------------------------------------------------------------------------
+        public function getParameter(int $id)
+        {
+            $sql = 'SELECT p.*, GROUP_CONCAT(DISTINCT pc.id_crop) AS crops, IFNULL(po.options, 0) AS options 
+                    FROM parameters AS p 
+                    LEFT JOIN parameters_crops AS pc ON pc.id_parameter = p.id 
+                    /*LEFT JOIN parameters_options AS po ON po.id_parameter = p.id */
+                    LEFT JOIN (
+                        SELECT id_parameter, GROUP_CONCAT(id, "^", value, "^", state) AS options 
+                        FROM parameters_options 
+                        GROUP BY id_parameter 
+                    ) AS po ON po.id_parameter = p.id 
+                    WHERE p.id = :value0 
+                    GROUP BY p.id 
+                    LIMIT 1';
+
+            $array = array($id);
+            return $this->selectOne($sql, $array);
+        }
+        
         public function getParameters()
         {
-            $sql = 'SELECT id, parameter, type, category, label, position, remark 
-                    FROM parameters';
+            $sql = 'SELECT * FROM parameters';
 
             return $this->select($sql);
         }
 
+        public function getCrops()
+        {
+            $sql = 'SELECT id, crop_no, crop 
+                    FROM crops 
+                    WHERE id != 17 
+                    ORDER BY crop';
+
+            return $this->select($sql);
+        }
+
+        public function getParameterByNameAndType(String $name, int $type, int $id = 0)
+        {
+            $sql = 'SELECT id 
+                    FROM parameters 
+                    WHERE parameter = :value0 AND type = :value1 AND id != :value2 
+                    LIMIT 1';
+
+            $array = array($name, $type, $id);
+            return $this->selectOne($sql, $array);
+        }
+
+        public function setParameter(String $parameter, int $type, int $category, String $label, int $position, String $remark, int $typeAll)
+        {
+            $sql = 'INSERT INTO parameters (parameter, type, category, label, position, remark, type_all) VALUES (:value0, :value1, :value2, :value3, :value4, :value5, :value6)';
+
+            $array = array($parameter, $type, $category, $label, $position, $remark, $typeAll);
+            return $this->insert($sql, $array);
+        }
+
+        public function updateParameter(int $id, String $parameter, int $type, int $category, String $label, int $position, String $remark, int $typeAll, int $state)
+        {
+            $sql = 'UPDATE parameters SET parameter = :value1, type = :value2, category = :value3, label = :value4, position = :value5, remark = :value6, type_all = :value7, state = :value8 WHERE id = :value0';
+
+            $array = array($id, $parameter, $type, $category, $label, $position, $remark, $typeAll, $state);
+            return $this->update($sql, $array);
+        }
+
+        public function deleteParameter(int $idParameter)
+        {
+            $sql = 'DELETE FROM parameters WHERE id = :value0';
+
+            $array = array($idParameter);
+            return $this->delete($sql, $array);
+        }
+
+        public function setParameterOption(int $idParameter, String $value)
+        {
+            $sql = 'INSERT INTO parameters_options (id_parameter, value) VALUES (:value0, :value1)';
+
+            $array = array($idParameter, $value);
+            return $this->insert($sql, $array);
+        }
+
+        public function updateParameterOption(int $id, String $value, int $state)
+        {
+            $sql = 'UPDATE parameters_options SET value = :value1, state = :value2 WHERE id = :value0';
+
+            $array = array($id, $value, $state);
+            return $this->update($sql, $array);
+        }
+
+        public function deleteParametersOptions(int $idParameter)
+        {
+            $sql = 'DELETE FROM parameters_options WHERE id_parameter = :value0';
+
+            $array = array($idParameter);
+            return $this->delete($sql, $array);
+        }
+
+        public function setParameterCrop(int $idParameter, int $idCrop)
+        {
+            $sql = 'INSERT INTO parameters_crops (id_parameter, id_crop) VALUES (:value0, :value1)';
+
+            $array = array($idParameter, $idCrop);
+            return $this->insert($sql, $array);
+        }
+
+        public function deleteParametersCrops(int $idParameter)
+        {
+            $sql = 'DELETE FROM parameters_crops WHERE id_parameter = :value0';
+
+            $array = array($idParameter);
+            return $this->delete($sql, $array);
+        }
+        //TODO Parameters--------------------------------------------------------------------------
+
+        //TODO Users--------------------------------------------------------------------------
+        public function getUser(int $id)
+        {
+            $sql = 'SELECT u.id, id_rol, user, pass, name, last_name, state, IFNULL(sc.secCusts, 0) AS secCusts  
+                    FROM users AS u 
+                    INNER JOIN users_details AS ud ON ud.id_user = u.id 
+                    LEFT JOIN (
+                        SELECT id_user, GROUP_CONCAT(id_sec_cust) AS secCusts 
+                        FROM users_sec_customers 
+                        GROUP BY id_user 
+                    ) AS sc ON sc.id_user = u.id 
+                    WHERE u.id = :value0 
+                    LIMIT 1';
+
+            $array = array($id);
+            return $this->selectOne($sql, $array);
+        }
+
         public function getUsers()
         {
-            $sql = 'SELECT u.id, user, name, last_name, rol 
+            $sql = 'SELECT u.id, user, name, last_name, rol, state 
                     FROM users AS u 
                     INNER JOIN users_details AS ud ON ud.id_user = u.id 
                     INNER JOIN roles AS r ON r.id = u.id_rol';
 
             return $this->select($sql);
         }
+
+        public function getSecCusts()
+        {
+            $sql = 'SELECT s.id, id_cust, sec_cust_no, sec_cust, cust_no, cust 
+                    FROM sec_customers AS s 
+                    INNER JOIN customers AS c ON c.id = s.id_cust 
+                    ORDER BY cust, sec_cust_no';
+
+            return $this->select($sql);
+        }
+
+        public function getRoles()
+        {
+            $sql = 'SELECT * FROM roles';
+
+            return $this->select($sql);
+        }
+
+        public function getUserByUser(String $user, int $id = 0)
+        {
+            $sql = 'SELECT id 
+                    FROM users 
+                    WHERE user = :value0 AND id != :value1 
+                    LIMIT 1';
+
+            $array = array($user, $id);
+            return $this->selectOne($sql, $array);
+        }
+
+        public function setUser(int $idRol, String $user, String $pass)
+        {
+            $sql = 'INSERT INTO users (id_rol, id_cust, user, pass) VALUES (:value0, 1, :value1, :value2)';
+
+            $array = array($idRol, $user, $pass);
+            return $this->insert($sql, $array);
+        }
+
+        public function updateUser(int $id, int $idRol, String $user, String $pass, int $state)
+        {
+            $sql = 'UPDATE users SET id_rol = :value1, user = :value2, pass = :value3, state = :value4 WHERE id = :value0';
+
+            $array = array($id, $idRol, $user, $pass, $state);
+            return $this->update($sql, $array);
+        }
+
+        public function deleteUser(int $idUser)
+        {
+            $sql = 'DELETE FROM users WHERE id = :value0';
+
+            $array = array($idUser);
+            return $this->delete($sql, $array);
+        }
+
+        public function setUserDetail(int $iduser, String $name, String $lastName)
+        {
+            $sql = 'INSERT INTO users_details (id_user, name, last_name) VALUES (:value0, :value1, :value2)';
+
+            $array = array($iduser, $name, $lastName);
+            return $this->insert($sql, $array);
+        }
+
+        public function updateUserDetail(int $iduser, String $name, String $lastName)
+        {
+            $sql = 'UPDATE users_details SET name = :value1, last_name = :value2 WHERE id = :value0';
+
+            $array = array($iduser, $name, $lastName);
+            return $this->update($sql, $array);
+        }
+
+        public function deleteUserDetail(int $idUser)
+        {
+            $sql = 'DELETE FROM users_details WHERE id_user = :value0';
+
+            $array = array($idUser);
+            return $this->delete($sql, $array);
+        }
+
+        public function setUserSecCustomer(int $idUser, int $idSecCust)
+        {
+            $sql = 'INSERT INTO users_sec_customers (id_user, id_sec_cust) VALUES (:value0, :value1)';
+
+            $array = array($idUser, $idSecCust);
+            return $this->insert($sql, $array);
+        }
+
+        public function deleteUserSecCustomer(int $idUser)
+        {
+            $sql = 'DELETE FROM users_sec_customers WHERE id_user = :value0';
+
+            $array = array($idUser);
+            return $this->delete($sql, $array);
+        }
+        //TODO Users--------------------------------------------------------------------------
 
     }
