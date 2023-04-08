@@ -104,6 +104,8 @@ async function loadUsers() {
                         $(".dataTables_paginate").bind( "click", '.paginate_button', function() {
                             window.scrollTo(0, 0);
                         });
+
+                        document.querySelectorAll('#table-users_wrapper .row')[2].classList.add('mt-3');
                     }else{
                         alert(objData.res);
                     }
@@ -136,8 +138,6 @@ async function loadUserEdit(id) {
     document.getElementById('modalAddUserLabel').innerText = 'Update user';
     document.getElementById('user-state-cont').classList.remove('d-none');
 
-    await loadCusts();
-
     return new Promise(resolve => {
 
         $.ajax({
@@ -154,7 +154,7 @@ async function loadUserEdit(id) {
                 //$('#parameter-crops').html('Error');
             },
 
-            success:  function(response) {
+            success:  async function(response) {
                 try {
                     var objData = JSON.parse(response);
 
@@ -169,6 +169,8 @@ async function loadUserEdit(id) {
                         document.getElementById('user-last-name').value = data['last_name'];
                         document.getElementById('user-rol').value = data['id_rol'];
                         document.getElementById('user-state').value = data['state'];
+
+                        await loadCusts();
 
                         if (data['secCusts']) {
 

@@ -149,6 +149,9 @@ async function loadParameters() {
                     $(".dataTables_paginate").bind( "click", '.paginate_button', function() {
                         window.scrollTo(0, 0);
                     });
+
+                    document.querySelectorAll('#table-parameters_wrapper .row')[2].classList.add('mt-3');
+
                 }else{
                     alert(objData.res);
                 }

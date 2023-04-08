@@ -59,6 +59,11 @@ $(document).ready(function() {
 });
 
 async function showOption($this, container){
+    
+    if (isMobile()) {
+        document.querySelector('body').classList.remove('toggle-sidebar');
+    }
+
     $('.main').fadeOut(0);
     $('.nav-link').addClass('collapsed');
 
@@ -84,10 +89,6 @@ async function showOption($this, container){
             }
 
             break;
-    }
-
-    if (isMobile()) {
-        document.querySelector('body').classList.remove('toggle-sidebar');
     }
 }
 
