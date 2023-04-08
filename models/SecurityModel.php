@@ -16,13 +16,11 @@
             $sql = "SELECT 
                         u.id, u.user, u.pass, 
                         name, last_name, 
-                        rol, 
-                        cust 
+                        id_rol, rol 
                     FROM users AS u 
                     INNER JOIN users_details AS ud ON ud.id_user = u.id 
                     INNER JOIN roles AS r ON r.id = u.id_rol 
-                    INNER JOIN customers AS c ON c.id = u.id_cust 
-                    WHERE u.token = '$this->token' 
+                    WHERE u.token = '$this->token' AND state = 1 
                     LIMIT 1";
 
             return $this->selectOne($sql);

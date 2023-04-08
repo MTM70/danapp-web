@@ -141,6 +141,7 @@ async function loadParameters() {
                     let table = new DataTable('#table-parameters', {
                         "processing": true,
                         "scrollY": false,
+                        "scrollX": (isMobile()) ? true : false,
                         "iDisplayLength": 10,
                         "stateSave": true,
                     }).page();

@@ -1287,3 +1287,13 @@ h6 {
 input:checked {
   background-color: #1a8754!important;
 }
+
+.active>.page-link, .page-link.active {
+  background-color: #006b39!important;
+  border-color: #1d920a!important;
+  color: white;
+}
+
+.page-link {
+  color: black;
+}
