@@ -55,11 +55,11 @@
                                     <div class="row mb-3">
                                         <div class="col">
                                             <label for="week-in">From</label>
-                                            <input type="week" name="from" id="week-from" required class="form-control">
+                                            <input type="week" name="from" id="week-from" min="2023-W01" max="<?= date('Y').'-W'.date('W'); ?>" value="<?= date('Y').'-W'.date('W'); ?>" required class="form-control">
                                         </div>
                                         <div class="col">
                                             <label for="week-end">To</label>
-                                            <input type="week" name="to" id="week-to" required class="form-control" value="<?= date('Y').'-W'.date('W'); ?>">
+                                            <input type="week" name="to" id="week-to" required class="form-control" min="2023-W01" max="<?= date('Y').'-W'.date('W'); ?>" value="<?= date('Y').'-W'.date('W'); ?>">
                                         </div>
                                         
                                     </div>

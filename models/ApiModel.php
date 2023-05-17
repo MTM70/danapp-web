@@ -22,6 +22,13 @@ class ApiModel extends Mysql
         return $this->selectOne($sql, $array);
     }
 
+    public function getUsersDetails()
+    {
+        $sql = "SELECT id_user, name, last_name FROM users_details";
+
+        return $this->select($sql);
+    }
+    
     public function getCrops()
     {
         $sql = "SELECT * FROM crops";
@@ -106,10 +113,10 @@ class ApiModel extends Mysql
         return $this->select($sql, $array);
     }
 
-    public function getOrdersParameters()
+    public function getOrdersParameters($idUser)
     {
         $path = BASE_URL."uploads/";
-        $sql = "SELECT id_order, id_variety, id_parameter, 
+        $sql = "SELECT id_user, id_order, id_variety, id_parameter, 
                         CASE p.type 
                             WHEN 4 THEN CONCAT('$path', value) 
                             ELSE value 
@@ -118,9 +125,10 @@ class ApiModel extends Mysql
                     FROM orders_parameters AS op 
                     INNER JOIN orders AS o ON o.id = id_order 
                     INNER JOIN parameters AS p ON p.id = id_parameter 
-                    WHERE o.state = 0";
+                    WHERE o.state = 0 AND op.id_user = :value0";
 
-        return $this->select($sql);
+        $array = array($idUser);
+        return $this->select($sql, $array);
     }
 
     public function getOrdersTypes()
@@ -158,18 +166,18 @@ class ApiModel extends Mysql
         return $this->select($sql);
     }
 
-    public function getOrderParameter(int $idOder, int $idVariety, int $idParameter)
+    public function getOrderParameter(int $idUser, int $idOder, int $idVariety, int $idParameter)
     {
-        $sql = "SELECT id FROM orders_parameters WHERE id_order = :value0 AND id_variety = :value1 AND id_parameter = :value2";
-        $array = array($idOder, $idVariety, $idParameter);
+        $sql = "SELECT id FROM orders_parameters WHERE id_user = :value0 AND id_order = :value1 AND id_variety = :value2 AND id_parameter = :value3";
+        $array = array($idUser, $idOder, $idVariety, $idParameter);
 
         return $this->selectOne($sql, $array);
     }
 
-    public function setDataSync(int $idOder, int $idVariety, int $idParameter, String $value, String $obs, int $year, int $week)
+    public function setDataSync(int $idUser, int $idOder, int $idVariety, int $idParameter, String $value, String $obs, int $year, int $week)
     {
-        $sql = "INSERT INTO orders_parameters (year, week, id_order, id_variety, id_parameter, value, obs) VALUES (:value5, :value6, :value0, :value1, :value2, :value3, :value4)";
-        $array = array($idOder, $idVariety, $idParameter, $value, $obs, $year, $week);
+        $sql = "INSERT INTO orders_parameters (year, week, id_user, id_order, id_variety, id_parameter, value, obs) VALUES (:value6, :value7, :value0, :value1, :value2, :value3, :value4, :value5)";
+        $array = array($idUser, $idOder, $idVariety, $idParameter, $value, $obs, $year, $week);
 
         return $this->insert($sql, $array);
     }

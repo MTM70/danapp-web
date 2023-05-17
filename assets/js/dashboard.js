@@ -35,6 +35,7 @@ $(document).ready(function() {
             },
         })
         .done(function(response){
+            console.log(response);
             var objData = JSON.parse(response);
 
             if(objData.status == true){
@@ -53,6 +54,11 @@ $(document).ready(function() {
     //TODO download data
     $("#form-download").on("submit", function(e){
         e.preventDefault();
+
+        if (document.querySelector('#week-from').value > document.querySelector('#week-to').value) {
+            alert('start date greater than end date');
+            return;
+        }
 
         window.open(base_url+'/Dashboard/downloadData2/'+$('#week-from').val()+'/'+$('#week-to').val(), '_blank');
     });

@@ -125,14 +125,14 @@
             return $this->insert($sql, $array);
         }
         
-        public function getVarietyByNo(int $number)
+        public function getVarietyByNo(int $idCrop, int $number)
         {
             $sql = 'SELECT id 
                     FROM varieties 
-                    WHERE variety_code = :value0 
+                    WHERE id_crop = :value0 AND variety_code = :value1 
                     LIMIT 1';
 
-            $array = array($number);
+            $array = array($idCrop, $number);
             return $this->selectOne($sql, $array);
         }
 
@@ -204,7 +204,7 @@
 
         public function getDataBetweenWeeks2(int $year1, int $week1, int $year2, int $week2)
         {
-            $sql = 'SELECT id_order, id_variety, id_parameter, value, obs 
+            $sql = 'SELECT id_user, id_order, id_variety, id_parameter, value, obs 
                     FROM orders_parameters AS op 
                     INNER JOIN orders AS o ON o.id = op.id_order 
                     WHERE (op.year BETWEEN :value0 AND :value2) AND (op.week BETWEEN :value1 AND :value3) 
@@ -216,7 +216,8 @@
 
         public function getOrdersParametersBetweenWeeks(int $year1, int $week1, int $year2, int $week2)
         {
-            $sql = 'SELECT id_order, id_variety, id_order, op.year, op.week, order_no, destination, cust_no, cust, sec_cust_no, sec_cust, 
+            $sql = 'SELECT op.id_user, name, last_name, 
+                        id_order, id_variety, id_order, op.year, op.week, order_no, destination, cust_no, cust, sec_cust_no, sec_cust, 
                         ot.type AS order_type, product, crop_general, crop, variety_code, variety 
                     FROM orders_parameters AS op 
                     INNER JOIN orders AS o ON o.id = op.id_order 
@@ -227,8 +228,9 @@
                     INNER JOIN crops_generals AS crg ON crg.id = cr.id_crop_general 
                     INNER JOIN orders_types AS ot ON ot.id = o.id_type 
                     INNER JOIN products AS pr ON pr.id = o.id_product 
+                    INNER JOIN users_details AS ud ON ud.id_user = op.id_user 
                     WHERE (op.year BETWEEN :value0 AND :value2) AND (op.week BETWEEN :value1 AND :value3) 
-                    GROUP BY id_order, v.id 
+                    GROUP BY id_order, op.id_user, v.id 
                     ORDER BY order_no';
 
             $array = array($year1, $week1, $year2, $week2);

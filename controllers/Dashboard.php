@@ -189,7 +189,7 @@
                         }
                     }
 
-                    $variety = $this->model->getVarietyByNo(trim($data[$i][27]));   //Comprobar si la variedad existe
+                    $variety = $this->model->getVarietyByNo($crop["id"], trim($data[$i][27]));   //Comprobar si la variedad existe
 
                     if (!$variety) {    //Si no existe se crea
                         $insert = $this->model->setVariety($crop["id"], trim($data[$i][27]), trim($data[$i][28]));
@@ -201,7 +201,7 @@
 
                             exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
                         }else{
-                            $variety = $this->model->getVarietyByNo(trim($data[$i][27]));
+                            $variety = $this->model->getVarietyByNo($crop["id"], trim($data[$i][27]));
                         }
                     }
 
@@ -440,17 +440,18 @@
                 $spreadsheet = new Spreadsheet();
                 $sheet = $spreadsheet->getActiveSheet();
                 $sheet->setCellValue('A1', 'Order number');
-                $sheet->setCellValue('B1', 'Secondary customer name');
-                $sheet->setCellValue('C1', 'Variety name');
-                $sheet->setCellValue('D1', 'Year');
-                $sheet->setCellValue('E1', 'Week');
-                $sheet->setCellValue('F1', 'Customer number');
-                $sheet->setCellValue('G1', 'Customer name');
-                $sheet->setCellValue('H1', 'Secondary customer number');
-                $sheet->setCellValue('I1', 'Order type');
-                $sheet->setCellValue('J1', 'Product');
-                $sheet->setCellValue('K1', 'Destination');
-                $sheet->setCellValue('L1', 'Variety number');
+                $sheet->setCellValue('B1', 'User');
+                $sheet->setCellValue('C1', 'Secondary customer name');
+                $sheet->setCellValue('D1', 'Variety name');
+                $sheet->setCellValue('E1', 'Year');
+                $sheet->setCellValue('F1', 'Week');
+                $sheet->setCellValue('G1', 'Customer number');
+                $sheet->setCellValue('H1', 'Customer name');
+                $sheet->setCellValue('I1', 'Secondary customer number');
+                $sheet->setCellValue('J1', 'Order type');
+                $sheet->setCellValue('K1', 'Product');
+                $sheet->setCellValue('L1', 'Destination');
+                $sheet->setCellValue('M1', 'Variety number');
 
                 $c = 13;
                 foreach ($parameters as $p) {
@@ -471,24 +472,25 @@
                     foreach ($response as $k) {
 
                         $sheet->setCellValue('A'.$f, $k["order_no"]);
-                        $sheet->setCellValue('B'.$f, $k["sec_cust"]);
-                        $sheet->setCellValue('C'.$f, $k["variety"]);
-                        $sheet->setCellValue('D'.$f, $k["year"]);
-                        $sheet->setCellValue('E'.$f, $k["week"]);
-                        $sheet->setCellValue('F'.$f, $k["cust_no"]);
-                        $sheet->setCellValue('G'.$f, $k["cust"]);
-                        $sheet->setCellValue('H'.$f, $k["sec_cust_no"]);
-                        $sheet->setCellValue('I'.$f, $k["order_type"]);
-                        $sheet->setCellValue('J'.$f, $k["product"]);
-                        $sheet->setCellValue('K'.$f, $k["destination"]);
-                        $sheet->setCellValue('L'.$f, $k["variety_code"]);
+                        $sheet->setCellValue('B'.$f, $k["name"]." ".$k["last_name"]);
+                        $sheet->setCellValue('C'.$f, $k["sec_cust"]);
+                        $sheet->setCellValue('D'.$f, $k["variety"]);
+                        $sheet->setCellValue('E'.$f, $k["year"]);
+                        $sheet->setCellValue('F'.$f, $k["week"]);
+                        $sheet->setCellValue('G'.$f, $k["cust_no"]);
+                        $sheet->setCellValue('H'.$f, $k["cust"]);
+                        $sheet->setCellValue('I'.$f, $k["sec_cust_no"]);
+                        $sheet->setCellValue('J'.$f, $k["order_type"]);
+                        $sheet->setCellValue('K'.$f, $k["product"]);
+                        $sheet->setCellValue('L'.$f, $k["destination"]);
+                        $sheet->setCellValue('M'.$f, $k["variety_code"]);
 
                         $c = 13;
                         foreach ($parameters as $p) {
                             
 
                             foreach ($data as $d) {
-                                if ($d["id_order"] == $k["id_order"] AND $d["id_variety"] == $k["id_variety"] AND $d["id_parameter"] == $p["id"]) {
+                                if ($d["id_user"] == $k["id_user"] AND $d["id_order"] == $k["id_order"] AND $d["id_variety"] == $k["id_variety"] AND $d["id_parameter"] == $p["id"]) {
 
                                     if ($p["type"] != 4) {
                                         $sheet->setCellValue([$c, $f], ($d["obs"] != "") ? $d["value"]." (".$d["obs"].")" : $d["value"]);
@@ -512,17 +514,18 @@
 
                 $sheet->getColumnDimension('A')->setWidth(10.14);
                 $sheet->getRowDimension(1)->setRowHeight(54.75);
-                $sheet->getColumnDimension('B')->setWidth(21.57);
-                $sheet->getColumnDimension('C')->setWidth(18);
-                $sheet->getColumnDimension('D')->setWidth(5.57);
-                $sheet->getColumnDimension('E')->setWidth(6.14);
-                $sheet->getColumnDimension('F')->setWidth(9.50);
-                $sheet->getColumnDimension('G')->setWidth(20.43);
-                $sheet->getColumnDimension('H')->setWidth(13.2);
-                //$sheet->getColumnDimension('I')->setWidth();
-                $sheet->getColumnDimension('J')->setWidth(8.57);
-                $sheet->getColumnDimension('K')->setWidth(12);
-                $sheet->getColumnDimension('L')->setWidth(9);
+                $sheet->getColumnDimension('B')->setWidth(18);
+                $sheet->getColumnDimension('C')->setWidth(21.57);
+                $sheet->getColumnDimension('D')->setWidth(18);
+                $sheet->getColumnDimension('E')->setWidth(5.57);
+                $sheet->getColumnDimension('F')->setWidth(6.14);
+                $sheet->getColumnDimension('G')->setWidth(9.50);
+                $sheet->getColumnDimension('H')->setWidth(20.43);
+                $sheet->getColumnDimension('I')->setWidth(13.2);
+                //$sheet->getColumnDimension('J')->setWidth();
+                $sheet->getColumnDimension('K')->setWidth(8.57);
+                $sheet->getColumnDimension('L')->setWidth(12);
+                $sheet->getColumnDimension('M')->setWidth(9);
                 
 
                 $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
@@ -561,10 +564,13 @@
                 $sheet->getStyle('L1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
                 $sheet->getStyle('L1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
                 $sheet->getStyle('L1')->getAlignment()->setWrapText(true);
+                $sheet->getStyle('M1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('M1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $sheet->getStyle('M1')->getAlignment()->setWrapText(true);
                 
 
-                $spreadsheet->getActiveSheet()->setAutoFilter('A1:BA20');
-                $spreadsheet->getActiveSheet()->freezePane('D2');
+                $spreadsheet->getActiveSheet()->setAutoFilter('A1:BQ20');
+                $spreadsheet->getActiveSheet()->freezePane('E2');
 
                 
                 $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');

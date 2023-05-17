@@ -8,10 +8,17 @@ $(document).ready(function() {
 
     $("#parameter-type").change(function(){
         if (this.value == 1) $(".parameter-more").removeClass('d-none');
-        else $(".parameter-more").addClass('d-none');
+        else {
+            $(".parameter-more").addClass('d-none');
+            document.getElementById('parameter-label').value = null;
+            document.getElementById('parameter-remark').value = null;
+        }
 
         if (this.value == 1 || this.value == 2) $("#parameter-all-cont").removeClass('d-none');
-        else $("#parameter-all-cont").addClass('d-none');
+        else {
+            document.getElementById('parameter-all').checked = false;
+            $("#parameter-all-cont").addClass('d-none');
+        }
 
         if (this.value == 5 || this.value == 6 || this.value == 7) {
             $("#parameter-options-cont").removeClass('d-none');
@@ -134,26 +141,30 @@ async function loadParameters() {
             },
 
             success:  function(response) {
-                var objData = JSON.parse(response);
+                try {
+                    var objData = JSON.parse(response);
 
-                if(objData.status == true){
-                    $('#parameters').html(objData.res);
-                    let table = new DataTable('#table-parameters', {
-                        "processing": true,
-                        "scrollY": false,
-                        "scrollX": (isMobile()) ? true : false,
-                        "iDisplayLength": 10,
-                        "stateSave": true,
-                    }).page();
+                    if(objData.status == true){
+                        $('#parameters').html(objData.res);
+                        let table = new DataTable('#table-parameters', {
+                            "processing": true,
+                            "scrollY": false,
+                            "scrollX": (isMobile()) ? true : false,
+                            "iDisplayLength": 10,
+                            "stateSave": true,
+                        }).page();
 
-                    $(".dataTables_paginate").bind( "click", '.paginate_button', function() {
-                        window.scrollTo(0, 0);
-                    });
+                        $(".dataTables_paginate").bind( "click", '.paginate_button', function() {
+                            window.scrollTo(0, 0);
+                        });
 
-                    document.querySelectorAll('#table-parameters_wrapper .row')[2].classList.add('mt-3');
+                        document.querySelectorAll('#table-parameters_wrapper .row')[2].classList.add('mt-3');
 
-                }else{
-                    alert(objData.res);
+                    }else{
+                        alert(objData.res);
+                    }
+                } catch (error) {
+                    alert(error);
                 }
 
                 $('#parameters-loading').addClass('d-none');
@@ -181,7 +192,7 @@ async function loadCrops() {
             },
 
             success:  function(response) {
-                if (!response.includes('DOCTYPE')) {
+                try {
                     var objData = JSON.parse(response);
 
                     if(objData.status == true){
@@ -189,8 +200,8 @@ async function loadCrops() {
                     }else{
                         alert(objData.res);
                     }   
-                }else{
-                    $('#parameter-crops').html(response);
+                } catch (error) {
+                    alert(error);
                 }
 
                 resolve('resolved');

@@ -31,6 +31,17 @@ class Api extends Controllers
         }
     }
 
+    public function getUsersDetails()
+    {
+        $res = $this->model->getUsersDetails();
+
+        if (!empty($res)) {
+            echo json_encode(array("error" => false, "datos" => $res));
+        } else {
+            echo json_encode(array("error" => true, "datos" => "No se encontraron usuarios!."));
+        }
+    }
+
     public function getCrops()
     {
         $res = $this->model->getCrops();
@@ -174,13 +185,13 @@ class Api extends Controllers
 
     public function getOrdersParameters()
     {
-        $res = $this->model->getOrdersParameters();
-
-        if (!empty($res)) {
-            echo json_encode(array("error" => false, "datos" => $res));
-        } else {
-            echo json_encode(array("error" => "No se encontraron ordenes, para este usuario!"));
+        if (!isset($_POST["id"]) OR !$_POST["id"]) {
+            exit(json_encode(array("error" => "Error al recibir datos!")));
         }
+
+        $res = $this->model->getOrdersParameters($_POST["id"]);
+
+        echo json_encode(array("error" => false, "datos" => $res));
     }
 
     public function getOrdersTypes()
@@ -245,7 +256,7 @@ class Api extends Controllers
             $data = json_decode($_POST["data"], true);
 
             foreach ($data as $k) {
-                $res = $this->model->getOrderParameter($k["id_order"], $k["id_variety"], $k["id_parameter"]);
+                $res = $this->model->getOrderParameter($k["id_user"], $k["id_order"], $k["id_variety"], $k["id_parameter"]);
 
                 if ($res) {
                     $res = $this->model->updateDataSync($res["id"], $k["value"], $k["obs"]);
@@ -254,7 +265,7 @@ class Api extends Controllers
                         exit();
                     }
                 }else{
-                    $res = $this->model->setDataSync($k["id_order"], $k["id_variety"], $k["id_parameter"], $k["value"], $k["obs"], DATE("Y"), DATE("W"));
+                    $res = $this->model->setDataSync($k["id_user"], $k["id_order"], $k["id_variety"], $k["id_parameter"], $k["value"], $k["obs"], DATE("Y"), DATE("W"));
                     if (!$res) {
                         echo json_encode(array("error" => "Al registrar datos!"));
                         exit();
@@ -275,7 +286,7 @@ class Api extends Controllers
             $data = json_decode($_POST["data"], true);
             
             $base64_string = $_POST['file'];
-            $name = $data["id_order"]."_".$data["id_variety"]."_".$data["id_parameter"].".jpg";
+            $name = $data["id_user"]."_".$data["id_order"]."_".$data["id_variety"]."_".$data["id_parameter"].".jpg";
             $outputfile = "uploads/$name";
 
             if (!$filehandler = fopen($outputfile, 'wb')) {
@@ -287,7 +298,7 @@ class Api extends Controllers
 
                 fclose($filehandler);
 
-                $res = $this->model->getOrderParameter($data["id_order"], $data["id_variety"], $data["id_parameter"]);
+                $res = $this->model->getOrderParameter($data["id_user"], $data["id_order"], $data["id_variety"], $data["id_parameter"]);
 
                 if ($res) {
                     $res = $this->model->updateDataSync($res["id"], $name, $data["obs"]);
@@ -296,7 +307,7 @@ class Api extends Controllers
                         exit();
                     }
                 }else{
-                    $res = $this->model->setDataSync($data["id_order"], $data["id_variety"], $data["id_parameter"], $name, $data["obs"], DATE("Y"), DATE("W"));
+                    $res = $this->model->setDataSync($data["id_user"], $data["id_order"], $data["id_variety"], $data["id_parameter"], $name, $data["obs"], DATE("Y"), DATE("W"));
                     if (!$res) {
                         echo json_encode(array("error" => "Al registrar datos!"));
                         exit();

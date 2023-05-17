@@ -137,6 +137,7 @@ async function loadUserEdit(id) {
     userProcess = 2;
     document.getElementById('modalAddUserLabel').innerText = 'Update user';
     document.getElementById('user-state-cont').classList.remove('d-none');
+    $('#user-sec-custs').html(null);
 
     return new Promise(resolve => {
 
@@ -223,7 +224,7 @@ async function loadCusts() {
             cache: false,
 
             beforeSend: function() {
-                $('#user-sec-custs').html(null);
+                
             },
 
             error:  function(xhr) {
