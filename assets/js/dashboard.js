@@ -1,3 +1,4 @@
+var stateCalendar = false;
 var stateParameters = false;
 var stateUsers = false;
 
@@ -65,10 +66,14 @@ $(document).ready(function() {
 });
 
 async function showOption($this, container){
+
+    let search = document.querySelector('.search-bar');
     
     if (isMobile()) {
         document.querySelector('body').classList.remove('toggle-sidebar');
     }
+
+    search.classList.add('d-none');
 
     $('.main').fadeOut(0);
     $('.nav-link').addClass('collapsed');
@@ -77,6 +82,19 @@ async function showOption($this, container){
     $('#'+container).fadeIn(0);
 
     switch (container) {
+
+        case 'main-calendar':
+            
+
+            document.querySelector('body').classList.add('toggle-sidebar');
+            search.classList.remove('d-none');
+            if (!stateCalendar) {
+                await loadCalendar();
+                loadCalendarFilters();
+            }
+
+            break;
+
         case 'main-parameters':
             
             if (!stateParameters) {

@@ -1284,6 +1284,31 @@ h6 {
   display: none;
 }
 
+.fs-0-9{
+  font-size: 0.9rem!important;
+}
+.fs-0-8{
+  font-size: 0.8rem!important;
+}
+.fs-0-7{
+  font-size: 0.7rem!important;
+}
+.fs-0-6{
+  font-size: 0.6rem!important;
+}
+.fs-0-5{
+  font-size: 0.5rem!important;
+}
+
+.calendar-hover{
+  background: #42bd842c!important;
+}
+
+#calendar td{
+  transition: 0.5s;
+  zoom: 0.9;
+}
+
 input:checked {
   background-color: #1a8754!important;
 }
@@ -1296,4 +1321,42 @@ input:checked {
 
 .page-link {
   color: black;
+}
+
+
+
+/* CHECKBOX */
+.mtm-checkbox-filter input[type="checkbox"]:not(:checked), 
+.mtm-checkbox-filter input[type="checkbox"]:checked {
+	position: absolute;
+	top: -9999%;
+}
+
+.mtm-checkbox-filter input[type="checkbox"] + label {
+	width: 100%;
+	padding: 5px;
+	padding-left: 10px;
+	padding-right: 10px;
+	border: 1px solid lightgray;
+	cursor: pointer;
+	font-size: 0.7rem;
+	-webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none; 
+}
+
+.mtm-checkbox-filter label:hover {
+	transition-duration: 0.2s;
+	background: #a8c5e72a;
+}
+
+.mtm-checkbox-filter input[type="checkbox"]:checked + label {
+	color: #155724;
+    background-color: #bfecca!important;
+	border: 1px solid white;
+}
+
+.mtm-checkbox-filter label{
+	margin-bottom: 0px;
 }

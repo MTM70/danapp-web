@@ -19,11 +19,11 @@
             return $this->selectOne($sql, $array);
         }
 
-        public function setOrder(int $orderNo, int $idSecCust, int $idType, int $idProduct, int $year, int $week, String $destination, String $remarks)
+        public function setOrder(int $orderNo, int $idSecCust, int $idType, int $idProduct, int $year, int $week, String $destination, String $remarks, String $visitDay)
         {
-            $sql = 'INSERT INTO orders (order_no, id_sec_cust, id_type, id_product, year, week, destination, remarks) VALUES (:value0, :value1, :value2, :value3, :value4, :value5, :value6, :value7)';
+            $sql = 'INSERT INTO orders (order_no, id_sec_cust, id_type, id_product, year, week, destination, remarks, visit_day) VALUES (:value0, :value1, :value2, :value3, :value4, :value5, :value6, :value7, :value8)';
 
-            $array = array($orderNo, $idSecCust, $idType, $idProduct, $year, $week, $destination, $remarks);
+            $array = array($orderNo, $idSecCust, $idType, $idProduct, $year, $week, $destination, $remarks, $visitDay);
             return $this->insert($sql, $array);
         }
 
@@ -217,7 +217,7 @@
         public function getOrdersParametersBetweenWeeks(int $year1, int $week1, int $year2, int $week2)
         {
             $sql = 'SELECT op.id_user, name, last_name, 
-                        id_order, id_variety, id_order, op.year, op.week, order_no, destination, cust_no, cust, sec_cust_no, sec_cust, 
+                        id_order, id_variety, id_order, op.date, op.year, op.week, order_no, destination, cust_no, cust, sec_cust_no, sec_cust, 
                         ot.type AS order_type, product, crop_general, crop, variety_code, variety 
                     FROM orders_parameters AS op 
                     INNER JOIN orders AS o ON o.id = op.id_order 
@@ -471,5 +471,146 @@
             return $this->delete($sql, $array);
         }
         //TODO Users--------------------------------------------------------------------------
+
+
+        //TODO Orders--------------------------------------------------------------------------
+
+        public function getOrdersByWeekById(int $year, int $week)
+        {
+            $sql = "SELECT od.id_order, od.id_variety, tot_quantity, tot_price, remarks, 
+                        o.order_no, o.id_sec_cust, sc.sec_cust, id_type, ot.type, o.id_product, o.year, o.week, o.destination, 
+                        CASE 
+                            WHEN IFNULL(vd.visit_day, 0) != 0 THEN vd.visit_day
+                            ELSE o.visit_day
+                        END AS visit_day, 
+                        IFNULL(vd.notify, 2) AS notify, 
+                        product, id_crop, crop, variety, IFNULL(vd.visit_day, 0) AS datetimes, 
+                        IFNULL(vts.varieties, '') AS varieties 
+                    FROM orders_details AS od 
+                    INNER JOIN orders AS o ON o.id = od.id_order 
+                    INNER JOIN orders_types AS ot ON ot.id = o.id_type 
+                    INNER JOIN sec_customers AS sc ON sc.id = o.id_sec_cust 
+                    INNER JOIN products AS p ON p.id = o.id_product 
+                    INNER JOIN varieties AS v ON v.id = od.id_variety 
+                    INNER JOIN crops AS c ON c.id = v.id_crop 
+                    INNER JOIN users AS u ON u.id = :value0 
+                    LEFT JOIN visit_days aS vd ON vd.id_user = :value0 AND vd.id_order = od.id_order 
+
+                    LEFT JOIN (
+                        SELECT od.id_order, GROUP_CONCAT(v.variety) AS varieties 
+                        FROM orders_details AS od 
+                        INNER JOIN orders AS o ON o.id = od.id_order 
+                        INNER JOIN varieties AS v ON v.id = od.id_variety 
+                        INNER JOIN users AS u ON u.id = :value0 
+                        WHERE o.state = 0 AND 
+                        CASE 
+                            WHEN id_rol != 1 THEN id_sec_cust IN (SELECT id_sec_cust FROM users_sec_customers AS usc WHERE usc.id_user = :value0) 
+                            ELSE id_sec_cust > 0 
+                        END 
+                        AND YEAR(o.visit_day) = :value1 AND WEEK(o.visit_day) = :value2 
+                        GROUP BY od.id_order 
+                    ) AS vts ON vts.id_order = o.id 
+
+                    WHERE o.state = 0 AND 
+                        CASE 
+                            WHEN id_rol != 1 THEN id_sec_cust IN (SELECT id_sec_cust FROM users_sec_customers AS usc WHERE usc.id_user = u.id) 
+                            ELSE id_sec_cust > 0 
+                        END 
+                        AND YEAR(o.visit_day) = :value1 AND WEEK(o.visit_day) = :value2 
+                    GROUP BY o.id 
+                    ORDER BY visit_day, order_no";
+
+            $array = array($_SESSION["id"], $year, $week);
+            return $this->select($sql, $array);
+        }
+
+        public function getOrdersTypesByWeekById(int $year, int $week)
+        {
+            $sql = "SELECT o.id_type, ot.type 
+                    FROM orders_details AS od 
+                    INNER JOIN orders AS o ON o.id = od.id_order 
+                    INNER JOIN orders_types AS ot ON ot.id = o.id_type 
+                    INNER JOIN users AS u ON u.id = :value0 
+
+                    WHERE o.state = 0 AND 
+                        CASE 
+                            WHEN id_rol != 1 THEN id_sec_cust IN (SELECT id_sec_cust FROM users_sec_customers AS usc WHERE usc.id_user = u.id) 
+                            ELSE id_sec_cust > 0 
+                        END 
+                        AND YEAR(o.visit_day) = :value1 AND WEEK(o.visit_day) = :value2 
+                    GROUP BY o.id_type";
+
+            $array = array($_SESSION["id"], $year, $week);
+            return $this->select($sql, $array);
+        }
+
+        public function getOrdersDestinationsByWeekById(int $year, int $week)
+        {
+            $sql = "SELECT o.destination 
+                    FROM orders_details AS od 
+                    INNER JOIN orders AS o ON o.id = od.id_order 
+                    INNER JOIN users AS u ON u.id = :value0 
+
+                    WHERE o.state = 0 AND 
+                        CASE 
+                            WHEN id_rol != 1 THEN id_sec_cust IN (SELECT id_sec_cust FROM users_sec_customers AS usc WHERE usc.id_user = u.id) 
+                            ELSE id_sec_cust > 0 
+                        END 
+                        AND YEAR(o.visit_day) = :value1 AND WEEK(o.visit_day) = :value2 
+                    GROUP BY o.destination";
+
+            $array = array($_SESSION["id"], $year, $week);
+            return $this->select($sql, $array);
+        }
+
+        public function getOrdersCropsByWeekById(int $year, int $week)
+        {
+            $sql = "SELECT c.id, crop 
+                    FROM orders_details AS od 
+                    INNER JOIN orders AS o ON o.id = od.id_order 
+                    INNER JOIN users AS u ON u.id = :value0 
+                    INNER JOIN varieties AS v ON v.id = od.id_variety 
+                    INNER JOIN crops AS c ON c.id = v.id_crop 
+
+                    WHERE o.state = 0 AND 
+                        CASE 
+                            WHEN id_rol != 1 THEN id_sec_cust IN (SELECT id_sec_cust FROM users_sec_customers AS usc WHERE usc.id_user = u.id) 
+                            ELSE id_sec_cust > 0 
+                        END 
+                        AND YEAR(o.visit_day) = :value1 AND WEEK(o.visit_day) = :value2 
+                    GROUP BY c.id";
+
+            $array = array($_SESSION["id"], $year, $week);
+            return $this->select($sql, $array);
+        }
+
+        public function getOrderVisitDay(int $idOrder)
+        {
+            $sql = 'SELECT id, notify 
+                    FROM visit_days 
+                    WHERE id_user = :value0 AND id_order = :value1 
+                    LIMIT 1';
+
+            $array = array($_SESSION['id'], $idOrder);
+            return $this->selectOne($sql, $array);
+        }
+
+        public function setOrderVisitDay(int $idOrder, String $datetime, int $notify)
+        {
+            $sql = 'INSERT INTO visit_days (id_user, id_order, visit_day, notify) VALUES (:value0, :value1, :value2, :value3)';
+
+            $array = array($_SESSION['id'], $idOrder, $datetime, $notify);
+            return $this->insert($sql, $array);
+        }
+
+        public function updateOrderVisitDay(int $id, String $datetime, $notify)
+        {
+            $sql = 'UPDATE visit_days SET visit_day = :value1, notify = :value2 WHERE id = :value0';
+
+            $array = array($id, $datetime, $notify);
+            return $this->update($sql, $array);
+        }
+
+        //TODO Orders--------------------------------------------------------------------------
 
     }

@@ -10,6 +10,15 @@
             </a>
         </li><!-- End Dashboard Nav -->
 
+        <li class="nav-heading">Orders</li>
+
+        <li class="nav-item">
+            <a class="nav-link cursor-select collapsed" onclick="showOption(this, 'main-calendar')">
+                <i class="bi bi-calendar"></i>
+                <span>Calendar</span>
+            </a>
+        </li><!-- End Profile Page Nav -->
+
         <?php 
             if (isset($_SESSION["idRol"]) AND $_SESSION["idRol"] == 1) {
                 echo '

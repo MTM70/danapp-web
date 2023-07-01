@@ -20,7 +20,7 @@
         public function dashboard()
         {
             $data['page_title'] = "Dashboard";
-            $data['page_js'] = array("dashboard.js");
+            $data['page_js'] = array("dashboard.js", "calendar.js");
 
             if ($_SESSION['idRol'] == 1) array_push($data["page_js"], "parameters.js", "users.js");
 
@@ -149,9 +149,34 @@
                                     $product = $this->model->getProductByProduct(trim($data[$i][16]));
                                 }
                             }
+                            
+                            //* GET DATE VISIT--------------------------------------------------------------------------
+
+                            $year = $data[$i][3];
+                            $week = $data[$i][4];
+
+                            //Obtener semanas del ano
+                            $date = new DateTime;
+                            $date->setISODate($year, 53);
+                            $weeks = $date->format("W") === "53" ? 53 : 52;
+                            //////////////////////////////////////////////////
+
+                            $cycle = (trim($data[$i][14]) == "BOG") ? 14 : 12 ;
+
+                            $week = $week + $cycle;
+                            if ($week > $weeks) {
+                                $week = $week - $weeks;
+                                $year++;
+                            }
+
+                            $week = ($week > 9) ? $week : "0".$week ;
+
+                            $lunes = date('Y-m-d', strtotime("Y".$year."W".$week."1"));
+
+                            //* GET DATE VISIT--------------------------------------------------------------------------
 
                             //Registramos la orden
-                            $insert = $this->model->setOrder(trim($data[$i][0]), $secCust["id"], $orderType["id"], $product["id"], trim($data[$i][3]), trim($data[$i][4]), trim($data[$i][14]), trim($data[$i][34]));
+                            $insert = $this->model->setOrder(trim($data[$i][0]), $secCust["id"], $orderType["id"], $product["id"], trim($data[$i][3]), trim($data[$i][4]), trim($data[$i][14]), trim($data[$i][34]), $lunes);
                             if (!$insert) {
                                 $this->arrResponse = array(
                                     'status' => false, 
@@ -442,18 +467,20 @@
                 $sheet->setCellValue('A1', 'Order number');
                 $sheet->setCellValue('B1', 'User');
                 $sheet->setCellValue('C1', 'Secondary customer name');
-                $sheet->setCellValue('D1', 'Variety name');
-                $sheet->setCellValue('E1', 'Year');
-                $sheet->setCellValue('F1', 'Week');
-                $sheet->setCellValue('G1', 'Customer number');
-                $sheet->setCellValue('H1', 'Customer name');
-                $sheet->setCellValue('I1', 'Secondary customer number');
-                $sheet->setCellValue('J1', 'Order type');
-                $sheet->setCellValue('K1', 'Product');
-                $sheet->setCellValue('L1', 'Destination');
-                $sheet->setCellValue('M1', 'Variety number');
+                $sheet->setCellValue('D1', 'Crop name');
+                $sheet->setCellValue('E1', 'Variety name');
+                $sheet->setCellValue('F1', 'Year');
+                $sheet->setCellValue('G1', 'Week');
+                $sheet->setCellValue('H1', 'Date');
+                $sheet->setCellValue('I1', 'Customer number');
+                $sheet->setCellValue('J1', 'Customer name');
+                $sheet->setCellValue('K1', 'Secondary customer number');
+                $sheet->setCellValue('L1', 'Order type');
+                $sheet->setCellValue('M1', 'Product');
+                $sheet->setCellValue('N1', 'Destination');
+                $sheet->setCellValue('O1', 'Variety number');
 
-                $c = 13;
+                $c = 16;
                 foreach ($parameters as $p) {
                     $sheet->setCellValue([$c, 1], $p["parameter"]);
                     $sheet->getColumnDimensionByColumn($c)->setAutoSize(true);
@@ -474,20 +501,23 @@
                         $sheet->setCellValue('A'.$f, $k["order_no"]);
                         $sheet->setCellValue('B'.$f, $k["name"]." ".$k["last_name"]);
                         $sheet->setCellValue('C'.$f, $k["sec_cust"]);
-                        $sheet->setCellValue('D'.$f, $k["variety"]);
-                        $sheet->setCellValue('E'.$f, $k["year"]);
-                        $sheet->setCellValue('F'.$f, $k["week"]);
-                        $sheet->setCellValue('G'.$f, $k["cust_no"]);
-                        $sheet->setCellValue('H'.$f, $k["cust"]);
-                        $sheet->setCellValue('I'.$f, $k["sec_cust_no"]);
-                        $sheet->setCellValue('J'.$f, $k["order_type"]);
-                        $sheet->setCellValue('K'.$f, $k["product"]);
-                        $sheet->setCellValue('L'.$f, $k["destination"]);
-                        $sheet->setCellValue('M'.$f, $k["variety_code"]);
+                        $sheet->setCellValue('D'.$f, $k["crop"]);
+                        $sheet->setCellValue('E'.$f, $k["variety"]);
+                        $sheet->setCellValue('F'.$f, $k["year"]);
+                        $sheet->setCellValue('G'.$f, $k["week"]);
+                        $sheet->setCellValue('H'.$f, $k["date"]);
+                        $sheet->setCellValue('I'.$f, $k["cust_no"]);
+                        $sheet->setCellValue('J'.$f, $k["cust"]);
+                        $sheet->setCellValue('K'.$f, $k["sec_cust_no"]);
+                        $sheet->setCellValue('L'.$f, $k["order_type"]);
+                        $sheet->setCellValue('M'.$f, $k["product"]);
+                        $sheet->setCellValue('N'.$f, $k["destination"]);
+                        $sheet->setCellValue('O'.$f, $k["variety_code"]);
 
-                        $c = 13;
+                        $c = 16;
                         foreach ($parameters as $p) {
                             
+                            $isset = false;
 
                             foreach ($data as $d) {
                                 if ($d["id_user"] == $k["id_user"] AND $d["id_order"] == $k["id_order"] AND $d["id_variety"] == $k["id_variety"] AND $d["id_parameter"] == $p["id"]) {
@@ -501,9 +531,12 @@
                                         $sheet->getCell([$c, $f])->getHyperlink()->setUrl("https://danapp.co/uploads/".$d["value"]);
                                     }
                                     
+                                    $isset = true;
                                     break; 
                                 }
                             }
+
+                            if (!$isset) $sheet->setCellValue([$c, $f], "");
 
                             $c++;
                         }
@@ -517,15 +550,17 @@
                 $sheet->getColumnDimension('B')->setWidth(18);
                 $sheet->getColumnDimension('C')->setWidth(21.57);
                 $sheet->getColumnDimension('D')->setWidth(18);
-                $sheet->getColumnDimension('E')->setWidth(5.57);
-                $sheet->getColumnDimension('F')->setWidth(6.14);
-                $sheet->getColumnDimension('G')->setWidth(9.50);
-                $sheet->getColumnDimension('H')->setWidth(20.43);
-                $sheet->getColumnDimension('I')->setWidth(13.2);
-                //$sheet->getColumnDimension('J')->setWidth();
-                $sheet->getColumnDimension('K')->setWidth(8.57);
-                $sheet->getColumnDimension('L')->setWidth(12);
-                $sheet->getColumnDimension('M')->setWidth(9);
+                $sheet->getColumnDimension('E')->setWidth(18);
+                $sheet->getColumnDimension('F')->setWidth(5.57);
+                $sheet->getColumnDimension('G')->setWidth(6.14);
+                $sheet->getColumnDimension('H')->setWidth(11);
+                $sheet->getColumnDimension('I')->setWidth(9.50);
+                $sheet->getColumnDimension('J')->setWidth(20.43);
+                $sheet->getColumnDimension('K')->setWidth(13.2);
+                //$sheet->getColumnDimension('L')->setWidth();
+                $sheet->getColumnDimension('M')->setWidth(8.57);
+                $sheet->getColumnDimension('N')->setWidth(12);
+                $sheet->getColumnDimension('O')->setWidth(9);
                 
 
                 $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
@@ -567,10 +602,16 @@
                 $sheet->getStyle('M1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
                 $sheet->getStyle('M1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
                 $sheet->getStyle('M1')->getAlignment()->setWrapText(true);
+                $sheet->getStyle('N1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('N1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $sheet->getStyle('N1')->getAlignment()->setWrapText(true);
+                $sheet->getStyle('O1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('O1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $sheet->getStyle('O1')->getAlignment()->setWrapText(true);
                 
 
                 $spreadsheet->getActiveSheet()->setAutoFilter('A1:BQ20');
-                $spreadsheet->getActiveSheet()->freezePane('E2');
+                $spreadsheet->getActiveSheet()->freezePane('F2');
 
                 
                 $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
@@ -972,7 +1013,10 @@
                     );
                 }
             }else{
-
+                $this->arrResponse = array(
+                    'status' => false, 
+                    'res' => 'Parameter fail!'
+                );
             }
 
             echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
@@ -1222,5 +1266,291 @@
             echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
         }
         //TODO Users --------------------------------------------------------------------
+
+
+        //TODO Calendar --------------------------------------------------------------------
+
+        public function loadCalendarFilters()
+        {
+            if (isset($_GET["week"])) {
+
+                $year = substr($_GET["week"], 0, 4);
+                $week = substr($_GET["week"], 6, 2);
+
+                $ordersTypes = $this->model->getOrdersTypesByWeekById($year, $week);
+                $destinations = $this->model->getOrdersDestinationsByWeekById($year, $week);
+                $crops = $this->model->getOrdersCropsByWeekById($year, $week);
+
+                if (!empty($ordersTypes)) {
+                    
+                    $this->html .= '
+                        <h6><i class="bi bi-building-fill-check me-1"></i>Orders types</h6>
+                        <div class="d-flex flex-wrap mtm-checkbox-filter" id="calendar-filters-types">
+                    ';
+
+                    foreach ($ordersTypes as $k) {
+                        $this->html .= '
+                            <div class="p-1">
+                                <input id="checkT'.$k["id_type"].'" type="checkbox" value="'.$k["id_type"].'" onclick="calendarFilter()">
+                                <label class="rounded-3" for="checkT'.$k["id_type"].'">'.$k["type"].'</label>
+                            </div>
+                        ';
+                    }
+
+                    $this->html .= '</div><hr>';
+                }
+
+                if (!empty($destinations)) {
+                    
+                    $this->html .= '
+                        <h6><i class="bi bi-airplane-fill me-1"></i>Destinations</h6>
+                        <div class="d-flex flex-wrap mtm-checkbox-filter" id="calendar-filters-destinations">
+                    ';
+
+                    foreach ($destinations as $k) {
+                        $this->html .= '
+                            <div class="p-1">
+                                <input id="checkD'.$k["destination"].'" type="checkbox" value="'.$k["destination"].'" onclick="calendarFilter()">
+                                <label class="rounded-3" for="checkD'.$k["destination"].'">'.$k["destination"].'</label>
+                            </div>
+                        ';
+                    }
+
+                    $this->html .= '</div><hr>';
+                }
+
+                if (!empty($crops)) {
+                    
+                    $this->html .= '
+                        <h6><i class="bi bi-gear-fill me-1"></i>Crops</h6>
+                        <div class="d-flex flex-wrap mtm-checkbox-filter" id="calendar-filters-crops">
+                    ';
+
+                    foreach ($crops as $k) {
+                        $this->html .= '
+                            <div class="p-1">
+                                <input id="checkC'.$k["id"].'" type="checkbox" value="'.$k["id"].'" onclick="calendarFilter()">
+                                <label class="rounded-3" for="checkC'.$k["id"].'">'.$k["crop"].'</label>
+                            </div>
+                        ';
+                    }
+
+                    $this->html .= '</div>';
+                }
+
+                $this->arrResponse = array(
+                    'status' => true, 
+                    'res' => $this->html
+                );
+            }else{
+                $this->arrResponse = array(
+                    'status' => false, 
+                    'res' => 'Parameter fail!'
+                );
+            }
+
+            echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
+        }
+
+        public function loadCalendarWeek()
+        {
+            if (isset($_GET["week"])) {
+
+                $year = substr($_GET["week"], 0, 4);
+                $week = substr($_GET["week"], 6, 2);
+
+                $response = $this->model->getOrdersByWeekById($year, $week);
+
+                if (!empty($response)) {
+
+                    $days = array();
+
+                    for ($d=1; $d <= 5 ; $d++) { 
+                        
+                        $day = date('Y-m-d', strtotime("Y".$year."W".$week.$d));
+                        array_push($days, $day);
+
+                    }
+
+                    $this->html = '
+                        <table class="table table-bordered text-center" style="table-layout: fixed;">
+                            <thead>
+                                <tr>
+                                    <th>M<!--<br><i class="text-muted fw-light">('.$days[0].')</i>--></th>
+                                    <th>T<!--<br><i class="text-muted fw-light">('.$days[1].')</i>--></th>
+                                    <th>W<!--<br><i class="text-muted fw-light">('.$days[2].')</i>--></th>
+                                    <th>T<!--<br><i class="text-muted fw-light">('.$days[3].')</i>--></th>
+                                    <th>F<!--<br><i class="text-muted fw-light">('.$days[4].')</i>--></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>';
+
+                                    foreach ($days as $key => $day) {
+
+                                        $this->html .= '<td class="p-3" ondragover="dragover(event)" ondragleave="dragleave(event)" ondrop="drop(event)" data-date="'.$day.'">';
+
+                                        foreach ($response as $o) {
+
+                                            if (substr($o["visit_day"], 0, 10) != $day) continue;
+
+                                            $visitDay = new DateTime($o["visit_day"]);
+
+                                            $this->html .= '
+                                                <div 
+                                                    class="card shadow-sm border mb-3" 
+                                                    style="cursor:move;" 
+                                                    draggable="true" 
+                                                    ondragstart="dragstart(event, 0);" 
+                                                    ondragend="dragEnd(event)" 
+                                                    data-id="'.$o["id_order"].'" 
+                                                    data-time="'.substr($o["visit_day"], 11, 5).'"
+                                                    data-type="'.$o["id_type"].'"
+                                                    data-destination="'.$o["destination"].'"
+                                                    data-crop="'.$o["id_crop"].'"
+                                                    data-notify="'.$o["notify"].'"
+                                                >
+                                                    <div class="card-header d-flex justify-content-between align-items-center bg-primary bg-opacity-10 p-1">
+                                                        <div class="ps-2">
+                                                            <h6 class="card-text text-secondary"><i class="bi bi-flower2 me-1"></i>'.$o["crop"].'</h6>
+                                                        </div>
+                                                        <div>
+                                                            <h6 class="card-text text-secondary">'.substr($o["type"], 0, 20).'</h6>
+                                                            <div>
+                                                                <h6 class="card-text fs-0-8"><i class="bi bi-bookmark me-1"></i>'.$o["product"].' | <i class="bi bi-airplane me-1"></i>'.$o["destination"].'</h6>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="card-body accordion accordion-flush p-3">
+                                                        <div class="d-flex align-items-center">
+                                                            <i class="bi bi-inboxes-fill me-3"></i>
+                                                            <div class="text-start">
+                                                                <h6 class="card-title my-0 py-0">No.'.$o["order_no"].'</h6>
+                                                                <h6 class="card-text my-0">Week '.$o["week"].' - '.$o["year"].'</h6>
+                                                            </div>
+                                                            <div class="flex-grow-1 text-end">
+                                                                <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#flush-collapse'.$o["id_order"].'" aria-expanded="false" aria-controls="flush-collapse'.$o["id_order"].'"></button>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="mt-3 accordion-collapse collapse" id="flush-collapse'.$o["id_order"].'">';
+
+                                                            $varieties = explode(',', $o["varieties"]);
+
+                                                            foreach ($varieties as $key => $value) {
+                                                                $this->html .= '<div class="badge m-1 bg-warning bg-opacity-25 text-dark">'.$value.'</div>';
+                                                            }
+
+                                                        $this->html .= '</div>
+                                                    </div>
+                                                    <div class="card-footer d-flex justify-content-between align-items-center">
+                                                        <div class="text-start pe-3">
+                                                            <h6 class="mb-0 fs-0-7 fw-semibold"><i class="bi bi-briefcase-fill me-1"></i>'.substr($o["sec_cust"], 0, 50).'</h6>
+                                                        </div>
+                                                        <div class="dropdown dropend">
+                                                            <button type="button" class="btn btn-sm '.($visitDay->format("H:i") != "00:00" ? "btn-success" : "btn-outline-success").' dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
+                                                                <i class="bi bi-clock me-1"></i>'.$visitDay->format("H:i").'
+                                                            </button>
+                                                            <form class="dropdown-menu p-4">
+                                                                <div class="mb-3">
+                                                                    <label class="form-label">Date</label>
+                                                                    <input type="date" class="form-control" value="'.$day.'">
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <label class="form-label">Time</label>
+                                                                    <input type="time" class="form-control" value="'.$visitDay->format("H:i").'" type="button">
+                                                                </div>
+                                                                <div class="mb-3 d-none">
+                                                                    <label class="form-label">Notify</label><br>
+                                                                    <div class="d-flex align-items-end">
+                                                                        <input type="number" class="form-control" min="1" step="1" max="100" onkeypress="return event.charCode >= 48 && event.charCode <= 57" value="'.$o["notify"].'" style="width: 60px!important;">
+                                                                        <span class="fs-0-8 ms-2">hours before</span>
+                                                                    </div>
+                                                                </div>
+                                                                <button type="button" class="btn btn-primary" onclick="updateOrderVisitDayForm(this, '.$o["id_order"].')">Update</button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ';
+                                        }
+
+                                        $this->html .= '</td>';
+
+                                    }
+
+                                $this->html .= '</tr>
+                            </tbody>
+                        </table>
+                    ';
+
+                    $this->arrResponse = array(
+                        'status' => true, 
+                        'res' => $this->html
+                    );
+                }else{
+                    $this->arrResponse = array(
+                        'status' => false, 
+                        'res' => 'No data!'
+                    );
+                }
+            }else{
+                $this->arrResponse = array(
+                    'status' => false, 
+                    'res' => 'Parameter fail!'
+                );
+            }
+
+            echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
+        }
+
+        public function updateOrderVisitDay()
+        {
+            if ($_POST AND isset($_POST["idOrder"]) AND isset($_POST["date"]) AND isset($_POST["time"]) AND isset($_POST["notify"]) AND $_POST["idOrder"] AND $_POST["date"] AND $_POST["time"] AND $_POST["notify"]) {
+
+                $exist = $this->model->getOrderVisitDay($_POST["idOrder"]);
+
+                $newDate = $_POST["date"]." ".$_POST["time"];
+
+                if (empty($exist)) {
+
+                    if ($this->model->setOrderVisitDay($_POST["idOrder"], $newDate, $_POST["notify"])) {
+                        $this->arrResponse = array(
+                            'status' => true, 
+                            'res' => 'Update successfull'
+                        );
+                    }else{
+                        $this->arrResponse = array(
+                            'status' => false, 
+                            'res' => 'Update date failed!'
+                        );
+                    }
+
+                }else{
+
+                    if ($this->model->updateOrderVisitDay($exist["id"], $newDate, $_POST["notify"])) {
+                        $this->arrResponse = array(
+                            'status' => true, 
+                            'res' => 'Update successfull'
+                        );
+                    }else{
+                        $this->arrResponse = array(
+                            'status' => false, 
+                            'res' => 'Update date failed!'
+                        );
+                    }
+                }
+
+            }else{
+                $this->arrResponse = array(
+                    'status' => false, 
+                    'res' => 'No data!'
+                );
+            }
+
+            echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
+        }
+
+        //TODO Calendar --------------------------------------------------------------------
 
     }

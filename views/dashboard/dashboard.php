@@ -149,6 +149,67 @@
 
         </main><!-- End #main -->
 
+        <main id="main-calendar" class="main" style="display:none;">
+
+            <div class="pagetitle d-flex justify-content-between align-items-center pe-3">
+                <div>
+                    <h1>Calendar</h1>
+                    <nav>
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="<?= base_url() ?>dashboard">Home</a></li>
+                            <li class="breadcrumb-item active">Calendar</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div class="d-flex align-items-center">
+                    <div>
+                        <div class="spinner-border spinner-border-sm text-success me-3 d-none" role="status" id="calendar-loading">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                    
+                    <input type="week" id="calendar-week" class="form-control" value="<?= date('Y').'-W'.date('W'); ?>">
+
+                    <button class="btn btn-light rounded-circle p-2 h-auto w-auto ms-3 position-relative" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight" style="width: 60px; height: 60px;">
+                        <i class="bi bi-funnel"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle" id="calendar-filters-notify" style="margin-top: 7; margin-left: -7;">
+                            <span class="visually-hidden">New alerts</span>
+                        </span>
+                    </button>
+                    <div class="offcanvas offcanvas-end" data-bs-scroll="true" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+                        <div class="offcanvas-header border-bottom">
+                            <h5 class="offcanvas-title" id="offcanvasRightLabel"><i class="bi bi-funnel-fill me-1"></i>Filters</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                        </div>
+                        <div class="offcanvas-body" id="calendar-filters">
+                        </div>
+                        <div class="offcanvas-bottom p-2">
+                            <button class="btn btn-warning form-control" id="calendar-filters-btn" onclick="calendarClearFilter()">Clear filters</button>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-light rounded-circle p-2 h-auto w-auto ms-3" style="width: 60px; height: 60px;" id="export" onclick="exportPDF('calendar')"><i class="bi bi-file-earmark-pdf"></i></button>
+                </div>
+            </div><!-- End Page Title -->
+
+            <section class="section">
+                <div class="row">
+                    <div class="col">
+
+                        <div class="card">
+                            <div class="card-body p-2" id="calendar">
+                                
+                                
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+        </main><!-- End #main -->
+
         <!-- Modal -->
         <div class="modal fade" id="modalAddParamter" tabindex="-1" aria-labelledby="modalAddParamterLabel" aria-hidden="true">
             <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
