@@ -1551,6 +1551,46 @@
             echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
         }
 
+        /* public function updateVisitDays()
+        {
+
+            $response = $this->model->getAllOrders();
+
+            //dep($response);
+
+            if (!empty($response)) {
+                foreach ($response as $k) {
+                    //* GET DATE VISIT--------------------------------------------------------------------------
+
+                    $year = $k["year"];
+                    $week = $k["week"];
+
+                    //Obtener semanas del ano
+                    $date = new DateTime;
+                    $date->setISODate($year, 53);
+                    $weeks = $date->format("W") === "53" ? 53 : 52;
+                    //////////////////////////////////////////////////
+
+                    $cycle = ($k["destination"] == "BOG") ? 14 : 12 ;
+
+                    $week = $week + $cycle;
+                    if ($week > $weeks) {
+                        $week = $week - $weeks;
+                        $year++;
+                    }
+
+                    $week = ($week > 9) ? $week : "0".$week ;
+
+                    $lunes = date('Y-m-d', strtotime("Y".$year."W".$week."1"));
+
+                    $this->model->updateOrderVisitDay2($k["id"], $lunes);
+
+                    //* GET DATE VISIT--------------------------------------------------------------------------
+                }
+            }
+
+        } */
+
         //TODO Calendar --------------------------------------------------------------------
 
     }

@@ -611,6 +611,22 @@
             return $this->update($sql, $array);
         }
 
+        /* public function getAllOrders()
+        {
+            $sql = "SELECT id, year, week, destination 
+                    FROM orders";
+
+            return $this->select($sql);
+        }
+
+        public function updateOrderVisitDay2(int $id, String $datetime)
+        {
+            $sql = 'UPDATE orders SET visit_day = :value1 WHERE id = :value0';
+
+            $array = array($id, $datetime);
+            return $this->update($sql, $array);
+        } */
+
         //TODO Orders--------------------------------------------------------------------------
 
     }

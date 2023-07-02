@@ -21,13 +21,13 @@ class Api extends Controllers
 
                 echo json_encode($res);
             } else {
-                echo json_encode(array("error" => "Usuario no encontrado"));
+                echo json_encode(array("error" => "User not found!"));
             }
 
             //$array = array("error" => false, "datos" => $res);
 
         } else {
-            echo json_encode(array("error" => "Al conectarse al server"));
+            echo json_encode(array("error" => "Parameter error!"));
         }
     }
 
@@ -38,7 +38,7 @@ class Api extends Controllers
         if (!empty($res)) {
             echo json_encode(array("error" => false, "datos" => $res));
         } else {
-            echo json_encode(array("error" => true, "datos" => "No se encontraron usuarios!."));
+            echo json_encode(array("error" => true, "datos" => "No data users!."));
         }
     }
 
@@ -49,7 +49,7 @@ class Api extends Controllers
         if (!empty($res)) {
             echo json_encode(array("error" => false, "datos" => $res));
         } else {
-            echo json_encode(array("error" => "No se encontraron cultivos!"));
+            echo json_encode(array("error" => "No data Crops!"));
         }
     }
 
@@ -61,7 +61,7 @@ class Api extends Controllers
         if (!empty($res)) {
             echo json_encode(array("error" => false, "datos" => $res));
         } else {
-            echo json_encode(array("error" => "No se encontraron cultivos!"));
+            echo json_encode(array("error" => "No data Varieties!"));
         }
     }
 
@@ -73,7 +73,7 @@ class Api extends Controllers
         if (!empty($res)) {
             echo json_encode(array("error" => false, "datos" => $res));
         } else {
-            echo json_encode(array("error" => "No se encontraron cultivos!"));
+            echo json_encode(array("error" => "No data Products!"));
         }
     }
 
@@ -84,7 +84,7 @@ class Api extends Controllers
         if (!empty($res)) {
             echo json_encode(array("error" => false, "datos" => $res));
         } else {
-            echo json_encode(array("error" => "No se encontraron fincas, para este usuario!"));
+            echo json_encode(array("error" => "No data sec_customers!"));
         }
     }
 
@@ -95,7 +95,7 @@ class Api extends Controllers
         if (!empty($res)) {
             echo json_encode(array("error" => false, "datos" => $res));
         } else {
-            echo json_encode(array("error" => "No se encontraron ordenes, para este usuario!"));
+            echo json_encode(array("error" => "No data orders!"));
         }
     }
 
@@ -135,14 +135,14 @@ class Api extends Controllers
 
             echo json_encode(array("error" => false, "datos" => $res));
         } else {
-            echo json_encode(array("error" => "No se encontraron ordenes, para este usuario!"));
+            echo json_encode(array("error" => "No data orders!"));
         }
     }
 
     public function getOrders3()
     {
         if (!isset($_POST["id"]) OR !$_POST["id"]) {
-            exit(json_encode(array("error" => "No se encontraron ordenes, para este usuario!")));
+            exit(json_encode(array("error" => "No data orders!")));
         }
 
         $res = $this->model->getOrders3($_POST["id"]);
@@ -179,14 +179,14 @@ class Api extends Controllers
 
             echo json_encode(array("error" => false, "datos" => $res));
         } else {
-            echo json_encode(array("error" => "No se encontraron ordenes, para este usuario!"));
+            echo json_encode(array("error" => "No data orders!"));
         }
     }
 
     public function getOrders4()
     {
         if (!isset($_POST["id"]) OR !$_POST["id"]) {
-            exit(json_encode(array("error" => "No se encontraron ordenes, para este usuario!")));
+            exit(json_encode(array("error" => "No data orders!")));
         }
 
         $res = $this->model->getOrders4($_POST["id"]);
@@ -223,14 +223,14 @@ class Api extends Controllers
 
             echo json_encode(array("error" => false, "datos" => $res));
         } else {
-            echo json_encode(array("error" => "No se encontraron ordenes, para este usuario!"));
+            echo json_encode(array("error" => "No data orders!"));
         }
     }
 
     public function getOrdersParameters()
     {
         if (!isset($_POST["id"]) OR !$_POST["id"]) {
-            exit(json_encode(array("error" => "Error al recibir datos!")));
+            exit(json_encode(array("error" => "Parameter error!")));
         }
 
         $res = $this->model->getOrdersParameters($_POST["id"]);
@@ -245,7 +245,7 @@ class Api extends Controllers
         if (!empty($res)) {
             echo json_encode(array("error" => false, "datos" => $res));
         } else {
-            echo json_encode(array("error" => "No se encontraron ordenes, para este usuario!"));
+            echo json_encode(array("error" => "No data orders types!"));
         }
     }
 
@@ -256,7 +256,7 @@ class Api extends Controllers
         if (!empty($res)) {
             echo json_encode(array("error" => false, "datos" => $res));
         } else {
-            echo json_encode(array("error" => "No se encontraron parametros!"));
+            echo json_encode(array("error" => "No data parameters!"));
         }
     }
 
@@ -267,7 +267,7 @@ class Api extends Controllers
         if (!empty($res)) {
             echo json_encode(array("error" => false, "datos" => $res));
         } else {
-            echo json_encode(array("error" => "No se encontraron parametros!"));
+            echo json_encode(array("error" => "No data parameters!"));
         }
     }
 
@@ -278,7 +278,7 @@ class Api extends Controllers
         if (!empty($res)) {
             echo json_encode(array("error" => false, "datos" => $res));
         } else {
-            echo json_encode(array("error" => "No se encontraron parametros!"));
+            echo json_encode(array("error" => "No data parameters options!"));
         }
     }
 
@@ -289,7 +289,7 @@ class Api extends Controllers
         if (!empty($res)) {
             echo json_encode(array("error" => false, "datos" => $res));
         } else {
-            echo json_encode(array("error" => "No se encontraron parametros cultivos!"));
+            echo json_encode(array("error" => "No data Parameters crops!"));
         }
     }
 
@@ -305,13 +305,13 @@ class Api extends Controllers
                 if ($res) {
                     $res = $this->model->updateDataSync($res["id"], $k["value"], $k["obs"]);
                     if (!$res) {
-                        echo json_encode(array("error" => "Al actualizar datos!"));
+                        echo json_encode(array("error" => "Error updating data!"));
                         exit();
                     }
                 }else{
                     $res = $this->model->setDataSync($k["id_user"], $k["id_order"], $k["id_variety"], $k["id_parameter"], $k["value"], $k["obs"], DATE("Y"), DATE("W"));
                     if (!$res) {
-                        echo json_encode(array("error" => "Al registrar datos!"));
+                        echo json_encode(array("error" => "Failed to record data!"));
                         exit();
                     }
                 }
@@ -319,7 +319,7 @@ class Api extends Controllers
             
             echo json_encode(array("error" => false));
         }else{
-            echo json_encode(array("error" => "Al recebir datos!"));
+            echo json_encode(array("error" => "parameter error!"));
         }
     }
 
@@ -334,7 +334,7 @@ class Api extends Controllers
             $outputfile = "uploads/$name";
 
             if (!$filehandler = fopen($outputfile, 'wb')) {
-                echo json_encode(array("error" => "Al guardar imagen!"));
+                echo json_encode(array("error" => "Failed to save image!"));
                 exit();
             }
 
@@ -347,25 +347,25 @@ class Api extends Controllers
                 if ($res) {
                     $res = $this->model->updateDataSync($res["id"], $name, $data["obs"]);
                     if (!$res) {
-                        echo json_encode(array("error" => "Al actualizar datos!"));
+                        echo json_encode(array("error" => "Error updating data!"));
                         exit();
                     }
                 }else{
                     $res = $this->model->setDataSync($data["id_user"], $data["id_order"], $data["id_variety"], $data["id_parameter"], $name, $data["obs"], DATE("Y"), DATE("W"));
                     if (!$res) {
-                        echo json_encode(array("error" => "Al registrar datos!"));
+                        echo json_encode(array("error" => "Failed to record data!"));
                         exit();
                     }
                 }
                 
             }else{
-                echo json_encode(array("error" => "Al guardar imagen!"));
+                echo json_encode(array("error" => "Failed to save image!"));
                 exit();
             }
             
             echo json_encode(array("error" => false));
         }else{
-            echo json_encode(array("error" => "Al recebir datos!"));
+            echo json_encode(array("error" => "parameter error!"));
         }
     }
 
@@ -408,7 +408,7 @@ class Api extends Controllers
             
             echo json_encode(array("error" => false));
         }else{
-            echo json_encode(array("error" => "Al recibir datos!"));
+            echo json_encode(array("error" => "Parameter error!"));
         }
     }
 
@@ -425,13 +425,13 @@ class Api extends Controllers
             $orderNo = $this->model->getIdAddOrder();
 
             if (empty($orderNo)) {
-                echo json_encode(array("error" => "Error al asignar No.!"));
+                echo json_encode(array("error" => "Failed to assign No.!"));
                 exit();
             }
             
             $res = $this->model->setOrder($orderNo["order_no"], $data["idSecCust"], $data["idOrderType"], $data["idProduct"], $year, $week, $data["destination"]);
             if (!$res) {
-                echo json_encode(array("error" => "Al crear orden!"));
+                echo json_encode(array("error" => "Add order error!"));
                 exit();
             }else{
                 foreach (explode(",", $data["varieties"]) as $key => $value) {
@@ -442,7 +442,7 @@ class Api extends Controllers
                         $this->model->deleteOrder($res);
                         $this->model->deleteOrdersDetails($res);
 
-                        echo json_encode(array("error" => "Error al agregar order detail!"));
+                        echo json_encode(array("error" => "Add order detail error!"));
                         exit();
                     }
                 }
@@ -450,7 +450,7 @@ class Api extends Controllers
             
             echo json_encode(array("error" => false, "id_order" => $res, "order_no" => $orderNo["order_no"], "year" => $year, "week" => $week));
         }else{
-            echo json_encode(array("error" => "Al recibir datos!"));
+            echo json_encode(array("error" => "Parameter error!"));
         }
     }
 
@@ -464,14 +464,14 @@ class Api extends Controllers
                 $insert = $this->model->setOrderDetail($data["idOrder"], $value);
 
                 if (!$insert) {
-                    echo json_encode(array("error" => "Error al agregar variedad!"));
+                    echo json_encode(array("error" => "Add variety error!"));
                     exit();
                 }
             }
             
             echo json_encode(array("error" => false));
         }else{
-            echo json_encode(array("error" => "Al recibir datos!"));
+            echo json_encode(array("error" => "Parameter error!"));
         }
     }
 
@@ -497,7 +497,7 @@ class Api extends Controllers
             
             echo json_encode(array("error" => false));
         }else{
-            echo json_encode(array("error" => "Al recibir datos!"));
+            echo json_encode(array("error" => "Parameter error!"));
         }
     }
 
@@ -509,7 +509,7 @@ class Api extends Controllers
             if (!empty($res)) {
                 echo json_encode(array("error" => false, "datos" => $res));
             } else {
-                echo json_encode(array("error" => "No se encontraron ordenes, para este usuario!"));
+                echo json_encode(array("error" => "No data!"));
             }
         }
     }
