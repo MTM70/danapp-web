@@ -25,6 +25,13 @@
                     <li class="nav-heading">Admin</li>
 
                     <li class="nav-item">
+                        <a class="nav-link cursor-select collapsed" onclick="showOption(this, '."'".'main-events'."'".')">
+                            <i class="bi bi-calendar2-event"></i>
+                            <span>Events</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
                         <a class="nav-link cursor-select collapsed" onclick="showOption(this, '."'".'main-parameters'."'".')">
                             <i class="bi bi-card-list"></i>
                             <span>Parameters</span>

@@ -3,7 +3,9 @@
     require_once('controllers/Security.php');
     use PhpOffice\PhpSpreadsheet\IOFactory;
     use PhpOffice\PhpSpreadsheet\Spreadsheet;
-    use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+
+    /* error_reporting(E_ALL);
+    ini_set('display_errors', 'On'); */
 
     class Dashboard extends Controllers{
 
@@ -22,7 +24,7 @@
             $data['page_title'] = "Dashboard";
             $data['page_js'] = array("dashboard.js", "calendar.js");
 
-            if ($_SESSION['idRol'] == 1) array_push($data["page_js"], "parameters.js", "users.js");
+            if ($_SESSION['idRol'] == 1) array_push($data["page_js"], "parameters.js", "users.js", "events.js");
 
             $this->views->getView($this,"dashboard", $data);
         }
@@ -631,6 +633,211 @@
 
             //echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
         }
+
+        //TODO Events --------------------------------------------------------------------
+        public function loadEvents()
+        {
+            $response = $this->model->getEvents();
+
+            if (!empty($response)) {
+
+                $this->html .= '
+                    <div class="card-group card-group-scroll">
+                ';
+
+                foreach ($response as $k) {
+
+                    $state = ($k["state"]) ? '' : 'bg-danger bg-opacity-10 text-decoration-line-through' ;
+                    $stateImg = ($k["state"]) ? '' : 'opacity: 0.3;' ;
+
+                    $this->html .= '
+                        <div class="card cursor-select shadow-none border border-light me-2 '.$state.'" style="height:65vh;" onclick="openModalViewEvent('."'".$k["name"]."'".')">
+                            <div class="img-hover-zoom">
+                                <div class="card-img-top" style="background-image: url('.base_url().'/uploads/events/'.$k["image"].'); background-position-y: center; '.$stateImg.'"></div>
+                            </div>
+                            
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="card-title">'.$k["name"].'</h5>
+                                    <button class="btn btn-light" onclick="loadEventEdit('.$k["id"].', event);" data-bs-toggle="modal" data-bs-target="#modalAddEvent"><i class="bi bi-pencil"></i></button>
+                                </div>
+                                <p class="card-text">'.$k["description"].'</p>
+                                <p class="card-text"><small class="text-success"><i class="bi bi-calendar-range me-1"></i>Week '.$k["start_week"].' to Week '.$k["end_week"].'</small></p>
+                            </div>
+                            <div class="card-footer">
+                                <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+                            </div>
+                        </div>
+                    ';
+                }
+
+                $this->html .= '
+                    </div>
+                ';
+
+                $this->arrResponse = array(
+                    'status' => true, 
+                    'res' => $this->html
+                );
+            }else{
+                $this->arrResponse = array(
+                    'status' => true, 
+                    'res' => 'No data!'
+                );
+            }
+
+            echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
+        }
+
+        public function setEvent()
+        {
+            if ($_POST AND isset($_POST["process"]) AND $_POST["process"]) {
+
+                if ($_POST["process"] == 1) {
+                    if (isset($_POST["event-name"]) AND isset($_POST["event-start"]) AND isset($_POST["event-end"]) AND isset($_POST["event-description"]) 
+                        AND isset($_FILES["event-file"]) AND $_POST["event-name"] AND $_POST["event-start"] AND $_POST["event-end"] AND $_POST["event-description"]) {
+
+                        if ($this->model->getEventByNameAndWeek(str_ucfirst($_POST["event-name"]), $_POST["event-start"], $_POST["event-end"], 0)) {
+                            $this->arrResponse = array(
+                                'status' => false, 
+                                'res' => 'Event exist!'
+                            );
+
+                            exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
+                        }
+
+                        //*Upload image----------------------
+                        if ($_FILES["event-file"]) {
+                            $filename = str_replace(" ", "", $_POST["event-name"]) . "." . pathinfo($_FILES["event-file"]["name"], PATHINFO_EXTENSION);
+                            $tempname = $_FILES["event-file"]["tmp_name"];
+
+                            if (!move_uploaded_file($tempname, __DIR__ . "/../uploads/events/" . $filename)) {
+                                /* $this->arrResponse = array(
+                                    'status' => false, 
+                                    'res' => 'Failed to upload image!' . $_FILES["event-file"]["error"]
+                                );
+
+                                exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE)); */
+                                $filename = "event-img.png";
+                            }
+                        }else{
+                            $filename = "event-img.png";
+                        }
+                        //*----------------------------------
+                        
+                        $id = $this->model->setEvent(str_ucfirst($_POST["event-name"]), $_POST["event-start"], $_POST["event-end"], str_ucfirst($_POST["event-description"]), $filename);
+
+                        if (!$id) {
+                            $this->arrResponse = array(
+                                'status' => false, 
+                                'res' => 'Add event fail!'
+                            );
+
+                            exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
+                        }
+
+                        $this->arrResponse = array(
+                            'status' => true, 
+                            'res' => 'Add event success'
+                        );
+                    }else{
+                        $this->arrResponse = array(
+                            'status' => false, 
+                            'res' => 'No data!'
+                        );
+                    }
+                }else {
+                    if (isset($_POST["event-id"]) AND isset($_POST["event-name"]) AND isset($_POST["event-start"]) AND isset($_POST["event-end"]) AND isset($_POST["event-description"]) AND isset($_POST["event-state"]) 
+                        AND isset($_FILES["event-file"]) AND $_POST["event-id"] AND $_POST["event-name"] AND $_POST["event-start"] AND $_POST["event-end"] AND $_POST["event-description"]) {
+
+                        if ($this->model->getEventByNameAndWeek(str_ucfirst($_POST["event-name"]), $_POST["event-start"], $_POST["event-end"], $_POST["event-id"])) {
+                            $this->arrResponse = array(
+                                'status' => false, 
+                                'res' => 'Event exist!'
+                            );
+
+                            exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
+                        }
+
+                        //*Upload image----------------------
+                        if ($_FILES["event-file"]) {
+                            $filename = str_replace(" ", "", $_POST["event-name"]) .date('H_i_s'). "." . pathinfo($_FILES["event-file"]["name"], PATHINFO_EXTENSION);
+                            $tempname = $_FILES["event-file"]["tmp_name"];
+
+                            if (!move_uploaded_file($tempname, __DIR__ . "/../uploads/events/" . $filename)) {
+                                /* $this->arrResponse = array(
+                                    'status' => false, 
+                                    'res' => 'Failed to upload image!' . $_FILES["event-file"]["error"]
+                                );
+
+                                exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE)); */
+                                $filename = $_POST["event-file-path"];
+                            }
+                        }else{
+                            $filename = $_POST["event-file-path"];
+                        }
+                        //*----------------------------------
+                        
+                        $update = $this->model->updateEvent($_POST["event-id"], str_ucfirst($_POST["event-name"]), $_POST["event-start"], $_POST["event-end"], str_ucfirst($_POST["event-description"]), $filename, $_POST["event-state"]);
+
+                        if (!$update) {
+                            $this->arrResponse = array(
+                                'status' => false, 
+                                'res' => 'Update event fail!'
+                            );
+
+                            exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
+                        }
+
+                        $this->arrResponse = array(
+                            'status' => true, 
+                            'res' => 'Update event success'
+                        );
+                    }else{
+                        $this->arrResponse = array(
+                            'status' => false, 
+                            'res' => 'No data!'
+                        );
+                    }
+                }
+
+            }else{
+                $this->arrResponse = array(
+                    'status' => false, 
+                    'res' => 'No data!'
+                );
+            }
+
+            echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
+        }
+
+        public function loadEventEdit()
+        {
+            if (isset($_GET["id"]) AND $_GET["id"]) {
+                $response = $this->model->getEvent($_GET["id"]);
+
+                if (!empty($response)) {
+
+                    $this->html = json_encode($response);
+
+                    $this->arrResponse = array(
+                        'status' => true, 
+                        'res' => $this->html
+                    );
+                }else{
+                    $this->arrResponse = array(
+                        'status' => false, 
+                        'res' => 'No data!'
+                    );
+                }
+            }else{
+
+            }
+
+            echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
+        }
+        //TODO Events --------------------------------------------------------------------
+
 
         //TODO Parameters --------------------------------------------------------------------
         public function loadParameters()

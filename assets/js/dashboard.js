@@ -1,5 +1,6 @@
 var stateCalendar = false;
 var stateParameters = false;
+var stateEvents = false;
 var stateUsers = false;
 
 $(document).ready(function() {
@@ -91,6 +92,14 @@ async function showOption($this, container){
             if (!stateCalendar) {
                 await loadCalendar();
                 loadCalendarFilters();
+            }
+
+            break;
+
+        case 'main-events':
+            
+            if (!stateEvents) {
+                await loadEvents();
             }
 
             break;

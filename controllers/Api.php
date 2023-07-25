@@ -513,4 +513,18 @@ class Api extends Controllers
             }
         }
     }
+
+    //*EVENTS--------------------------------------------------------------
+    public function getEvents()
+    {
+        if (isset($_GET["id"]) AND $_GET["id"]) {
+            $res = $this->model->getEvents($_GET["id"]);
+
+            if (!empty($res)) {
+                echo json_encode(array("error" => false, "datos" => $res));
+            } else {
+                echo json_encode(array("error" => "No data!"));
+            }
+        }
+    }
 }

@@ -238,6 +238,55 @@
         }
         //TODO Home--------------------------------------------------------------------------
 
+
+        //TODO Events--------------------------------------------------------------------------
+        public function getEvent(int $id)
+        {
+            $sql = 'SELECT * 
+                    FROM events 
+                    WHERE id = :value0 
+                    LIMIT 1';
+
+            $array = array($id);
+            return $this->selectOne($sql, $array);
+        }
+
+        public function getEvents()
+        {
+            $sql = 'SELECT * FROM events';
+
+            return $this->select($sql);
+        }
+
+        public function getEventByNameAndWeek(string $name, int $start, int $end, int $id = 0)
+        {
+            $sql = 'SELECT id 
+                    FROM events 
+                    WHERE name = :value0 AND start_week = :value1 AND end_week = :value2 AND id != :value3 
+                    LIMIT 1';
+
+            $array = array($name, $start, $end, $id);
+            return $this->selectOne($sql, $array);
+        }
+
+        public function setEvent(string $name, int $start, int $end, String $description, string $image)
+        {
+            $sql = 'INSERT INTO events (name, start_week, end_week, description, image) VALUES (:value0, :value1, :value2, :value3, :value4)';
+
+            $array = array($name, $start, $end, $description, $image);
+            return $this->insert($sql, $array);
+        }
+
+        public function updateEvent(int $id, String $name, int $start, int $end, String $description, string $image, int $state)
+        {
+            $sql = 'UPDATE events SET name = :value1, start_week = :value2, end_week = :value3, description = :value4, image = :value5, state = :value6 WHERE id = :value0';
+
+            $array = array($id, $name, $start, $end, $description, $image, $state);
+            return $this->update($sql, $array);
+        }
+        //TODO Events--------------------------------------------------------------------------
+
+
         //TODO Parameters--------------------------------------------------------------------------
         public function getParameter(int $id)
         {
@@ -502,12 +551,17 @@
                         INNER JOIN orders AS o ON o.id = od.id_order 
                         INNER JOIN varieties AS v ON v.id = od.id_variety 
                         INNER JOIN users AS u ON u.id = :value0 
+                        LEFT JOIN visit_days aS vd ON vd.id_user = :value0 AND vd.id_order = od.id_order 
                         WHERE o.state = 0 AND 
+                            CASE 
+                                WHEN id_rol != 1 THEN id_sec_cust IN (SELECT id_sec_cust FROM users_sec_customers AS usc WHERE usc.id_user = :value0) 
+                                ELSE id_sec_cust > 0 
+                            END 
+                            AND 
                         CASE 
-                            WHEN id_rol != 1 THEN id_sec_cust IN (SELECT id_sec_cust FROM users_sec_customers AS usc WHERE usc.id_user = :value0) 
-                            ELSE id_sec_cust > 0 
+                            WHEN IFNULL(vd.visit_day, 0) != 0 THEN YEAR(vd.visit_day) = :value1 AND WEEK(vd.visit_day) = :value2 
+                            ELSE YEAR(o.visit_day) = :value1 AND WEEK(o.visit_day) = :value2
                         END 
-                        AND YEAR(o.visit_day) = :value1 AND WEEK(o.visit_day) = :value2 
                         GROUP BY od.id_order 
                     ) AS vts ON vts.id_order = o.id 
 
@@ -516,7 +570,12 @@
                             WHEN id_rol != 1 THEN id_sec_cust IN (SELECT id_sec_cust FROM users_sec_customers AS usc WHERE usc.id_user = u.id) 
                             ELSE id_sec_cust > 0 
                         END 
-                        AND YEAR(o.visit_day) = :value1 AND WEEK(o.visit_day) = :value2 
+                    AND 
+                        CASE 
+                            WHEN IFNULL(vd.visit_day, 0) != 0 THEN YEAR(vd.visit_day) = :value1 AND WEEK(vd.visit_day) = :value2 
+                            ELSE YEAR(o.visit_day) = :value1 AND WEEK(o.visit_day) = :value2
+                        END 
+                             
                     GROUP BY o.id 
                     ORDER BY visit_day, order_no";
 

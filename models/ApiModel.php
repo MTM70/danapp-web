@@ -313,4 +313,12 @@ class ApiModel extends Mysql
 
         return $this->select($sql, $array);
     }
+
+    //*Events-------------------------------------------------------------
+    public function getEvents()
+    {
+        $sql = 'SELECT * FROM events';
+
+        return $this->select($sql);
+    }
 }
