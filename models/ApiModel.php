@@ -50,6 +50,13 @@ class ApiModel extends Mysql
         return $this->select($sql);
     }
 
+    public function getCustomers()
+    {
+        $sql = "SELECT * FROM customers";
+
+        return $this->select($sql);
+    }
+    
     public function getSecCustomers()
     {
         $sql = "SELECT id, id_cust, sec_cust_no, UPPER(s.sec_cust) AS sec_cust FROM sec_customers AS s";
@@ -244,10 +251,10 @@ class ApiModel extends Mysql
             return $this->selectOne($sql);
         }
 
-    public function setOrder(int $orderNo, int $idSecCust, int $idType, int $idProduct, int $year, int $week, String $destination)
+    public function setOrder(int $orderNo, int $idSecCust, int $idType, int $idProduct, int $year, int $week, String $destination, String $visitDay)
     {
-        $sql = "INSERT INTO orders (order_no, id_sec_cust, id_type, id_product, year, week, destination) VALUES (:value0, :value1, :value2, :value3, :value4, :value5, :value6)";
-        $array = array($orderNo, $idSecCust, $idType, $idProduct, $year, $week, $destination);
+        $sql = "INSERT INTO orders (order_no, id_sec_cust, id_type, id_product, year, week, destination, visit_day) VALUES (:value0, :value1, :value2, :value3, :value4, :value5, :value6, :value7)";
+        $array = array($orderNo, $idSecCust, $idType, $idProduct, $year, $week, $destination, $visitDay);
 
         return $this->insert($sql, $array);
     }

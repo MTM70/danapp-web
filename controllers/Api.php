@@ -77,6 +77,17 @@ class Api extends Controllers
         }
     }
 
+    public function getCustomers()
+    {
+        $res = $this->model->getCustomers();
+
+        if (!empty($res)) {
+            echo json_encode(array("error" => false, "datos" => $res));
+        } else {
+            echo json_encode(array("error" => "No data sec_customers!"));
+        }
+    }
+    
     public function getSecCustomers()
     {
         $res = $this->model->getSecCustomers();
@@ -428,8 +439,30 @@ class Api extends Controllers
                 echo json_encode(array("error" => "Failed to assign No.!"));
                 exit();
             }
+
+
+            //*Obtener semanas del ano
+            $date = new DateTime;
+            $date->setISODate($year, 53);
+            $weeks = $date->format("W") === "53" ? 53 : 52;
+            //////////////////////////////////////////////////
+
+            $cycle = ($data["destination"] == "BOG") ? 14 : 12 ;
+
+            $year2 = $date -> format("Y");
+            $week2 = $week + $cycle;
+            if ($week2 > $weeks) {
+                $week2 = $week2 - $weeks;
+                $year2++;
+            }
+
+            $week2 = ($week2 > 9) ? $week2 : "0".$week2 ;
+
+            $lunes = date('Y-m-d', strtotime("Y".$year2."W".$week2."1"));
+            //*Obtener semanas del ano
+
             
-            $res = $this->model->setOrder($orderNo["order_no"], $data["idSecCust"], $data["idOrderType"], $data["idProduct"], $year, $week, $data["destination"]);
+            $res = $this->model->setOrder($orderNo["order_no"], $data["idSecCust"], $data["idOrderType"], $data["idProduct"], $year, $week, $data["destination"], $lunes);
             if (!$res) {
                 echo json_encode(array("error" => "Add order error!"));
                 exit();
@@ -448,7 +481,7 @@ class Api extends Controllers
                 }
             }
             
-            echo json_encode(array("error" => false, "id_order" => $res, "order_no" => $orderNo["order_no"], "year" => $year, "week" => $week));
+            echo json_encode(array("error" => false, "id_order" => $res, "order_no" => $orderNo["order_no"], "year" => $year, "week" => $week, "visit_day" => $lunes));
         }else{
             echo json_encode(array("error" => "Parameter error!"));
         }
