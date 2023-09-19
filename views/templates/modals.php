@@ -62,6 +62,7 @@
                                 <option value="5">Selection</option>
                                 <option value="6">Selection radio</option>
                                 <option value="7">Switch</option>
+                                <option value="8">Option value</option>
                             </select>
                         </div>
                         <div class="col-md-4">
@@ -200,13 +201,12 @@
 <!-- Modal add event -->
 <div class="modal fade" id="modalAddEvent" tabindex="-1" aria-labelledby="modalAddEventLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content">
-            <form action="#" id="form-event" type="POST" accept="image/*" enctype="multipart/form-data">
-            
+        <form action="#" id="form-event" type="POST" accept="image/*" enctype="multipart/form-data">
+            <div class="modal-content">
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="modalAddEventLabel">Add event</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
+                        <h1 class="modal-title fs-5" id="modalAddEventLabel">Add event</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
                 <div class="modal-body">
                     <div class="row g-3">
                         <div class="d-none">
@@ -219,7 +219,7 @@
                                 <i class="bi bi-card-image display-1"></i>
                             </div>
                             <input class="form-control mt-1" type="file" name="event-file" id="event-file">
-                            <input type="text" class="d-none" name="event-file-path" id="event-file-path" value="" readonly disabled>
+                            <input type="text" class="d-none" name="event-file-path" id="event-file-path" value="">
                         </div>
 
                         <div class="col-md-8 ps-md-5">
@@ -281,8 +281,8 @@
                     <button type="submit" class="btn btn-primary" id="event-btn">Save changes</button>
                 </div>
 
-            </form>
-        </div>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -297,40 +297,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div class="table-responsive">
-                    <table class="table table-hover table-striped text-center">
-                        <thead>
-                            <tr>
-                                <th>Year</th>
-                                <th>Number of orders</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            <tr>
-                                <td>2021</td>
-                                <td>45</td>
-                                <td>
-                                    <button class="btn btn-primary">Download</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>2022</td>
-                                <td>12</td>
-                                <td>
-                                    <button class="btn btn-primary">Download</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>2023</td>
-                                <td>23</td>
-                                <td>
-                                    <button class="btn btn-primary">Download</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="table-responsive" id="event-years">
                 </div>
             </div>
         </div>

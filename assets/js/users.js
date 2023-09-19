@@ -10,7 +10,7 @@ $(document).ready(function() {
            secCusts.push(this.value);
         });
 
-        if (!secCusts.length && document.getElementById('user-rol').value != 1) {
+        if (!secCusts.length && document.getElementById('user-rol').value == 2) {
             alert('Add sec cust!');
             return;
         }

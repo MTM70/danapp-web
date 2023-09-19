@@ -200,11 +200,48 @@ async function loadEventEdit(id, event) {
     });
 }
 
-function openModalViewEvent(title) {
+function openModalViewEvent(id, title) {
 
     document.getElementById('modalViewEventLabel').innerText = title;
     toogleModal('modalViewEvent', true);
+    $('#event-years').html(null);
+
+    $.ajax({
+        url: base_url+"dashboard/loadEventYears",
+        type: 'GET',
+        data: {'id': id},
+        cache: false,
+
+        beforeSend: function() {
+            
+        },
+
+        error:  function(xhr) {
+            //$('#parameter-crops').html('Error');
+        },
+
+        success:  function(response) {
+            try {
+                var objData = JSON.parse(response);
+
+                if(objData.status == true){
+                    $('#event-years').html(objData.res);
+                }else{
+                    alert(objData.res);
+                }
+            } catch (error) {
+                console.log(response);
+                alert(error);
+            }
+
+            resolve('resolved');
+        }
+    })
     
+}
+
+function downloadDataEventByYear(year, idEvent) {
+    window.open(base_url+'Dashboard/downloadDataEventByYear/'+year+'/'+idEvent, '_blank');
 }
 
 function resetEventForm(){

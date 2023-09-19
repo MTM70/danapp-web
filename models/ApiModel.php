@@ -322,10 +322,83 @@ class ApiModel extends Mysql
     }
 
     //*Events-------------------------------------------------------------
-    public function getEvents()
+    public function getEvents(int $user)
     {
-        $sql = 'SELECT * FROM events';
+        $sql = 'SELECT e.id, e.name, start_week, end_week, description, image, e.state 
+                FROM events AS e 
+                INNER JOIN users AS u ON u.id = :value0 
+                WHERE e.id_country = u.id_country';
 
-        return $this->select($sql);
+        $array = array($user);
+
+        return $this->select($sql, $array);
+    }
+
+    public function getEventSecCustByEventBySecCust(int $idUser, int $idEvent, int $idSecCust, String $name, String $table)
+    {
+        $sql = "SELECT id FROM $table WHERE id_user = :value0 AND id_event = :value1 AND id_sec_cust = :value2 AND YEAR(date) = DATE('Y') AND name = :value3 LIMIT 1";
+        $array = array($idUser, $idEvent, $idSecCust, $name);
+
+        return $this->selectOne($sql, $array);
+    }
+
+    public function setDataEventSecCustSync(int $idUser, int $idEvent, int $idSecCust, String $name, String $email, String $emailName, String $date, String $table)
+    {
+        $sql = "INSERT INTO $table (id_user, id_event, id_sec_cust, name, email, email_name, date) VALUES (:value0, :value1, :value2, :value3, :value4, :value5, :value6)";
+        $array = array($idUser, $idEvent, $idSecCust, $name, $email, $emailName, $date);
+
+        return $this->insert($sql, $array);
+    }
+
+    public function updateDataEventSecCustSync(int $id, String $name, String $email, String $emailName, String $table)
+    {
+        $sql = "UPDATE $table SET name = :value1, email = :value2, email_name = :value3 WHERE id = :value0";
+        $array = array($id, $name, $email, $emailName);
+
+        return $this->update($sql, $array);
+    }
+
+    //*Varieties
+    public function getEventVarietyByEventBySecCustByVariety(int $idUser, int $idEvent, int $idSecCust, int $idVariety, String $name, int $idEventMap = null, String $table)
+    {
+        $sql = "SELECT id FROM $table WHERE id_user = :value0 AND id_event = :value1 AND id_sec_cust = :value2 AND id_variety = :value3 AND name = :value4 AND 
+                CASE 
+                    WHEN  :value5 IS NULL THEN id_event_map IS NULL 
+                    ELSE id_event_map = :value5 
+                END 
+                LIMIT 1";
+        $array = array($idUser, $idEvent, $idSecCust, $idVariety, $name, $idEventMap);
+
+        return $this->selectOne($sql, $array);
+    }
+
+    public function setDataEventVarietySync(int $idUser, int $idEvent, int $idSecCust, String $name, int $idType, int $idProduct, int $idVariety, int $idEventMap = null, int $year, int $week, int $totQuantity, int $replicas, String $remark, String $date, String $table)
+    {
+        $sql = "INSERT INTO $table (id_user, id_event, id_sec_cust, name, id_type, id_product, id_variety, id_event_map, year, week, tot_quantity, replicas, remark, date) VALUES (:value0, :value1, :value2, :value3, :value4, :value5, :value6, :value7, :value8, :value9, :value10, :value11, :value12, :value13)";
+        $array = array($idUser, $idEvent, $idSecCust, $name, $idType, $idProduct, $idVariety, $idEventMap, $year, $week, $totQuantity, $replicas, $remark, $date);
+
+        return $this->insert($sql, $array);
+    }
+
+    public function updateDataEventVarietySync(int $id, int $year, int $week, int $totQuantity, int $replicas, String $remark, String $table)
+    {
+        $sql = "UPDATE $table SET year = :value1, week = :value2, tot_quantity = :value3, replicas = :value4, remark = :value5 WHERE id = :value0";
+        $array = array($id, $year, $week, $totQuantity, $replicas, $remark);
+
+        return $this->update($sql, $array);
+    }
+
+    public function deleteEventVarietyByEventBySecCustByVariety(int $idUser, int $idEvent, int $idSecCust, int $idVariety, String $name, int $idEventMap = null, String $table)
+    {
+
+        $sql = "DELETE FROM $table WHERE id_user = :value0 AND id_event = :value1 AND id_sec_cust = :value2 AND id_variety = :value3 AND name = :value4 AND 
+                CASE 
+                    WHEN  :value5 IS NULL THEN id_event_map IS NULL 
+                    ELSE id_event_map = :value5 
+                END 
+                LIMIT 1";
+        $array = array($idUser, $idEvent, $idSecCust, $idVariety, $name, $idEventMap);
+
+        return $this->delete($sql, $array);
     }
 }

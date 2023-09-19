@@ -144,6 +144,14 @@
             return $this->insert($sql, $array);
         }
 
+        public function updateVariety(int $id, String $variety)
+        {
+            $sql = 'UPDATE varieties SET variety = :value1 WHERE id = :value0)';
+
+            $array = array($id, $variety);
+            return $this->update($sql, $array);
+        }
+
         public function getOrderDetail(int $idOrder, int $idVatiety)
         {
             $sql = 'SELECT id 
@@ -277,12 +285,54 @@
             return $this->insert($sql, $array);
         }
 
-        public function updateEvent(int $id, String $name, int $start, int $end, String $description, string $image, int $state)
+        public function updateEvent(int $id, String $name, int $start, int $end, String $description, string $image = null, int $state)
         {
             $sql = 'UPDATE events SET name = :value1, start_week = :value2, end_week = :value3, description = :value4, image = :value5, state = :value6 WHERE id = :value0';
 
             $array = array($id, $name, $start, $end, $description, $image, $state);
             return $this->update($sql, $array);
+        }
+
+        public function getEventYears(int $idEvent)
+        {
+            $sql = "SELECT YEAR(e.date) AS year, 
+                        COUNT(e.id) AS orders, IFNULL(e2.id, 0) AS ordersBck 
+                    FROM events_sec_customers_orders AS e 
+                    LEFT JOIN events_sec_customers_orders_bck AS e2 ON e2.id_event = :value0 AND YEAR(e2.date) = YEAR(e.date) 
+                    WHERE e.id_event = :value0 GROUP BY YEAR(e.date) ORDER BY YEAR(e.date)";
+
+            $array = array($idEvent);
+            return $this->select($sql, $array);
+        }
+
+        public function getDataEventByYear(int $year, int $idEvent)
+        {
+            $sql = "SELECT esc.date AS date_first, d.*, 
+                        ud.name AS name_user, last_name, 
+                        esc.name, esc.email, esc.email_name, esc.email_name, 
+                        e.name AS event, 
+                        ot.type AS order_type, 
+                        sc.sec_cust_no, sc.sec_cust, 
+                        p.product, 
+                        v.variety_code, v.variety, 
+                        c.crop_no, c.crop, 
+                        cust.cust_no, cust.cust, 
+                        IFNULL(m.greenhouse, '') AS greenhouse, IFNULL(m.position, '') AS position 
+                    FROM events_sec_customers_orders AS d 
+                    INNER JOIN events_sec_customers AS esc ON esc.id_event = d.id_event AND esc.id_sec_cust = d.id_sec_cust AND YEAR(esc.date) = YEAR(d.date) AND esc.name = d.name 
+                    INNER JOIN events AS e ON e.id = d.id_event 
+                    INNER JOIN orders_types AS ot ON ot.id = d.id_type 
+                    INNER JOIN sec_customers AS sc ON sc.id = d.id_sec_cust 
+                    INNER JOIN customers AS cust ON cust.id = sc.id_cust 
+                    INNER JOIN products AS p ON p.id = d.id_product 
+                    INNER JOIN varieties AS v ON v.id = d.id_variety 
+                    INNER JOIN crops AS c ON c.id = v.id_crop 
+                    INNER JOIN users_details AS ud ON ud.id_user = d.id_user 
+                    LEFT JOIN events_maps AS m ON m.id = d.id_event_map 
+                    WHERE YEAR(d.date) = :value0 AND d.id_event = :value1";
+
+            $array = array($year, $idEvent);
+            return $this->select($sql, $array);
         }
         //TODO Events--------------------------------------------------------------------------
 

@@ -3,6 +3,7 @@
     require_once('controllers/Security.php');
     use PhpOffice\PhpSpreadsheet\IOFactory;
     use PhpOffice\PhpSpreadsheet\Spreadsheet;
+    //use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
     /* error_reporting(E_ALL);
     ini_set('display_errors', 'On'); */
@@ -230,6 +231,8 @@
                         }else{
                             $variety = $this->model->getVarietyByNo($crop["id"], trim($data[$i][27]));
                         }
+                    }else{
+                        $insert = $this->model->updateVariety($variety["id"], trim($data[$i][28]));
                     }
 
                     $orderDetail = $this->model->getOrderDetail($order["id"], $variety["id"]);  //Comprobar si la orden detalle existe
@@ -651,7 +654,7 @@
                     $stateImg = ($k["state"]) ? '' : 'opacity: 0.3;' ;
 
                     $this->html .= '
-                        <div class="card cursor-select shadow-none border border-light me-2 '.$state.'" style="height:65vh;" onclick="openModalViewEvent('."'".$k["name"]."'".')">
+                        <div class="card cursor-select shadow-none border border-light me-2 '.$state.'" style="height:65vh;" onclick="openModalViewEvent('.$k["id"].', '."'".$k["name"]."'".')">
                             <div class="img-hover-zoom">
                                 <div class="card-img-top" style="background-image: url('.base_url().'/uploads/events/'.$k["image"].'); background-position-y: center; '.$stateImg.'"></div>
                             </div>
@@ -835,6 +838,265 @@
             }
 
             echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
+        }
+
+        public function loadEventYears()
+        {
+            if (isset($_GET["id"]) AND $_GET["id"]) {
+                $response = $this->model->getEventYears($_GET["id"]);
+
+                if (!empty($response)) {
+
+                    $this->html.='
+                    <table class="table table-hover text-center" id="table-users" style="font-size:14px;">
+                        <thead>
+                            <tr>
+                                <th>Year</th>
+                                <th>Number of orders</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>';
+
+                    foreach ($response as $k) {
+
+                        $this->html .= '
+                            <tr>
+                                <td class="align-middle">'.$k["year"].'</td>
+                                <td class="align-middle">'.$k["orders"].'</td>
+                                <td>
+                                    <!--<button class="btn btn-primary" onclick="downloadDataEventByYear('.$k["year"].', '.$_GET["id"].')">Download</button>-->
+                                    <div class="dropdown">
+                                        <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                            Download
+                                        </button>
+                                        <ul class="dropdown-menu position-fixed">
+                                            <li><a class="dropdown-item" href="#" onclick="downloadDataEventByYear('.$k["year"].', '.$_GET["id"].')">Company</a></li>';
+
+                                            if ($k["ordersBck"] > 0) $this->html .= '<li><a class="dropdown-item" href="#">Customers ('.$k["ordersBck"].')</a></li>';
+                                            $this->html .= '
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        ';
+                    }
+
+                    $this->html .= '
+                            </tbody>
+                        </table>
+                    ';
+
+                    $this->arrResponse = array(
+                        'status' => true, 
+                        'res' => $this->html
+                    );
+                }else{
+                    $this->arrResponse = array(
+                        'status' => false, 
+                        'res' => 'No data!'
+                    );
+                }
+            }else{
+
+            }
+
+            echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
+        }
+
+        public function downloadDataEventByYear($params)
+        {
+
+            if ($params) {
+                header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+                header('Content-Disposition: attachment;filename="DanApp-event.xlsx"');
+                header('Cache-Control: max-age=0');
+
+                $params = explode(",", $params);
+                $year = $params[0];
+                $idEvent = $params[1];
+
+                $data = $this->model->getDataEventByYear($year, $idEvent);
+
+                $spreadsheet = new Spreadsheet();
+                $sheet = $spreadsheet->getActiveSheet();
+                $sheet->setCellValue('A1', 'Date');
+                $sheet->setCellValue('B1', 'Delivery Year');
+                $sheet->setCellValue('C1', 'Delivery Week');
+                $sheet->setCellValue('D1', 'User');
+                $sheet->setCellValue('E1', 'Event');
+                $sheet->setCellValue('F1', 'Customer number');
+                $sheet->setCellValue('G1', 'Customer name');
+                $sheet->setCellValue('H1', 'Secondary customer number');
+                $sheet->setCellValue('I1', 'Secondary customer name');
+                $sheet->setCellValue('J1', 'Client name');
+                $sheet->setCellValue('K1', 'Email');
+                $sheet->setCellValue('L1', 'Email name');
+                $sheet->setCellValue('M1', 'Crop name');
+                $sheet->setCellValue('N1', 'Order type');
+                $sheet->setCellValue('O1', 'Product');
+                $sheet->setCellValue('P1', 'Variety number');
+                $sheet->setCellValue('Q1', 'Variety name');
+                $sheet->setCellValue('R1', 'Tot. quantity');
+                $sheet->setCellValue('S1', 'replicas');
+                $sheet->setCellValue('T1', 'Greenhouse');
+                $sheet->setCellValue('U1', 'Position');
+                $sheet->setCellValue('V1', 'Remark');
+
+                if (!empty($data)) {
+
+                    $f = 2;
+
+                    foreach ($data as $k) {
+
+                        $sheet->setCellValue('A'.$f, $k["date_first"]);
+                        $sheet->setCellValue('B'.$f, $k["year"]);
+                        $sheet->setCellValue('C'.$f, $k["week"]);
+                        $sheet->setCellValue('D'.$f, $k["name_user"]." ".$k["last_name"]);
+                        $sheet->setCellValue('E'.$f, $k["event"]);
+                        $sheet->setCellValue('F'.$f, $k["cust_no"]);
+                        $sheet->setCellValue('G'.$f, $k["cust"]);
+                        $sheet->setCellValue('H'.$f, $k["sec_cust_no"]);
+                        $sheet->setCellValue('I'.$f, $k["sec_cust"]);
+                        $sheet->setCellValue('J'.$f, $k["name"]);
+                        $sheet->setCellValue('K'.$f, $k["email"]);
+                        $sheet->setCellValue('L'.$f, $k["email_name"]);
+                        
+                        $sheet->setCellValue('M'.$f, $k["crop"]);
+                        $sheet->setCellValue('N'.$f, $k["order_type"]);
+                        $sheet->setCellValue('O'.$f, $k["product"]);
+                        $sheet->setCellValue('P'.$f, $k["variety_code"]);
+                        $sheet->setCellValue('Q'.$f, $k["variety"]);
+
+                        $sheet->setCellValue('R'.$f, $k["tot_quantity"]);
+                        $sheet->setCellValue('S'.$f, $k["replicas"]);
+                        $sheet->setCellValue('T'.$f, $k["greenhouse"]);
+                        $sheet->setCellValue('U'.$f, $k["position"]);
+                        $sheet->setCellValue('V'.$f, $k["remark"]);
+
+                        //$sheet->getStyle("A" . $f)->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_DATE_YYYYMMDDSLASH);
+                        
+
+                        $f++;
+                    }
+
+                    /* $dateColumn = "A";
+                    $lastRow = count($data);
+
+                    $sheet->getStyle($dateColumn . "2:" . $dateColumn . ($lastRow + 1))->getNumberFormat()->setFormatCode('yyyy-mm-dd'); */
+                }
+
+                $sheet->getColumnDimension('A')->setWidth(10.14);
+                $sheet->getRowDimension(1)->setRowHeight(54.75);
+                $sheet->getColumnDimension('B')->setWidth(11);
+                $sheet->getColumnDimension('C')->setWidth(11);
+                $sheet->getColumnDimension('D')->setWidth(18);
+                $sheet->getColumnDimension('E')->setWidth(18);
+                $sheet->getColumnDimension('F')->setWidth(11);
+                $sheet->getColumnDimension('G')->setWidth(25);
+                $sheet->getColumnDimension('H')->setWidth(11);
+                $sheet->getColumnDimension('I')->setWidth(25);
+                $sheet->getColumnDimension('J')->setWidth(16);
+                $sheet->getColumnDimension('K')->setWidth(25);
+                $sheet->getColumnDimension('L')->setWidth(16);
+                $sheet->getColumnDimension('M')->setWidth(16);
+                $sheet->getColumnDimension('N')->setWidth(15);
+                $sheet->getColumnDimension('O')->setWidth(12);
+                $sheet->getColumnDimension('P')->setWidth(9);
+                $sheet->getColumnDimension('S')->setWidth(25);
+                $sheet->getColumnDimension('T')->setWidth(20);
+                $sheet->getColumnDimension('U')->setWidth(10);
+                $sheet->getColumnDimension('V')->setAutoSize(true);
+                
+
+                $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('A1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $sheet->getStyle('A1')->getAlignment()->setWrapText(true);
+                $sheet->getStyle('B1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('B1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $sheet->getStyle('B1')->getAlignment()->setWrapText(true);
+                $sheet->getStyle('C1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('C1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $sheet->getStyle('C1')->getAlignment()->setWrapText(true);
+                $sheet->getStyle('D1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('D1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $sheet->getStyle('D1')->getAlignment()->setWrapText(true);
+                $sheet->getStyle('E1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('E1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $sheet->getStyle('E1')->getAlignment()->setWrapText(true);
+                $sheet->getStyle('F1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('F1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $sheet->getStyle('F1')->getAlignment()->setWrapText(true);
+                $sheet->getStyle('G1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('G1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $sheet->getStyle('G1')->getAlignment()->setWrapText(true);
+                $sheet->getStyle('H1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('H1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $sheet->getStyle('H1')->getAlignment()->setWrapText(true);
+                $sheet->getStyle('I1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('I1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $sheet->getStyle('I1')->getAlignment()->setWrapText(true);
+                $sheet->getStyle('J1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('J1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $sheet->getStyle('J1')->getAlignment()->setWrapText(true);
+                $sheet->getStyle('K1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('K1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $sheet->getStyle('K1')->getAlignment()->setWrapText(true);
+                $sheet->getStyle('L1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('L1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $sheet->getStyle('L1')->getAlignment()->setWrapText(true);
+                $sheet->getStyle('M1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('M1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $sheet->getStyle('M1')->getAlignment()->setWrapText(true);
+                $sheet->getStyle('N1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('N1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $sheet->getStyle('N1')->getAlignment()->setWrapText(true);
+                $sheet->getStyle('O1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('O1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $sheet->getStyle('O1')->getAlignment()->setWrapText(true);
+                $sheet->getStyle('P1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('P1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $sheet->getStyle('P1')->getAlignment()->setWrapText(true);
+                $sheet->getStyle('Q1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('Q1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $sheet->getStyle('Q1')->getAlignment()->setWrapText(true);
+                $sheet->getStyle('R1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('R1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $sheet->getStyle('R1')->getAlignment()->setWrapText(true);
+                $sheet->getStyle('S1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('S1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $sheet->getStyle('S1')->getAlignment()->setWrapText(true);
+                $sheet->getStyle('T1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('T1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $sheet->getStyle('T1')->getAlignment()->setWrapText(true);
+                $sheet->getStyle('U1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('U1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $sheet->getStyle('U1')->getAlignment()->setWrapText(true);
+                $sheet->getStyle('V1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('V1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $sheet->getStyle('V1')->getAlignment()->setWrapText(true);
+                
+
+                $spreadsheet->getActiveSheet()->setAutoFilter('A1:V20');
+                //$spreadsheet->getActiveSheet()->freezePane('F2');
+
+                
+                $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+                $writer->save('php://output');
+                //$writer->save('hello world.xlsx');
+
+                $this->arrResponse = array(
+                    'status' => true, 
+                    'res' => 'Download data success'
+                );
+            }else{
+                $this->arrResponse = array(
+                    'status' => false, 
+                    'res' => 'No filter'
+                );
+            }
+
+            //echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
         }
         //TODO Events --------------------------------------------------------------------
 

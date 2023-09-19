@@ -20,7 +20,7 @@ $(document).ready(function() {
             $("#parameter-all-cont").addClass('d-none');
         }
 
-        if (this.value == 5 || this.value == 6 || this.value == 7) {
+        if (this.value == 5 || this.value == 6 || this.value == 7 || this.value == 8) {
             $("#parameter-options-cont").removeClass('d-none');
             stateOptions = true;
         }else{
@@ -298,7 +298,7 @@ async function loadParameterEdit(id) {
                         let data = JSON.parse(objData.res);
 
                         switch (data['type']) {
-                            case 5: case 6: case 7:
+                            case 5: case 6: case 7: case 8:
                                 document.querySelectorAll("#parameter-type option").forEach(opt => {
                                     if (opt.value < 5) {
                                         opt.disabled = true;
@@ -358,7 +358,7 @@ async function loadParameterEdit(id) {
                         if (data['type'] == 1 || data['type'] == 2) $("#parameter-all-cont").removeClass('d-none');
                         else $("#parameter-all-cont").addClass('d-none');
 
-                        if (data['type'] == 5 || data['type'] == 6 || data['type'] == 7) {
+                        if (data['type'] == 5 || data['type'] == 6 || data['type'] == 7 || data['type'] == 8) {
                             $("#parameter-options-cont").removeClass('d-none');
                             stateOptions = true;
                         }else{
