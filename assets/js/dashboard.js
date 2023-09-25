@@ -1,7 +1,8 @@
-var stateCalendar = false;
-var stateParameters = false;
-var stateEvents = false;
-var stateUsers = false;
+let stateCalendar = false;
+let stateParameters = false;
+let stateEvents = false;
+let stateUsers = false;
+let stateCustomers = false;
 
 $(document).ready(function() {
 
@@ -119,6 +120,14 @@ async function showOption($this, container){
                 await loadUsers();
                 await loadCusts();
                 loadRoles();
+            }
+
+            break;
+
+        case 'main-customers':
+            
+            if (!stateCustomers) {
+                await loadCustomers();
             }
 
             break;

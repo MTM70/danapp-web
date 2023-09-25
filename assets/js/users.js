@@ -97,8 +97,9 @@ async function loadUsers() {
                             "processing": true,
                             "scrollY": false,
                             "scrollX": (isMobile()) ? true : false,
-                            "iDisplayLength": 10,
+                            "iDisplayLength": 50,
                             "stateSave": true,
+                            scrollY: '53vh',
                         }).page();
 
                         $(".dataTables_paginate").bind( "click", '.paginate_button', function() {

@@ -25,7 +25,7 @@
             $data['page_title'] = "Dashboard";
             $data['page_js'] = array("dashboard.js", "calendar.js");
 
-            if ($_SESSION['idRol'] == 1) array_push($data["page_js"], "parameters.js", "users.js", "events.js");
+            if ($_SESSION['idRol'] == 1) array_push($data["page_js"], "parameters.js", "users.js", "events.js", "customers.js");
 
             $this->views->getView($this,"dashboard", $data);
         }
@@ -1735,6 +1735,223 @@
             echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
         }
         //TODO Users --------------------------------------------------------------------
+
+        //TODO Customers --------------------------------------------------------------------
+        public function loadCustomers()
+        {
+            $response = $this->model->getCustomers();
+
+            if (!empty($response)) {
+
+                $this->html.='
+                    <table class="table table-hover" id="table-customers" style="font-size:14px;">
+                        <thead>
+                            <tr>
+                                <th scope="col">Cust No</th>
+                                <th scope="col">Name</th>
+                            </tr>
+                        </thead>
+                        <tbody>';
+
+                foreach ($response as $k) {
+
+                    //$state = ($k["state"]) ? '' : 'bg-danger bg-opacity-10 text-decoration-line-through' ;
+
+                    $this->html .= '
+                        <tr class="cursor-select" onclick="loadCustomerEdit('.$k["id"].')" data-bs-toggle="modal" data-bs-target="#modalAddCustomer">
+                            <td class="align-middle">'.$k["cust_no"].'</td>
+                            <td class="d-flex align-items-center"><div class="rounded-circle bg-success bg-opacity-10 me-3" style="width:30px; height:30px; background-image: url('."'".media()."img/customers/".$k["logo"]."'".'); background-size: cover;"></div> '.$k["cust"].'</td>
+                        </tr>
+                    ';
+                }
+
+                $this->html .= '
+                        </tbody>
+                    </table>
+                ';
+
+                $this->arrResponse = array(
+                    'status' => true, 
+                    'res' => $this->html
+                );
+            }else{
+                $this->arrResponse = array(
+                    'status' => false, 
+                    'res' => 'No data!'
+                );
+            }
+
+            echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
+        }
+
+        public function loadCustomerEdit()
+        {
+            if (isset($_GET["id"]) AND $_GET["id"]) {
+                $response = $this->model->getCustomer($_GET["id"]);
+
+                if (!empty($response)) {
+
+                    $this->html = json_encode($response);
+
+                    $this->arrResponse = array(
+                        'status' => true, 
+                        'res' => $this->html
+                    );
+                }else{
+                    $this->arrResponse = array(
+                        'status' => false, 
+                        'res' => 'No data!'
+                    );
+                }
+            }else{
+                $this->arrResponse = array(
+                    'status' => false, 
+                    'res' => 'Parameter fail!'
+                );
+            }
+
+            echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
+        }
+        public function setCustomer()
+        {
+            if ($_POST AND isset($_POST["process"]) AND $_POST["process"]) {
+
+                if ($_POST["process"] == 1) {
+                    if (isset($_POST["customer-number"]) AND isset($_POST["customer-name"]) AND isset($_FILES["customer-file"])  AND isset($_POST["sec-customers"]) AND $_POST["customer-number"] AND $_POST["customer-name"]) {
+
+                        if ($this->model->getCustomerByNumber($_POST["customer-number"])) {
+                            $this->arrResponse = array(
+                                'status' => false, 
+                                'res' => 'Customer exist!'
+                            );
+
+                            exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
+                        }
+
+                        //*Upload image----------------------
+                        if ($_FILES["customer-file"]) {
+                            $filename = $_POST["customer-number"] . "." . pathinfo($_FILES["customer-file"]["name"], PATHINFO_EXTENSION);
+                            $tempname = $_FILES["customer-file"]["tmp_name"];
+
+                            if (!move_uploaded_file($tempname, __DIR__ . "/../assets/img/customers/" . $filename)) {
+                                /* $this->arrResponse = array(
+                                    'status' => false, 
+                                    'res' => 'Failed to upload image!' . $_FILES["event-file"]["error"]
+                                );
+
+                                exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE)); */
+                                $filename = "danziger.png";
+                            }
+                        }else{
+                            $filename = "danziger.png";
+                        }
+                        //*----------------------------------
+                        
+                        $id = $this->model->setCustomer($_POST["customer-number"], $_POST["customer-name"], $filename);
+
+                        if (!$id) {
+                            $this->arrResponse = array(
+                                'status' => false, 
+                                'res' => 'Add customer fail!'
+                            );
+
+                            exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
+                        }
+
+                        foreach (json_decode(stripslashes($_POST["sec-customers"])) as $key => $value) {
+
+                            $data = explode(',', $value);
+
+                            if (!$this->model->getSecCustByNo($id, $data[0])) {
+                                if (!$this->model->setSecCustomer($id, $data[0], $data[1])) {
+    
+                                    $this->arrResponse = array(
+                                        'status' => false, 
+                                        'res' => 'Add sec cust fail!'
+                                    );
+            
+                                    exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
+                                }
+                            }
+
+                        }
+
+                        $this->arrResponse = array(
+                            'status' => true, 
+                            'res' => 'Add customer success'
+                        );
+                    }else{
+                        $this->arrResponse = array(
+                            'status' => false, 
+                            'res' => 'No data!'
+                        );
+                    }
+                }else{
+                    if (isset($_POST["customer-id"]) AND isset($_POST["customer-number"]) AND isset($_POST["customer-name"]) AND isset($_FILES["customer-file"])  AND isset($_POST["sec-customers"]) AND $_POST["customer-id"] AND $_POST["customer-number"] AND $_POST["customer-name"]) {
+                        
+                        //*Upload image----------------------
+                        if ($_FILES["customer-file"]) {
+                            $filename = $_POST["customer-number"] .date('H_i_s'). "." . pathinfo($_FILES["customer-file"]["name"], PATHINFO_EXTENSION);
+                            $tempname = $_FILES["customer-file"]["tmp_name"];
+
+                            if (!move_uploaded_file($tempname, __DIR__ . "/../assets/img/customers/" . $filename)) {
+                                $filename = $_POST["customer-file-path"];
+                            }
+                        }else{
+                            $filename = $_POST["customer-file-path"];
+                        }
+                        //*----------------------------------
+
+                        if (!$this->model->updateSecCustomer($_POST["customer-id"], $_POST["customer-name"], $filename)) {
+                            $this->arrResponse = array(
+                                'status' => false, 
+                                'res' => 'Update customer fail!'
+                            );
+
+                            exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
+                        }
+
+                        foreach (json_decode(stripslashes($_POST["sec-customers"])) as $key => $value) {
+
+                            $data = explode(',', $value);
+
+                            if (!$this->model->getSecCustByNo($_POST["customer-id"], $data[0])) {
+                                if (!$this->model->setSecCustomer($_POST["customer-id"], $data[0], $data[1])) {
+    
+                                    $this->arrResponse = array(
+                                        'status' => false, 
+                                        'res' => 'Add sec cust fail!'
+                                    );
+            
+                                    exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
+                                }
+                            }
+
+                        }
+
+                        $this->arrResponse = array(
+                            'status' => true, 
+                            'res' => 'Update cust success'
+                        );
+                    }else{
+                        $this->arrResponse = array(
+                            'status' => false, 
+                            'res' => 'No data!'
+                        );
+                    }
+                }
+
+            }else{
+                $this->arrResponse = array(
+                    'status' => false, 
+                    'res' => 'No data!'
+                );
+            }
+
+            echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
+        }
+
+        //TODO Customers --------------------------------------------------------------------
 
 
         //TODO Calendar --------------------------------------------------------------------

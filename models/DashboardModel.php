@@ -38,11 +38,11 @@
             return $this->selectOne($sql, $array);
         }
 
-        public function setCustomer(int $custNo, String $cust)
+        public function setCustomer(int $custNo, String $cust, String $logo = "")
         {
-            $sql = 'INSERT INTO customers (cust_no, cust) VALUES (:value0, :value1)';
+            $sql = 'INSERT INTO customers (cust_no, cust, logo) VALUES (:value0, :value1, :value2)';
 
-            $array = array($custNo, $cust);
+            $array = array($custNo, $cust, $logo);
             return $this->insert($sql, $array);
         }
 
@@ -570,6 +570,53 @@
             return $this->delete($sql, $array);
         }
         //TODO Users--------------------------------------------------------------------------
+
+        //TODO Customers--------------------------------------------------------------------------
+        public function getCustomer(int $id)
+        {
+            $sql = 'SELECT c.*, IFNULL(sc.secCusts, "") AS secCusts 
+                    FROM customers AS c 
+                    LEFT JOIN (
+                        SELECT id_cust, GROUP_CONCAT(sec_cust_no, "&", sec_cust) AS secCusts 
+                        FROM sec_customers 
+                        GROUP BY id_cust 
+                    ) AS sc ON sc.id_cust = c.id 
+                    WHERE c.id = :value0 
+                    LIMIT 1';
+
+            $array = array($id);
+            return $this->selectOne($sql, $array);
+        }
+
+        public function getCustomerByNumber(int $number, int $id = 0)
+        {
+            $sql = 'SELECT id 
+                    FROM customers 
+                    WHERE cust_no = :value0 AND id != :value1 
+                    LIMIT 1';
+
+            $array = array($number, $id);
+            return $this->selectOne($sql, $array);
+        }
+
+        public function getCustomers()
+        {
+            $sql = 'SELECT * 
+                    FROM customers 
+                    ORDER BY cust ASC';
+
+            return $this->select($sql);
+        }
+
+        public function updateSecCustomer(int $id, String $name, String $logo)
+        {
+            $sql = 'UPDATE customers SET cust = :value1, logo = :value2 WHERE id = :value0';
+
+            $array = array($id, $name, $logo);
+            return $this->update($sql, $array);
+        }
+
+        //TODO Customers--------------------------------------------------------------------------
 
 
         //TODO Orders--------------------------------------------------------------------------

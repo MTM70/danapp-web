@@ -198,6 +198,67 @@
     </div>
 </div>
 
+<!-- Modal add customer -->
+<div class="modal fade" id="modalAddCustomer" tabindex="-1" aria-labelledby="modalAddCustomerLabel" aria-hidden="true">
+    <form action="#" id="form-customer" type="POST">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content rounded-3">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="modalAddCustomerLabel">Add customer</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                <div class="row">
+                        <div class="d-none">
+                            <input type="number" id="customer-id" name="customer-id" readonly>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label for="customer-image" class="form-label">Logo</label>
+                            <div class="w-100 img-thumbnail d-flex justify-content-center align-items-center" style="height: 150px; background-size: cover; background-position: center;" id="customer-image">
+                                <i class="bi bi-card-image display-1"></i>
+                            </div>
+                            <input class="form-control mt-1" type="file" name="customer-file" id="customer-file">
+                            <input type="text" class="d-none" name="customer-file-path" id="customer-file-path" value="">
+                        </div>
+
+                        <div class="col-md-9 ps-md-5">
+                            <div class="row">
+                                
+                                <div class="col-md-4 mb-3">
+                                    <label for="customer-number" class="form-label">Customer Number</label>
+                                    <input type="number" class="form-control" name="customer-number" id="customer-number" min="1" required>
+                                </div>
+                                
+                                <div>
+                                    <label for="customer-name" class="form-label">Name</label>
+                                    <input type="text" class="form-control" name="customer-name" id="customer-name" required>
+                                </div>
+
+                            </div>
+                            
+                        </div>
+
+                        <div class="mt-5">
+                            <label for="" class="form-label">Sec customers
+                                <button class="btn btn-sm btn-primary rounded-circle p-0 ms-1" type="button" style="width:20px; height:20px;" onclick="addSecCustomer()">
+                                    <i class="bi bi-plus fw-bold"></i>
+                                </button>
+                            </label>
+                        </div>
+                        <hr class="mt-1">
+                        <div class="row overflow-auto m-0 py-1" id="customer-sec-cust" style="max-height:15vh;"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary" id="customer-btn">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
 <!-- Modal add event -->
 <div class="modal fade" id="modalAddEvent" tabindex="-1" aria-labelledby="modalAddEventLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
@@ -285,7 +346,6 @@
         </form>
     </div>
 </div>
-
 
 <!-- Modal view event -->
 <div class="modal fade" id="modalViewEvent" tabindex="-1" aria-labelledby="modalViewEventLabel" aria-hidden="true">

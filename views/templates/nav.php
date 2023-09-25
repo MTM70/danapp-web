@@ -44,6 +44,13 @@
                             <span>Users</span>
                         </a>
                     </li><!-- End Profile Page Nav -->
+
+                    <li class="nav-item">
+                        <a class="nav-link cursor-select collapsed" onclick="showOption(this, '."'".'main-customers'."'".')">
+                            <i class="bi bi-briefcase"></i>
+                            <span>Customers</span>
+                        </a>
+                    </li>
                 ';
             }
         ?>

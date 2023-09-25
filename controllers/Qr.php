@@ -43,7 +43,7 @@ class Qr extends Controllers
 
                     if ($k["crop"] == 10) continue;
 
-                    if ($cg != $k["crop_general"]) $this->html .= '<div class="col-12 fs-1-3 fw-semibold bg-primary bg-opacity-10 text-primary mt-2 mb-2 p-3 text-center">'.$k["crop_general"].$_SESSION["qrEvent"].'</div>';
+                    if ($cg != $k["crop_general"]) $this->html .= '<div class="col-12 fs-1-3 fw-semibold bg-primary bg-opacity-10 text-primary mt-2 mb-2 p-3 text-center">'.$k["crop_general"].'</div>';
 
                     $this->html .= '
                         <div class="border text-center p-1 bg-white" id="cont'.$k["id"].'" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" style="width:270px; height:300px;">
