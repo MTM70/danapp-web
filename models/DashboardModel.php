@@ -244,6 +244,75 @@
             $array = array($year1, $week1, $year2, $week2);
             return $this->select($sql, $array);
         }
+
+        public function getDataCountBetweenWeeksGroupCust(int $year1, int $week1, int $year2, int $week2)
+        {
+            $sql = "SELECT 
+                        d.cust,
+                        COUNT(*) AS count 
+                    FROM (
+                        SELECT DISTINCT c.cust, o.id, op.id_user 
+                        FROM orders_parameters AS op 
+                        INNER JOIN orders AS o ON o.id = op.id_order 
+                        INNER JOIN sec_customers AS sc ON sc.id = o.id_sec_cust 
+                        INNER JOIN customers AS c ON c.id = sc.id_cust 
+                        WHERE (op.year BETWEEN :value0 AND :value2) AND (op.week BETWEEN :value1 AND :value3) 
+                    ) AS d
+                    GROUP BY d.cust";
+
+            $array = array($year1, $week1, $year2, $week2);
+            return $this->select($sql, $array);
+        }
+
+        public function getVarietiesBetweenWeeks(int $year1, int $week1, int $year2, int $week2)
+        {
+            $sql = 'SELECT DISTINCT v.id_crop, c.crop, v.id, v.variety 
+                    FROM orders_parameters AS op 
+                    INNER JOIN orders AS o ON o.id = op.id_order 
+                    INNER JOIN varieties AS v ON v.id = op.id_variety 
+                    INNER JOIN crops AS c ON c.id = v.id_crop 
+                    WHERE (op.year BETWEEN :value0 AND :value2) AND (op.week BETWEEN :value1 AND :value3) 
+                    ORDER BY v.id_crop, v.variety';
+
+            $array = array($year1, $week1, $year2, $week2);
+            return $this->select($sql, $array);
+        }
+
+        public function getVarietiesBetweenWeeksDistinctOrders(int $year1, int $week1, int $year2, int $week2, string $varieties)
+        {
+            $sql = "SELECT
+                        u.user, 
+                        sc.sec_cust, 
+                        o.order_no, 
+                        op.date, op.id_order, op.id_user, op.id_variety, op.year, op.week, 
+                        c.crop, 
+                        v.id_crop, v.variety 
+                    FROM orders_parameters AS op 
+                    INNER JOIN orders AS o ON o.id = op.id_order 
+                    INNER JOIN varieties AS v ON v.id = op.id_variety 
+                    INNER JOIN crops AS c ON c.id = v.id_crop 
+                    INNER JOIN users AS u ON u.id = op.id_user 
+                    INNER JOIN sec_customers AS sc ON sc.id = o.id_sec_cust 
+                    WHERE (op.year BETWEEN :value0 AND :value2) AND (op.week BETWEEN :value1 AND :value3) AND id_variety IN ($varieties) 
+                    GROUP BY o.id, op.id_user, v.id 
+                    ORDER BY v.id_crop, v.variety";
+
+            $array = array($year1, $week1, $year2, $week2);
+            return $this->select($sql, $array);
+        }
+
+        public function getDataCompareBetweenWeeksOrders(int $year1, int $week1, int $year2, int $week2, string $varieties, string $parameters)
+        {
+            $sql = "SELECT 
+                        id_user, id_order, id_variety, id_parameter, value, obs 
+                    FROM orders_parameters 
+                    WHERE 
+                        (year BETWEEN :value0 AND :value2) AND (week BETWEEN :value1 AND :value3) 
+                        AND id_variety IN ($varieties) AND id_parameter IN ($parameters)";
+
+            $array = array($year1, $week1, $year2, $week2);
+            return $this->select($sql, $array);
+        }
         //TODO Home--------------------------------------------------------------------------
 
 
@@ -359,7 +428,7 @@
         
         public function getParameters()
         {
-            $sql = 'SELECT * FROM parameters';
+            $sql = 'SELECT * FROM parameters ORDER BY parameter';
 
             return $this->select($sql);
         }

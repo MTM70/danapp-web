@@ -75,7 +75,7 @@ async function loadUsers() {
         stateUsers = true;
 
         $.ajax({
-            url: base_url+"dashboard/loadUsers",
+            url: base_url+"/Dashboard/loadUsers",
             cache: false,
 
             beforeSend: function() {
@@ -143,7 +143,7 @@ async function loadUserEdit(id) {
     return new Promise(resolve => {
 
         $.ajax({
-            url: base_url+"dashboard/loadUserEdit",
+            url: base_url+"/Dashboard/loadUserEdit",
             type: 'GET',
             data: {'id': id},
             cache: false,
@@ -221,7 +221,7 @@ async function loadCusts() {
     return new Promise(resolve => {
 
         $.ajax({
-            url: base_url+"dashboard/loadSecCusts",
+            url: base_url+"/Dashboard/loadSecCusts",
             cache: false,
 
             beforeSend: function() {
@@ -252,7 +252,7 @@ async function loadRoles() {
     return new Promise(resolve => {
 
         $.ajax({
-            url: base_url+"dashboard/loadRoles",
+            url: base_url+"/Dashboard/loadRoles",
             cache: false,
 
             beforeSend: function() {

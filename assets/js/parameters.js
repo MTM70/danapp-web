@@ -128,7 +128,7 @@ async function loadParameters() {
         stateParameters = true;
 
         $.ajax({
-            url: base_url+"dashboard/loadParameters",
+            url: base_url+"/Dashboard/loadParameters",
             cache: false,
 
             beforeSend: function() {
@@ -181,7 +181,7 @@ async function loadCrops() {
     return new Promise(resolve => {
 
         $.ajax({
-            url: base_url+"dashboard/loadCrops",
+            url: base_url+"/Dashboard/loadCrops",
             cache: false,
 
             beforeSend: function() {
@@ -278,7 +278,7 @@ async function loadParameterEdit(id) {
     return new Promise(resolve => {
 
         $.ajax({
-            url: base_url+"dashboard/loadParameterEdit",
+            url: base_url+"/Dashboard/loadParameterEdit",
             type: 'GET',
             data: {'id': id},
             cache: false,

@@ -1348,8 +1348,8 @@ input:checked {
 /* CHECKBOX */
 .mtm-checkbox-filter input[type="checkbox"]:not(:checked), 
 .mtm-checkbox-filter input[type="checkbox"]:checked {
-	position: absolute;
-	top: -9999%;
+	position: fixed;
+  display: none;
 }
 
 .mtm-checkbox-filter input[type="checkbox"] + label {

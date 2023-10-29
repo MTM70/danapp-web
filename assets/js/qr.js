@@ -9,7 +9,7 @@ const loadQr = async () => {
     return new Promise(resolve => {
 
         $.ajax({
-            url: base_url+"Qr/event",
+            url: base_url+"/Qr/event",
             type: 'GET',
             data: {'id_event': idEvent},
             cache: false,
@@ -59,7 +59,7 @@ const convertirADiv = async (contId, id) => {
     return new Promise(resolve => {
 
         $.ajax({
-            url: base_url+"Qr/saveQrToServer",
+            url: base_url+"/Qr/saveQrToServer",
             type: 'POST',
             data: {'urlApi': img.src, 'id': id},
             cache: false,

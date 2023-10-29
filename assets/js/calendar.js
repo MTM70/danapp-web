@@ -15,7 +15,7 @@ const loadCalendar = async () => {
         stateCalendar = true;
 
         $.ajax({
-            url: base_url+"dashboard/loadCalendarWeek",
+            url: base_url+"/dashboard/loadCalendarWeek",
             type: 'GET',
             data: {'week': document.querySelector('#calendar-week').value},
             cache: false,
@@ -60,7 +60,7 @@ const loadCalendarFilters = async () => {
         stateCalendar = true;
 
         $.ajax({
-            url: base_url+"dashboard/loadCalendarFilters",
+            url: base_url+"/dashboard/loadCalendarFilters",
             type: 'GET',
             data: {'week': document.querySelector('#calendar-week').value},
             cache: false,
@@ -199,7 +199,7 @@ const updateOrderVisitDay = async (idOrder, date, time, notify) => {
     return new Promise(resolve => {
 
         $.ajax({
-            url: base_url+"dashboard/updateOrderVisitDay",
+            url: base_url+"/dashboard/updateOrderVisitDay",
             type: 'POST',
             data: {'idOrder': idOrder, 'date':date, 'time':time, 'notify':notify},
             cache: false,

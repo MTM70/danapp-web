@@ -1,6 +1,6 @@
 <?php
 
-    const BASE_URL = "http://macbook-pro.local/danapp-web/";
+    const BASE_URL = "http://macbook-pro.local/danapp-web";
     
     //Conexion a DB
     const DB_HOST = "localhost";

@@ -93,7 +93,7 @@ async function loadCustomers() {
         stateCustomers = true;
 
         $.ajax({
-            url: base_url+"Dashboard/loadCustomers",
+            url: base_url+"/Dashboard/loadCustomers",
             cache: false,
 
             beforeSend: function() {
@@ -160,7 +160,7 @@ async function loadCustomerEdit(id) {
     return new Promise(resolve => {
 
         $.ajax({
-            url: base_url+"dashboard/loadCustomerEdit",
+            url: base_url+"/dashboard/loadCustomerEdit",
             type: 'GET',
             data: {'id': id},
             cache: false,
@@ -188,7 +188,7 @@ async function loadCustomerEdit(id) {
 
                         if (data['logo']) {
                             imgCustomer.querySelector('i').classList.add('d-none');
-                            imgCustomer.style.backgroundImage = `url(${base_url}assets/img/customers/${data['logo']})`;
+                            imgCustomer.style.backgroundImage = `url(${base_url}/assets/img/customers/${data['logo']})`;
                             document.getElementById('customer-file-path').value = data['logo'];
                         }else {
                             imgCustomer.style.backgroundImage = null;

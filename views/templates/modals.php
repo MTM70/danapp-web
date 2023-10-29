@@ -1,3 +1,24 @@
+<!-- Upload Data -->
+<div class="modal fade" id="modal-upload-orders" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="uploadOrdersModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="uploadOrdersModalLabel">Upload Orders</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body mtm-checkbox-filter">
+                <form class="mb-0" action="#" id="form-upload" method="POST" enctype="multipart/form-data">
+                    <input class="form-control mb-3" type="file" name="excel" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required id="formFile">
+                    <button class="form-control btn btn-success" id="upload-btn">
+                        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true" id="upload-loading"></span>
+                        <span id="upload-text">Upload</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Modal add parameter -->
 <div class="modal fade" id="modalAddParamter" tabindex="-1" aria-labelledby="modalAddParamterLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
@@ -150,14 +171,14 @@
                         </div>
                         <div class="col-md-2">
                             <label for="user-name" class="form-label">User</label>
-                            <input type="text" class="form-control" name="user-name" id="user-name" placeholder="@user" required>
+                            <input type="text" class="form-control" name="user-name" id="user-name" placeholder="@user" autocomplete="off" required>
                         </div>
                         <div class="col-md-2">
                             <label for="user-new-password" class="form-label">Password</label>
-                            <input type="password" class="form-control" name="user-new-password" id="user-new-password">
+                            <input type="password" class="form-control" name="user-new-password" autocomplete="off" id="user-new-password">
                         </div>
                         <div class="d-none">
-                            <input type="password" class="form-control" name="user-password" id="user-password" readonly required>
+                            <input type="password" class="form-control" name="user-password" id="user-password" autocomplete="off" readonly required>
                         </div>
 
                         <div class="col-md-2">
@@ -358,6 +379,76 @@
             </div>
             <div class="modal-body">
                 <div class="table-responsive" id="event-years">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="modal-compare-varieties" tabindex="-1" aria-labelledby="compareVarietiesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="compareVarietiesModalLabel">Varieties</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body mtm-checkbox-filter">
+                <div class="d-none">
+                    <input type="text" placeholder="Buscar...">
+                </div>
+                <div class="d-flex flex-wrap" id="compare-varieties"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="varieties-compare-apply" data-bs-dismiss="modal">Apply</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="modal-compare-parameters" tabindex="-1" aria-labelledby="compareParametersModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="compareParametersModalLabel">Parameters</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body mtm-checkbox-filter">
+                <div class="d-flex flex-wrap" id="compare-parameters"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="parameters-compare-apply" data-bs-dismiss="modal">Apply</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Images full -->
+<div class="modal fade" id="modalImage" tabindex="-1" aria-labelledby="modalImageLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content bg-dark">
+            <div class="modal-header text-white">
+                <h1 class="modal-title fs-5" id="modalImageLabel">Modal title</h1>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="carouselExampleCaptions" class="carousel slide">
+
+                    <div class="carousel-indicators" id="images-compare-indicators"></div>
+                    <div class="carousel-inner" id="images-compare">
+                        
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
                 </div>
             </div>
         </div>

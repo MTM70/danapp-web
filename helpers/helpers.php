@@ -6,7 +6,7 @@
 
     function media()
     {
-        return BASE_URL."assets/";
+        return BASE_URL."/assets";
     }
 
     function get_view(String $name_file, $data = null)

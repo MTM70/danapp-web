@@ -90,7 +90,7 @@ async function loadEvents() {
         stateEvents = true;
 
         $.ajax({
-            url: base_url+"dashboard/loadEvents",
+            url: base_url+"/dashboard/loadEvents",
             cache: false,
 
             beforeSend: function() {
@@ -150,7 +150,7 @@ async function loadEventEdit(id, event) {
     return new Promise(resolve => {
 
         $.ajax({
-            url: base_url+"dashboard/loadEventEdit",
+            url: base_url+"/dashboard/loadEventEdit",
             type: 'GET',
             data: {'id': id},
             cache: false,
@@ -179,7 +179,7 @@ async function loadEventEdit(id, event) {
 
                         if (data['image']) {
                             imgEvent.querySelector('i').classList.add('d-none');
-                            imgEvent.style.backgroundImage = `url(${base_url}uploads/events/${data['image']})`;
+                            imgEvent.style.backgroundImage = `url(${base_url}/uploads/events/${data['image']})`;
                             document.getElementById('event-file-path').value = data['image'];
                         }else {
                             imgEvent.style.backgroundImage = null;
@@ -207,7 +207,7 @@ function openModalViewEvent(id, title) {
     $('#event-years').html(null);
 
     $.ajax({
-        url: base_url+"dashboard/loadEventYears",
+        url: base_url+"/dashboard/loadEventYears",
         type: 'GET',
         data: {'id': id},
         cache: false,
@@ -233,15 +233,13 @@ function openModalViewEvent(id, title) {
                 console.log(response);
                 alert(error);
             }
-
-            resolve('resolved');
         }
     })
     
 }
 
 function downloadDataEventByYear(year, idEvent) {
-    window.open(base_url+'Dashboard/downloadDataEventByYear/'+year+'/'+idEvent, '_blank');
+    window.open(base_url+'/Dashboard/downloadDataEventByYear/'+year+'/'+idEvent, '_blank');
 }
 
 function resetEventForm(){

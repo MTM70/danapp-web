@@ -31,7 +31,7 @@ $(document).ready(function() {
                 var objData = JSON.parse(response);
 
                 if(objData.status == true){
-                    location.href= base_url+"dashboard";
+                    location.href= base_url+"/dashboard";
                 }else{
                     alert(objData.res);
                 }

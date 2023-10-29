@@ -637,6 +637,281 @@
             //echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
         }
 
+        public function loadChartCountCust()
+        {
+            if (isset($_GET["from"]) AND isset($_GET["to"]) AND $_GET["from"] AND $_GET["to"]) {
+
+                $week1 = explode("-W", $_GET["from"])[1];
+                $year1 = explode("-W", $_GET["from"])[0];
+
+                $week2 = explode("-W", $_GET["to"])[1];
+                $year2 = explode("-W", $_GET["to"])[0];
+
+                $response = $this->model->getDataCountBetweenWeeksGroupCust($year1, $week1, $year2, $week2);
+
+                $this->arrResponse = array(
+                    'status' => true, 
+                    'res' => $response
+                );
+
+            }else{
+                $this->arrResponse = array(
+                    'status' => false, 
+                    'res' => 'Parameter fail!'
+                );
+            }
+
+            echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
+        }
+
+        public  function loadVarietiesCompare()
+        {
+            if (isset($_GET["from"]) AND isset($_GET["to"]) AND $_GET["from"] AND $_GET["to"]) {
+
+                $week1 = explode("-W", $_GET["from"])[1];
+                $year1 = explode("-W", $_GET["from"])[0];
+
+                $week2 = explode("-W", $_GET["to"])[1];
+                $year2 = explode("-W", $_GET["to"])[0];
+
+                $response = $this->model->getVarietiesBetweenWeeks($year1, $week1, $year2, $week2);
+
+                $crop = null;
+
+                if (!empty($response)) {
+
+                    foreach ($response as $k) {
+
+                        if ($crop != $k["id_crop"]) $this->html .= '<div class="w-100 mt-2">'.$k["crop"].'</div>';
+
+                        $this->html .= '
+                            <div class="p-1">
+                                <input id="checkCompareVariety'.$k["id"].'" type="checkbox" value="'.$k["id"].','.$k["variety"].'">
+                                <label class="rounded-3" for="checkCompareVariety'.$k["id"].'">'.$k["variety"].'</label>
+                            </div>
+                        ';
+
+                        $crop = $k["id_crop"];
+                    }
+
+                    $this->arrResponse = array(
+                        'status' => true, 
+                        'res' => $this->html
+                    );
+                }else{
+                    $this->arrResponse = array(
+                        'status' => true, 
+                        'res' => 'No data!'
+                    );
+                }
+            }else{
+                $this->arrResponse = array(
+                    'status' => false, 
+                    'res' => 'Parameter fail!'
+                );
+            }
+
+            echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
+        }
+
+        public  function loadParametersCompare()
+        {
+            $response = $this->model->getParameters();
+
+            if (!empty($response)) {
+
+                foreach ($response as $k) {
+                    $this->html .= '
+                        <div class="p-1">
+                            <input id="checkCompareParameter'.$k["id"].'" type="checkbox" value="'.$k["id"].','.$k["parameter"].','.$k["type"].'">
+                            <label class="rounded-3" for="checkCompareParameter'.$k["id"].'">'.$k["parameter"].'</label>
+                        </div>
+                    ';
+                }
+
+                $this->arrResponse = array(
+                    'status' => true, 
+                    'res' => $this->html
+                );
+            }else{
+                $this->arrResponse = array(
+                    'status' => true, 
+                    'res' => 'No data!'
+                );
+            }
+
+            echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
+        }
+
+        public  function loadTableCompare()
+        {
+            if (isset($_GET["from"]) AND isset($_GET["to"]) AND $_GET["from"] AND $_GET["to"] AND isset($_GET["varieties"]) AND isset($_GET["parameters"]) AND $_GET["varieties"] AND $_GET["parameters"]) {
+
+                $week1 = explode("-W", $_GET["from"])[1];
+                $year1 = explode("-W", $_GET["from"])[0];
+
+                $week2 = explode("-W", $_GET["to"])[1];
+                $year2 = explode("-W", $_GET["to"])[0];
+
+                $varieties = json_decode($_GET["varieties"], true);
+                $parameters = json_decode($_GET["parameters"], true);
+
+                $varietiesSearch = array();
+                $parametersSearch = array();
+
+                foreach ($varieties as $variety) {
+                    $varietiesSearch[] = explode(",", $variety)[0]; // Agrega el número al array de números
+                }
+
+                foreach ($parameters as $parameter) {
+                    $parametersSearch[] = explode(",", $parameter)[0]; // Agrega el número al array de números
+                }
+
+                $varietiesSearch = implode(",", $varietiesSearch);
+                $parametersSearch = implode(",", $parametersSearch);
+
+                $response = $this->model->getVarietiesBetweenWeeksDistinctOrders($year1, $week1, $year2, $week2, $varietiesSearch);
+                $data = $this->model->getDataCompareBetweenWeeksOrders($year1, $week1, $year2, $week2, $varietiesSearch, $parametersSearch);
+
+                $this->html .= '
+                    <table class="table table-bordered table-hover text-center fs-0-8" id="table-compare" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th rowspan="2" class="bg-white text-center align-middle" style="z-index: 1;">Order No</th>
+                                <th rowspan="2" class="bg-white text-center align-middle" style="z-index: 1;">Sec Cust</th>
+                                <th rowspan="2" class="bg-white text-center align-middle" style="z-index: 1;">User</th>
+                                <th rowspan="2" class="bg-white text-center align-middle" style="z-index: 2;">Variety</th>
+                                <th class="text-center align-middle" rowspan="2">Week</th>
+                                <th class="text-center align-middle" rowspan="2">Date</th>
+                                <th colspan="'.count($parameters).'" class="text-center">Parameters</th>
+                            </tr>
+                            <tr>';
+                                
+                                foreach ($parameters as $parameter) {
+                                    $parameter = explode(',', $parameter);
+
+                                    $this->html .= '<td class="text-center align-middle">'.$parameter[1].'</td>';
+                                }
+                            
+                            $this->html .= '</tr>
+                        </thead>
+
+                        <tbody>';
+
+                            if (!empty($response)) {
+                                foreach ($response as $k) {
+                                    $this->html .= '
+                                        <tr>
+                                            <td class="bg-white align-middle" style="z-index: 1;">'.$k["order_no"].'</td>
+                                            <td class="bg-white align-middle" style="z-index: 1;">'.$k["sec_cust"].'</td>
+                                            <td class="bg-white align-middle" style="z-index: 1;">'.$k["user"].'</td>
+                                            <th class="bg-white align-middle" style="z-index: 1;">'.$k["variety"].'</th>
+                                            <td class="text-center align-middle">W'.$k["week"].' '.$k["year"].'</td>
+                                            <td class="text-center align-middle">'.$k["date"].'</td>';
+
+                                            $indexImg = 0;
+
+                                            foreach ($parameters as $parameter) {
+                                                $parameter = explode(',', $parameter);
+                                                
+                                                $isset = false;
+
+                                                if (isset($data)) {
+
+                                                    foreach ($data as $d) {
+                                                        if ($d["id_order"] == $k["id_order"] AND $d["id_user"] == $k["id_user"] AND $d["id_variety"] == $k["id_variety"] AND $d["id_parameter"] == $parameter[0]) {
+
+                                                            if ($parameter[2] == 4) {
+                                                                //'.base_url().'
+
+                                                                $route = base_url()."/uploads/".$d["value"]; 
+
+                                                                $this->html .= '
+                                                                    <td class="text-center align-middle">
+                                                                        <img 
+                                                                            class="cursor-select" 
+                                                                            src="'.$route.'" 
+                                                                            alt="Imagen" 
+                                                                            width="100px"
+                                                                            data-index="'.$indexImg.'" 
+                                                                            data-parameter="'.$parameter[1].'" 
+                                                                            data-obs="'.$d["obs"].'" 
+                                                                            onclick="viewImage(this)"
+                                                                            data-bs-toggle="modal" data-bs-target="#modalImage"
+                                                                        >
+                                                                    </td>
+                                                                ';
+
+                                                                $indexImg++;
+                                                            }else if ($parameter[2] == 8 AND strpos($d["value"], '=') !== false) {
+
+                                                                $dataB9 = explode(',', $d['value']);
+                                                                
+                                                                $this->html .= '
+                                                                    <td class="text-center align-middle">
+                                                                        <table class="table table-bordered text-center bg-light mb-0 fs-0-9">
+                                                                            <tr>
+                                                                                <th class="bg-secondary bg-opacity-50 text-white align-middle" rowspan="2" width="40px">B-9 ppm</th>';
+
+                                                                                foreach ($dataB9 as $value) {
+                                                                                    $value = explode('=', $value);
+
+                                                                                    $this->html .= '
+                                                                                        <th class="p-1">'.$value[0].'</th>
+                                                                                    ';
+                                                                                }
+
+                                                                            $this->html .= '
+                                                                            </tr>
+                                                                            <tr>';
+
+                                                                                foreach ($dataB9 as $value) {
+                                                                                    $value = explode('=', $value);
+
+                                                                                    $this->html .= '
+                                                                                        <td class="p-1">'.$value[1].'</td>
+                                                                                    ';
+                                                                                }
+                                                                                
+                                                                            $this->html .= '
+                                                                            </tr>
+                                                                        </table>
+                                                                    </td>
+                                                                ';
+                                                            }
+                                                            else $this->html .= '<td class="text-center align-middle">'.$d["value"].'</td>';
+
+                                                            $isset = true;
+                                                        }
+                                                    }
+                                                }
+
+                                                if(!$isset) $this->html .= '<td></td>';
+                                            }
+
+                                        $this->html .= '</tr>
+                                    ';
+                                }
+                            }
+
+                        $this->html .= '</tbody>
+                    </table>
+                ';
+
+                $this->arrResponse = array(
+                    'status' => true, 
+                    'res' => $this->html
+                );
+            }else{
+                $this->arrResponse = array(
+                    'status' => false, 
+                    'res' => 'Parameter fail!'
+                );
+            }
+
+            echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
+        }
+
         //TODO Events --------------------------------------------------------------------
         public function loadEvents()
         {
@@ -1124,7 +1399,7 @@
 
                 foreach ($response as $k) {
 
-                    $type = array("Yes/No", "Number", "Date", "Text", "Image", "Select", "Select Radio", "Switch");
+                    $type = array("Yes/No", "Number", "Date", "Text", "Image", "Select", "Select Radio", "Switch", "Option Value");
                     $position = array("Top", "Middle", "Bottom");
                     $category = array("Client", "Technical", "All");
 
@@ -1760,7 +2035,7 @@
                     $this->html .= '
                         <tr class="cursor-select" onclick="loadCustomerEdit('.$k["id"].')" data-bs-toggle="modal" data-bs-target="#modalAddCustomer">
                             <td class="align-middle">'.$k["cust_no"].'</td>
-                            <td class="d-flex align-items-center"><div class="rounded-circle bg-success bg-opacity-10 me-3" style="width:30px; height:30px; background-image: url('."'".media()."img/customers/".$k["logo"]."'".'); background-size: cover;"></div> '.$k["cust"].'</td>
+                            <td class="d-flex align-items-center"><div class="rounded-circle bg-success bg-opacity-10 me-3" style="width:30px; height:30px; background-image: url('."'".media()."/img/customers/".$k["logo"]."'".'); background-size: cover;"></div> '.$k["cust"].'</td>
                         </tr>
                     ';
                 }
