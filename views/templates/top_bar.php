@@ -2,7 +2,7 @@
 <header id="header" class="header fixed-top d-flex align-items-center shadow-sm">
 
     <div class="d-flex align-items-center justify-content-between">
-        <a href="<?= base_url() ?>dashboard" class="logo d-flex align-items-center">
+        <a href="<?= base_url() ?>/dashboard" class="logo d-flex align-items-center">
             <img src="assets/img/icon-192.png" alt="">
             <span class="d-none d-lg-block">DanApp</span>
         </a>
@@ -19,8 +19,8 @@
     <nav class="header-nav ms-auto">
         <ul class="d-flex align-items-center">
 
-            <li class="nav-item d-block d-lg-none">
-                <a class="nav-link nav-icon search-bar-toggle " href="#">
+            <li class="nav-item">
+                <a class="nav-link nav-icon search-bar-toggle d-none" href="#">
                     <i class="bi bi-search"></i>
                 </a>
             </li><!-- End Search Icon-->

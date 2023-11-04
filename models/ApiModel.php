@@ -148,6 +148,35 @@ class ApiModel extends Mysql
         return $this->select($sql, $array);
     }
 
+    public function getOrders5(int $id)
+    {
+        $sql = "SELECT od.id_order, od.id_variety, tot_quantity, tot_price, remarks, 
+                        o.order_no, o.id_sec_cust, sc.sec_cust, id_type, o.id_product, o.year, o.week, o.destination, 
+                        product, crop, variety, 
+                        CASE 
+                            WHEN IFNULL(vd.visit_day, 0) != 0 THEN vd.visit_day 
+                            ELSE o.visit_day 
+                        END AS visit_day 
+                    FROM orders_details AS od 
+                    INNER JOIN orders AS o ON o.id = od.id_order 
+                    INNER JOIN sec_customers AS sc ON sc.id = o.id_sec_cust 
+                    INNER JOIN products AS p ON p.id = o.id_product 
+                    INNER JOIN varieties AS v ON v.id = od.id_variety 
+                    INNER JOIN crops AS c ON c.id = v.id_crop 
+                    INNER JOIN users AS u ON u.id = :value0 
+                    LEFT JOIN visit_days aS vd ON vd.id_user = :value0 AND vd.id_order = od.id_order 
+                    WHERE o.id NOT IN (SELECT id_order FROM orders_closed WHERE id_user = :value0) 
+                        AND 
+                        CASE 
+                            WHEN id_rol != 1 THEN id_sec_cust IN (SELECT id_sec_cust FROM users_sec_customers AS usc WHERE usc.id_user = u.id) 
+                            ELSE id_sec_cust > 0 
+                        END
+                    ORDER BY od.id_order";
+
+        $array = array($id);
+        return $this->select($sql, $array);
+    }
+
     public function getOrdersParameters($idUser)
     {
         $path = BASE_URL."uploads/";
@@ -231,6 +260,14 @@ class ApiModel extends Mysql
         $array = array($id);
 
         return $this->update($sql, $array);
+    }
+
+    public function setOrderClosed(int $idOder, int $idUser)
+    {
+        $sql = "INSERT INTO orders_closed (id_order, id_user) VALUES (:value0, :value1)";
+        $array = array($idOder, $idUser);
+
+        return $this->insert($sql, $array);
     }
 
     public function deleteOrderParameter(int $idOder, int $idVariety, int $idParameter)

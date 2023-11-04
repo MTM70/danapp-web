@@ -238,6 +238,50 @@ class Api extends Controllers
         }
     }
 
+    public function getOrders5()
+    {
+        if (!isset($_POST["id"]) OR !$_POST["id"]) {
+            exit(json_encode(array("error" => "No data orders!")));
+        }
+
+        $res = $this->model->getOrders5($_POST["id"]);
+
+        if (!empty($res)) {
+
+            foreach ($res as $key => $values) {
+
+                $year = $values["year"];
+                $week = $values["week"];
+
+                //Obtener semanas del ano
+                $date = new DateTime;
+                $date->setISODate($year, 53);
+                $weeks = $date->format("W") === "53" ? 53 : 52;
+                //////////////////////////////////////////////////
+                
+                $cycle = ($values["destination"] == "BOG") ? 14 : 12 ;
+
+                $week = $week + ($cycle - 1);
+                if ($week > $weeks) {
+                    $week = $week - $weeks;
+                    $year++;
+                }
+
+                $week = ($week > 9) ? $week : "0".$week ;
+
+                $lunes = date('Y-m-d', strtotime("Y".$year."W".$week."1"));
+                $viernes = date('Y-m-d', strtotime("Y".$year."W".$week."5"));
+
+                $res[$key]["notify"] = $year.",".$week.",".$lunes." 07:00:00,".$viernes." 07:00:00";
+                //$res[$key]["notify"] = "2023-02-27 21:18:00,2023-02-27 21:18:00";
+            }
+
+            echo json_encode(array("error" => false, "datos" => $res));
+        } else {
+            echo json_encode(array("error" => "No data orders!"));
+        }
+    }
+
     public function getOrdersParameters()
     {
         if (!isset($_POST["id"]) OR !$_POST["id"]) {
@@ -394,7 +438,25 @@ class Api extends Controllers
             
             echo json_encode(array("error" => false));
         }else{
-            echo json_encode(array("error" => "Al recibir datos!"));
+            echo json_encode(array("error" => "parameter error!"));
+        }
+    }
+
+    public function setOrderClosed()
+    {
+        if (isset($_POST['data'])) {
+
+            $data = json_decode($_POST["data"], true);
+            
+            $res = $this->model->setOrderClosed($data["idOrder"], $data["idUser"]);
+            if (!$res) {
+                echo json_encode(array("error" => "Failed to close order!"));
+                exit();
+            }
+            
+            echo json_encode(array("error" => false));
+        }else{
+            echo json_encode(array("error" => "parameter error!"));
         }
     }
 

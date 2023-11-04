@@ -1,6 +1,6 @@
 <!-- Upload Data -->
 <div class="modal fade" id="modal-upload-orders" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="uploadOrdersModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-dialog modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
                 <h1 class="modal-title fs-5" id="uploadOrdersModalLabel">Upload Orders</h1>

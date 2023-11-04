@@ -1276,6 +1276,9 @@ h6 {
   color: #006b39;
 }
 
+
+/*==============================================================*/
+
 .cursor-select{
   cursor: pointer;
 }
@@ -1327,6 +1330,16 @@ h6 {
 #calendar td{
   transition: 0.5s;
   zoom: 0.9;
+}
+
+@media (max-width: 600px) {
+  #table-calendar{
+    table-layout: auto!important;
+  }
+
+  #miDropdown{
+    width: 350px!important;
+  }
 }
 
 input:checked {

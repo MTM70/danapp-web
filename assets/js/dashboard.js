@@ -4,7 +4,13 @@ let stateEvents = false;
 let stateUsers = false;
 let stateCustomers = false;
 
-$(document).ready(function() {
+//* Charts
+let stateChartCusts = false;
+let stateChartUsers = false;
+let stateChartCrops = false;
+let stateChartVarieties = false;
+
+$(document).ready(async function() {
 
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
     const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
@@ -39,7 +45,7 @@ $(document).ready(function() {
         })
         .done(function(response){
             //console.log(response);
-            var objData = JSON.parse(response);
+            const objData = JSON.parse(response);
 
             if(objData.status == true){
                 alert(objData.res);
@@ -53,30 +59,56 @@ $(document).ready(function() {
         });
     });
 
-    document.querySelector('#week-from').addEventListener('change', function() {
-        loadChartCountCust();
-        loadVarietiesCompare();
+    document.querySelector('#week-from').addEventListener('change', async function() {
+        setStateChart(0, false);
+
+        await loadCharts();
+        await loadVarietiesCompare();
+        await loadParametersCompare();
+        await loadTableCompare(false);
+        await loadFiltersChart();
     });
 
-    document.querySelector('#week-to').addEventListener('change', function() {
-        loadChartCountCust();
-        loadVarietiesCompare();
+    document.querySelector('#week-to').addEventListener('change', async function() {
+        setStateChart(0, false);
+
+        await loadCharts();
+        await loadVarietiesCompare();
+        await loadParametersCompare();
+        await loadTableCompare(false);
+        await loadFiltersChart();
+    });
+
+    document.querySelector('#filters-chart-btn').addEventListener('click', function() {
+        setStateChart(0, false);
+
+        // Obtén una referencia al elemento del dropdown que deseas cerrar
+        const dropdown = document.getElementById("miDropdown"); // Reemplaza "miDropdown" con el ID de tu dropdown
+        // Cierra el dropdown
+        new bootstrap.Dropdown(dropdown).hide();
+
+        loadCharts();
+    });
+
+    document.querySelector('#varieties-compare-btn').addEventListener('click', function() {
+        toogleModal('modal-compare-varieties', true)
+    });
+
+    document.querySelector('#parameters-compare-btn').addEventListener('click', function() {
+        toogleModal('modal-compare-parameters', true)
     });
 
     document.querySelector('#varieties-compare-apply').addEventListener('click', function() {
-
         showSelectionCompare('compare-varieties', 'compare-varieties-selected');
-
     });
 
     document.querySelector('#parameters-compare-apply').addEventListener('click', function() {
-
         showSelectionCompare('compare-parameters', 'compare-parameters-selected');
-
     });
 
     document.querySelector('.toggle-sidebar-btn').addEventListener('click', function() {
         resizeTable();
+        setStateChart(0, false);
     });
 
 
@@ -92,22 +124,42 @@ $(document).ready(function() {
         window.open(base_url+'/Dashboard/downloadData2/'+$('#week-from').val()+'/'+$('#week-to').val(), '_blank');
     });
 
-    loadChartCountCust();
-    loadVarietiesCompare();
-    loadParametersCompare();
+    window.addEventListener('resize', () => {
+        setStateChart(0, false);
+        resizeTable();
+    });
+
+    await loadCharts();
+    await loadVarietiesCompare();
+    await loadParametersCompare();
+    await loadFiltersChart();
 });
 
-const loadChartCountCust = async () => {
+const loadCharts = async () => {
+
+    let buttons = Array.from(document.querySelectorAll('#nav-tab button'));
+    let btnActive = buttons.find(button => button.classList.contains('active'));
+
+    let index = buttons.indexOf(btnActive);
+    let id = btnActive.getAttribute('data-bs-target');
+
+    if (getStateChart(index)) return;
+
+    const filters = await getFiltersChartSelected();
 
     return new Promise(resolve => {
         $.ajax({
-            url: base_url+"/Dashboard/loadChartCountCust",
+            url: base_url+"/Dashboard/loadCharts",
             type: 'GET',
-            data: {'from' : document.querySelector('#week-from').value, 'to' : document.querySelector('#week-to').value},
+            data: { 'from' : document.querySelector('#week-from').value, 'to' : document.querySelector('#week-to').value, 'type' : index, 'filters' : JSON.stringify(filters) },
             cache: false,
 
             beforeSend: function() {
-                document.querySelector("#chart").innerHTML = '<i class="spinner spinner-border"></i>'
+                document.querySelector(id).innerHTML = `
+                    <div class="d-flex justify-content-center align-items-center h-100">
+                        <i class="spinner spinner-border"></i>
+                    </div>
+                `;
             },
     
             error:  function(xhr) {
@@ -117,23 +169,71 @@ const loadChartCountCust = async () => {
 
             success:  function(response) {
 
-                document.querySelector("#chart").innerHTML = null;
+                //console.log(response);
+
+                document.querySelector(id).innerHTML = null;
 
                 try {
-                    var objData = JSON.parse(response);
+                    const objData = JSON.parse(response);
 
                     if(objData.status == true){
-                        //$('#chart').html(objData.res);
-                        //console.log(objData.res);
 
-                        const categories = objData.res.map(item => (item.cust.length > 20) ? `${item.cust.substring(0, 20)}...` : item.cust);
-                        const data = objData.res.map(item => item.count);
+                        /* const categories = objData.res.map(item => (item.categorie.length > 20) ? `${item.categorie.substring(0, 20)}...` : item.categorie);
+                        const data = objData.res.map(item => item.count); */
 
-                        //console.log({categories, data});
+                        const data = [];
+
+                        objData.res.forEach(element => {
+
+                            if (index == 2 && filters.crops.length){
+
+                                let isFilter = false;
+
+                                filters.crops.forEach(crop => {
+                                    if (crop.split(',')[1] == element.categorie) {
+                                        isFilter = true;
+                                    }
+                                });
+
+                                if (!isFilter) return;
+                                
+                            }
+
+                            if (index == 3 && filters.varieties.length){
+
+                                let isFilter = false;
+
+                                filters.varieties.forEach(variety => {
+                                    if (variety.split(',')[1] == element.categorie) {
+                                        isFilter = true;
+                                    }
+                                });
+
+                                if (!isFilter) return;
+                                
+                            }
+
+                            let dataPoint = {
+                                x: element.categorie,
+                                y: element.count,
+                                goals: []
+                            };
+                        
+                            if (element.goal !== undefined) {
+                                dataPoint.goals.push({
+                                    name: 'Uploads',
+                                    value: element.goal,
+                                    strokeHeight: 5,
+                                    strokeColor: '#775DD0'
+                                });
+                            }
+                        
+                            data.push(dataPoint);
+                        });
 
                         let options = {
                             title: {
-                                text: 'Quantity of orders evaluated - customer',  // Aquí defines el título que desees
+                                text: `Quantity of orders evaluated - ${capitalizarPrimeraLetra(id.split('-')[1])}`,  // Aquí defines el título que desees
                                 align: 'center',
                                 margin: 10,
                                 offsetX: 0,
@@ -145,8 +245,10 @@ const loadChartCountCust = async () => {
                                 }
                             },
                             series: [{
+                                name: 'Evaluated',
                                 data: data
-                            }],
+                            }
+                            ],
                             chart: {
                                 height: '100%',
                                 type: 'bar',
@@ -163,23 +265,45 @@ const loadChartCountCust = async () => {
                                 }
                             },
                             dataLabels: {
-                                enabled: true
+                                enabled: (!isMobile()) ? objData.res.length <= 30 : objData.res.length <= 10 ,
+                                formatter: function (value, { seriesIndex, dataPointIndex, w }) {
+                                    if (value === 0 && w.config.series[seriesIndex].data[dataPointIndex].goal !== 0) {
+                                        return w.config.series[seriesIndex].data[dataPointIndex].goal;
+                                    } else {
+                                        return value;
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                shared: true,
+                                intersect: false,
+                                y: {
+                                    formatter: function (val) {
+                                        return val.toString();
+                                    }
+                                }
                             },
                             legend: {
                                 show: true
                             },
                             xaxis: {
-                                categories: categories,
+                                //categories: categories,
                                 labels: {
                                     style: {
                                         fontSize: '12px'
+                                    },
+                                    formatter: (value) => {
+                                        const len = value.length;
+                                        return len > 20 ? `${value.substring(0, 20)}...` : value;
                                     }
                                 }
                             }
                         };
 
-                        chart = new ApexCharts(document.querySelector("#chart"), options);
+                        let chart = new ApexCharts(document.querySelector(id), options);
                         chart.render();
+
+                        setStateChart(index, true);
                     }else{
                         alert(objData.res);
                     }
@@ -192,6 +316,279 @@ const loadChartCountCust = async () => {
         })
     });
 
+}
+
+const loadFiltersChart = async () => {
+
+    const selecteds = await getFiltersChartSelected();
+
+    return new Promise(resolve => {
+        $.ajax({
+            url: base_url+"/Dashboard/loadFiltersChart",
+            type: 'GET',
+            data: {'from' : document.querySelector('#week-from').value, 'to' : document.querySelector('#week-to').value},
+            cache: false,
+
+            beforeSend: function() {
+                $('#filters-chart').html(`
+                    <div class="col-4">
+                        <div class="border border-dark border-opacity-10 rounded-3" style="height: 150px;">
+                            <div>
+                                <p class="placeholder-glow m-2 mt-3">
+                                    <span class="placeholder rounded-2 col-8 bg-dark bg-opacity-25"></span>
+                                </p>
+                                <p class="placeholder-glow m-2">
+                                    <span class="placeholder rounded-2 col-8 bg-dark bg-opacity-25"></span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="border border-dark border-opacity-10 rounded-3 overflow-auto" style="height: 150px;">
+                            <div>
+                                <p class="placeholder-glow m-2 mt-3">
+                                    <span class="placeholder rounded-2 col-8 bg-dark bg-opacity-25"></span>
+                                </p>
+                                <p class="placeholder-glow m-2">
+                                    <span class="placeholder rounded-2 col-8 bg-dark bg-opacity-25"></span>
+                                </p>
+                                <p class="placeholder-glow m-2">
+                                    <span class="placeholder rounded-2 col-8 bg-dark bg-opacity-25"></span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="border border-dark border-opacity-10 rounded-3 overflow-auto" style="height: 150px;">
+                            <div>
+                                <p class="placeholder-glow m-2 mt-3">
+                                    <span class="placeholder rounded-2 col-8 bg-dark bg-opacity-25"></span>
+                                </p>
+                                <p class="placeholder-glow m-2">
+                                    <span class="placeholder rounded-2 col-8 bg-dark bg-opacity-25"></span>
+                                </p>
+                                <p class="placeholder-glow m-2">
+                                    <span class="placeholder rounded-2 col-8 bg-dark bg-opacity-25"></span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 mt-4">
+                        <div class="border border-dark border-opacity-10 rounded-3 overflow-auto" style="height: 150px;">
+                            <div>
+                                <p class="placeholder-glow m-2 mt-3">
+                                    <span class="placeholder rounded-2 col-8 bg-dark bg-opacity-25"></span>
+                                </p>
+                                <p class="placeholder-glow m-2">
+                                    <span class="placeholder rounded-2 col-8 bg-dark bg-opacity-25"></span>
+                                </p>
+                                <p class="placeholder-glow m-2">
+                                    <span class="placeholder rounded-2 col-8 bg-dark bg-opacity-25"></span>
+                                </p>
+                                <p class="placeholder-glow m-2">
+                                    <span class="placeholder rounded-2 col-8 bg-dark bg-opacity-25"></span>
+                                </p>
+                                <p class="placeholder-glow m-2">
+                                    <span class="placeholder rounded-2 col-8 bg-dark bg-opacity-25"></span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 mt-4">
+                        <div class="border border-dark border-opacity-10 rounded-3 overflow-auto" style="height: 150px;">
+                            <div>
+                                <p class="placeholder-glow m-2 mt-3">
+                                    <span class="placeholder rounded-2 col-12 bg-dark bg-opacity-25"></span>
+                                </p>
+                                <p class="placeholder-glow m-2">
+                                    <span class="placeholder rounded-2 col-12 bg-dark bg-opacity-25"></span>
+                                </p>
+                                <p class="placeholder-glow m-2">
+                                    <span class="placeholder rounded-2 col-12 bg-dark bg-opacity-25"></span>
+                                </p>
+                                <p class="placeholder-glow m-2">
+                                    <span class="placeholder rounded-2 col-12 bg-dark bg-opacity-25"></span>
+                                </p>
+                                <p class="placeholder-glow m-2">
+                                    <span class="placeholder rounded-2 col-12 bg-dark bg-opacity-25"></span>
+                                </p>
+                                <p class="placeholder-glow m-2">
+                                    <span class="placeholder rounded-2 col-12 bg-dark bg-opacity-25"></span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                `);
+            },
+    
+            error:  function(xhr) {
+                alert(xhr);
+                resolve(false);
+            },
+
+            success: async function(response) {
+                try {
+                    const objData = JSON.parse(response);
+
+                    if(objData.status == true){
+
+                        $('#filters-chart').html(objData.res);
+
+                        document.querySelectorAll('#filters-chart input[type="checkbox"]').forEach(element => {
+                            element.addEventListener('change', function() {
+                                checkFiltersChartSelected();
+                            });
+
+                            selecteds.destinations.forEach(value => {
+                                if (element.value == value) element.checked = true;
+                            });
+
+                            selecteds.types.forEach(value => {
+                                if (element.value == value) element.checked = true;
+                            });
+
+                            selecteds.products.forEach(value => {
+                                if (element.value == value) element.checked = true;
+                            });
+
+                            selecteds.crops.forEach(value => {
+                                if (element.value == value) element.checked = true;
+                            });
+
+                            selecteds.varieties.forEach(value => {
+                                if (element.value == value) element.checked = true;
+                            });
+                        });
+                    }else{
+                        alert(objData.res);
+                    }
+                } catch (error) {
+                    alert(error);
+                }
+
+                resolve('resolved');
+            }
+        })
+    });
+
+}
+
+const checkFiltersChartSelected = () => {
+
+    const btn = document.querySelector('#filters-chart-btn');
+    let isChecked = false;
+
+    document.querySelectorAll('#filters-chart input[type="checkbox"]:checked').forEach(element => {
+        isChecked = true;
+        return;
+    });
+
+    //if (isChecked) btn.removeAttribute('disabled');
+    //else btn.setAttribute('disabled', true);
+
+}
+
+const getFiltersChartSelected = async () => {
+
+    const mapObject = {};
+    let containers = document.querySelectorAll('#filters-chart> div');
+
+    let array = [];
+    containers[0].querySelectorAll('input[type="checkbox"]:checked').forEach(element => {
+        array.push(element.value);
+    });
+    mapObject['destinations'] = array;
+
+    array = [];
+    containers[1].querySelectorAll('input[type="checkbox"]:checked').forEach(element => {
+        array.push(element.value);
+    });
+    mapObject['types'] = array;
+
+    array = [];
+    containers[2].querySelectorAll('input[type="checkbox"]:checked').forEach(element => {
+        array.push(element.value);
+    });
+    mapObject['products'] = array;
+
+    array = [];
+    containers[3].querySelectorAll('input[type="checkbox"]:checked').forEach(element => {
+        array.push(element.value);
+    });
+    mapObject['crops'] = array;
+
+    array = [];
+    containers[4].querySelectorAll('input[type="checkbox"]:checked').forEach(element => {
+        array.push(element.value);
+    });
+    mapObject['varieties'] = array;
+
+    if (!mapObject.destinations.length && !mapObject.types.length && !mapObject.products.length && !mapObject.crops.length && !mapObject.varieties.length)
+        document.querySelector('#chart-filters-notify').classList.add('d-none');
+    else
+        document.querySelector('#chart-filters-notify').classList.remove('d-none');
+
+    return mapObject;
+
+}
+
+const getStateChart = (index) => {
+
+    let value = false;
+
+    switch (index) {
+        case 0:
+            value = stateChartCusts;
+            break;
+
+        case 1:
+            value = stateChartUsers;
+            break;
+
+        case 2:
+            value = stateChartCrops;
+            break;
+
+        case 3:
+            value = stateChartVarieties;
+            break;
+    
+        default:
+            break;
+    }
+
+    return value;
+    
+}
+
+const setStateChart = (index, state) => {
+    if (state)
+    switch (index) {
+        case 0:
+            stateChartCusts = true;
+            break;
+
+        case 1:
+            stateChartUsers = true;
+            break;
+
+        case 2:
+            stateChartCrops = true;
+            break;
+
+        case 3:
+            stateChartVarieties = true;
+            break;
+    
+        default:
+            break;
+    }
+    else{
+        stateChartCusts = false;
+        stateChartUsers = false;
+        stateChartCrops = false;
+        stateChartVarieties = false;
+    }
 }
 
 const loadVarietiesCompare = async () => {
@@ -214,10 +611,22 @@ const loadVarietiesCompare = async () => {
 
             success:  function(response) {
                 try {
-                    var objData = JSON.parse(response);
+
+                    const objData = JSON.parse(response);
 
                     if(objData.status == true){
+
+                        let selecteds = document.querySelectorAll(`#compare-varieties input[type="checkbox"]:checked`);
+
                         $('#compare-varieties').html(objData.res);
+
+                        selecteds.forEach(selected => {
+                            document.querySelectorAll(`#compare-varieties input[type="checkbox"]`).forEach(element => {
+                                console.log({ 'selected' : selected.value, 'value' : element.value });
+                                if (selected.value == element.value) element.checked = true;
+                            });
+                        });
+                        
                     }else{
                         alert(objData.res);
                     }
@@ -237,6 +646,8 @@ const loadParametersCompare = async () => {
     return new Promise(resolve => {
         $.ajax({
             url: base_url+"/Dashboard/loadParametersCompare",
+            type: 'GET',
+            data: {'from' : document.querySelector('#week-from').value, 'to' : document.querySelector('#week-to').value},
             cache: false,
 
             beforeSend: function() {
@@ -250,10 +661,20 @@ const loadParametersCompare = async () => {
 
             success:  function(response) {
                 try {
-                    var objData = JSON.parse(response);
+                    const objData = JSON.parse(response);
 
                     if(objData.status == true){
+
+                        let selecteds = document.querySelectorAll(`#compare-parameters input[type="checkbox"]:checked`);
+
                         $('#compare-parameters').html(objData.res);
+
+                        selecteds.forEach(selected => {
+                            document.querySelectorAll(`#compare-parameters input[type="checkbox"]`).forEach(element => {
+                                console.log({ 'selected' : selected.value, 'value' : element.value });
+                                if (selected.value == element.value) element.checked = true;
+                            });
+                        });
                     }else{
                         alert(objData.res);
                     }
@@ -268,7 +689,7 @@ const loadParametersCompare = async () => {
 
 }
 
-const showSelectionCompare = (idCheckboxs, idBtn) => {
+const showSelectionCompare = (idCheckboxs, idBtn, modal = true) => {
     let cont = document.querySelector(`#${idBtn}`);
     cont.innerHTML = null;
     
@@ -278,7 +699,7 @@ const showSelectionCompare = (idCheckboxs, idBtn) => {
 
         let div = document.createElement('div');
         div.classList.add('bg-success', 'bg-opacity-25', 'fs-0-7', 'm-1', 'px-2', 'py-1', 'rounded-2');
-        div.innerHTML = `${value[1]}<button class="btn btn-sm py-1 px-1 ms-2 rounded-circle"><i class="bi bi-x"></i></button>`;
+        div.innerHTML = `${value[1]}<button class="btn btn-sm py-1 px-1 ms-2 rounded-circle" onclick="compareRemoveSelected('${idCheckboxs}', '${idBtn}', '${element.value}');"><i class="bi bi-x"></i></button>`;
 
         cont.appendChild(div);
     });
@@ -287,10 +708,20 @@ const showSelectionCompare = (idCheckboxs, idBtn) => {
         cont.innerHTML = '<h6>Clic here.</h6>';
     }
 
-    loadTableCompare();
+    loadTableCompare(modal);
 }
 
-const loadTableCompare = async () => {
+const compareRemoveSelected = (idCheckboxs, idBtn, value) => {
+    event.stopPropagation();
+
+    document.querySelectorAll(`#${idCheckboxs} input[type="checkbox"]:checked`).forEach(element => {
+        if (element.value == value) element.checked = false;
+    });
+
+    showSelectionCompare(idCheckboxs, idBtn, false);
+}
+
+const loadTableCompare = async (modal = true) => {
 
     let varieties = [];
     let parameters = [];
@@ -311,8 +742,8 @@ const loadTableCompare = async () => {
             </div>
         `);
 
-        if (varieties.length == 0) toogleModal('modal-compare-varieties', true);
-        else if (parameters.length == 0) toogleModal('modal-compare-parameters', true);
+        if (varieties.length == 0 && modal) toogleModal('modal-compare-varieties', true);
+        else if (parameters.length == 0 && modal) toogleModal('modal-compare-parameters', true);
 
         return;
     }
@@ -340,7 +771,7 @@ const loadTableCompare = async () => {
 
             success:  function(response) {
                 try {
-                    var objData = JSON.parse(response);
+                    const objData = JSON.parse(response);
 
                     if(objData.status == true){
                         $('#compare-table').html(objData.res);
@@ -364,8 +795,12 @@ const loadTableCompare = async () => {
                         /* $(".dataTables_paginate").bind( "click", '.paginate_button', function() {
                             window.scrollTo(0, 0);
                         }); */
-                        window.scrollTo(0, 1000);
-                        if (!isMobile()) document.querySelector('body').classList.add('toggle-sidebar');
+                        if(modal) window.scrollTo(0, 1000);
+
+                        if (!isMobile()) {
+                            document.querySelector('body').classList.add('toggle-sidebar');
+                            setStateChart(0, false);
+                        }
                         resizeTable();
 
                         //document.querySelectorAll('#table-compare_wrapper .row')[2].classList.add('mt-3');
@@ -394,7 +829,7 @@ const viewImage = (element) => {
     contImages.innerHTML = null;
     contIndicators.innerHTML = null;
 
-    document.querySelector('#modalImageLabel').innerHTML = `${tds[1].innerText} / Order No.${tds[0].innerText} / ${tds[3].innerText}`;
+    document.querySelector('#modalImageLabel').innerHTML = `${tds[2].innerText} / Order No.${tds[1].innerText} / ${tds[0].innerText}`;
 
     tr.querySelectorAll('img').forEach(image => {
 
@@ -458,12 +893,14 @@ const resizeTable = () => {
 async function showOption($this, container){
 
     let search = document.querySelector('.search-bar');
+    let searchBtn = document.querySelector('.search-bar-toggle');
     
     if (isMobile()) {
         document.querySelector('body').classList.remove('toggle-sidebar');
     }
 
     search.classList.add('d-none');
+    searchBtn.classList.add('d-none');
 
     $('.main').fadeOut(0);
     $('.nav-link').addClass('collapsed');
@@ -476,7 +913,10 @@ async function showOption($this, container){
         case 'main-calendar':
             
             if (!isMobile()) document.querySelector('body').classList.add('toggle-sidebar');
+            else searchBtn.classList.remove('d-none');
+
             search.classList.remove('d-none');
+            
             if (!stateCalendar) {
                 await loadCalendar();
                 loadCalendarFilters();
@@ -544,4 +984,8 @@ function toogleModal(id, action) {
 
 function hasDuplicates(arr) {
     return new Set(arr).size !== arr.length;
+}
+
+function capitalizarPrimeraLetra(cadena) {
+    return cadena.charAt(0).toUpperCase() + cadena.slice(1);
 }

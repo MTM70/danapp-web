@@ -232,6 +232,7 @@
                             $variety = $this->model->getVarietyByNo($crop["id"], trim($data[$i][27]));
                         }
                     }else{
+                        //TODO debo revisar primero si ya existe el nombre con codigo en 0 y producto =
                         $insert = $this->model->updateVariety($variety["id"], trim($data[$i][28]));
                     }
 
@@ -637,9 +638,9 @@
             //echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
         }
 
-        public function loadChartCountCust()
+        public function loadCharts()
         {
-            if (isset($_GET["from"]) AND isset($_GET["to"]) AND $_GET["from"] AND $_GET["to"]) {
+            if (isset($_GET["from"]) AND isset($_GET["to"]) AND isset($_GET["type"]) AND isset($_GET["filters"]) AND $_GET["from"] AND $_GET["to"]) {
 
                 $week1 = explode("-W", $_GET["from"])[1];
                 $year1 = explode("-W", $_GET["from"])[0];
@@ -647,7 +648,120 @@
                 $week2 = explode("-W", $_GET["to"])[1];
                 $year2 = explode("-W", $_GET["to"])[0];
 
-                $response = $this->model->getDataCountBetweenWeeksGroupCust($year1, $week1, $year2, $week2);
+                $filters = json_decode($_GET["filters"], true);
+
+                $filterUploads = "";
+                $filterCompleted = "";
+
+                if (count($filters["destinations"]) OR count($filters["types"]) OR count($filters["products"]) OR count($filters["crops"]) OR count($filters["varieties"])) {
+                    
+                    $and = "";
+
+                    if (count($filters["destinations"])) {
+
+                        $array = array_map(function($element) {
+                            return "'" . explode(",",$element)[0] . "'";
+                        }, $filters["destinations"]);
+
+                        $and .= "AND o.destination IN (".implode(',', $array).") ";
+                    }
+
+                    if (count($filters["types"])) {
+
+                        $array = array_map(function($element) {
+                            return explode(",",$element)[0];
+                        }, $filters["types"]);
+
+                        $and .= "AND o.id_type IN (".implode(',', $array).") ";
+                    }
+
+                    if (count($filters["products"])) {
+
+                        $array = array_map(function($element) {
+                            return explode(",",$element)[0];
+                        }, $filters["products"]);
+
+                        $and .= "AND o.id_product IN (".implode(',', $array).") ";
+                    }
+
+                    if (count($filters["crops"])) {
+
+                        $array = array_map(function($element) {
+                            return explode(",",$element)[0];
+                        }, $filters["crops"]);
+
+                        $and .= "AND c.id IN (".implode(',', $array).") ";
+                    }
+
+                    if (count($filters["varieties"])) {
+
+                        $array = array_map(function($element) {
+                            return explode(",",$element)[0];
+                        }, $filters["varieties"]);
+
+                        $and .= "AND v.id IN (".implode(',', $array).") ";
+                    }
+
+                    /* if (count($filters["types"])) $and .= "AND o.id_type IN (".implode(',', $filters["types"]).") ";
+                    if (count($filters["products"])) $and .= "AND o.id_product IN (".implode(',', $filters["products"]).") ";
+                    if (count($filters["crops"])) $and .= "AND c.id IN (".implode(',', $filters["crops"]).") ";
+                    if (count($filters["varieties"])) $and .= "AND v.id IN (".implode(',', $filters["varieties"]).") "; */
+                    
+                    $filterUploads = "
+                        INNER JOIN (
+                            SELECT DISTINCT od.id_order 
+                            FROM orders_details AS od 
+                            INNER JOIN orders AS o ON o.id = od.id_order 
+                            INNER JOIN varieties AS v ON v.id = od.id_variety 
+                            INNER JOIN crops AS c ON c.id = v.id_crop 
+                            WHERE 
+                                (YEAR(visit_day) BETWEEN :value0 AND :value2) AND (WEEK(visit_day) BETWEEN :value1 AND :value3) 
+                                $and
+                        ) AS filter ON filter.id_order = o.id 
+                    ";
+
+                    $filterCompleted = "
+                        INNER JOIN (
+                            SELECT DISTINCT op.id_order 
+                            FROM orders_parameters AS op 
+                            INNER JOIN orders AS o ON o.id = op.id_order 
+                            INNER JOIN orders_closed AS oc ON oc.id_order = op.id_order 
+                            INNER JOIN varieties AS v ON v.id = op.id_variety 
+                            INNER JOIN crops AS c ON c.id = v.id_crop 
+                            WHERE 
+                                (YEAR(oc.date) BETWEEN :value0 AND :value2) AND (WEEK(oc.date) BETWEEN :value1 AND :value3) 
+                                $and 
+                        ) AS filter ON filter.id_order = o.id 
+                    ";
+
+                }
+
+                /* $this->arrResponse = array(
+                    'status' => true, 
+                    'res' => $filterUploads
+                );
+
+                exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE)); */
+
+                $response = null;
+
+                switch ($_GET["type"]) {
+                    case '0':
+                        $response = $this->model->getDataCountBetweenWeeksGroupCust($year1, $week1, $year2, $week2, $filterUploads, $filterCompleted);
+                        break;
+
+                    case '1':
+                        $response = $this->model->getDataCountBetweenWeeksGroupUser($year1, $week1, $year2, $week2, $filterCompleted);
+                        break;
+
+                    case '2':
+                        $response = $this->model->getDataCountBetweenWeeksGroupCrop($year1, $week1, $year2, $week2, $filterUploads, $filterCompleted);
+                        break;
+
+                    case '3':
+                        $response = $this->model->getDataCountBetweenWeeksGroupVariety($year1, $week1, $year2, $week2, $filterUploads, $filterCompleted);
+                        break;
+                }
 
                 $this->arrResponse = array(
                     'status' => true, 
@@ -660,6 +774,199 @@
                     'res' => 'Parameter fail!'
                 );
             }
+
+            echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
+        }
+
+        public function loadFiltersChart()
+        {
+            if (isset($_GET["from"]) AND isset($_GET["to"]) AND $_GET["from"] AND $_GET["to"]) {
+
+                $week1 = explode("-W", $_GET["from"])[1];
+                $year1 = explode("-W", $_GET["from"])[0];
+
+                $week2 = explode("-W", $_GET["to"])[1];
+                $year2 = explode("-W", $_GET["to"])[0];
+
+                $destinations = $this->model->getDestinationsBetweenWeeks($year1, $week1, $year2, $week2);
+                $orderTypes = $this->model->getOrderTypesBetweenWeeks($year1, $week1, $year2, $week2);
+                $products = $this->model->getProductsBetweenWeeks($year1, $week1, $year2, $week2);
+                $crops = $this->model->getDataCountBetweenWeeksGroupCrop($year1, $week1, $year2, $week2);
+                $varieties = $this->model->getDataCountBetweenWeeksGroupVariety($year1, $week1, $year2, $week2);
+
+                $this->html .= '
+                    <div class="col-12 col-md-3 mt-4 mt-md-0">
+                        <div class="border border-dark border-opacity-10 p-2 rounded-3 overflow-auto" style="max-height: 150px;">
+                            
+                            <p class="position-absolute bg-white fw-semibold" style="margin-top: -18px; margin-left: 2px;">Destinations</p>
+
+                            <div>';
+
+                                if (!empty($destinations)) {
+
+                                    $top = "mt-2";
+
+                                    foreach ($destinations as $k) {
+                                        $this->html .= '
+                                            <div class="p-1 '.$top.'">
+                                                <div class="form-check">
+                                                    <input class="form-check-input cursor-select filter-destination" type="checkbox" value="'.$k["destination"].','.$k["destination"].'" id="checkChartDest'.$k["destination"].'">
+                                                    <label class="form-check-label cursor-select" for="checkChartDest'.$k["destination"].'">
+                                                        '.$k["destination"].'
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        ';
+
+                                        $top = null;
+                                    }
+                                }
+
+                            $this->html .= '
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-5 mt-4 mt-md-0">
+                        <div class="border border-dark border-opacity-10 p-2 rounded-3 overflow-auto" style="max-height: 150px;">
+                            
+                            <p class="position-absolute px-2 bg-white fw-semibold" style="margin-top: -18px; margin-left: 2px;">Order types</p>
+
+                            <div>';
+
+                                if (!empty($orderTypes)) {
+
+                                    $top = "mt-2";
+
+                                    foreach ($orderTypes as $k) {
+                                        $this->html .= '
+                                            <div class="p-1 '.$top.'">
+                                                <div class="form-check">
+                                                    <input class="form-check-input cursor-select filter-type" type="checkbox" value="'.$k["id"].','.$k["categorie"].'" id="checkChartType'.$k["id"].'">
+                                                    <label class="form-check-label cursor-select" for="checkChartType'.$k["id"].'">
+                                                        '.$k["categorie"].'
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        ';
+
+                                        $top = null;
+                                    }
+                                }
+
+                            $this->html .= '
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4 mt-4 mt-md-0">
+                        <div class="border border-dark border-opacity-10 p-2 rounded-3 overflow-auto" style="max-height: 150px;">
+                            
+                            <p class="position-absolute px-2 bg-white fw-semibold" style="margin-top: -18px; margin-left: 2px;">Products</p>
+
+                            <div>';
+
+                                if (!empty($products)) {
+
+                                    $top = "mt-2";
+
+                                    foreach ($products as $k) {
+                                        $this->html .= '
+                                            <div class="p-1 '.$top.'">
+                                                <div class="form-check">
+                                                    <input class="form-check-input cursor-select filter-product" type="checkbox" value="'.$k["id"].','.$k["categorie"].'" id="checkChartProd'.$k["id"].'">
+                                                    <label class="form-check-label cursor-select" for="checkChartProd'.$k["id"].'">
+                                                        '.$k["categorie"].'
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        ';
+
+                                        $top = null;
+                                    }
+                                }
+
+                            $this->html .= '
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 mt-4">
+                        <div class="border border-dark border-opacity-10 p-2 rounded-3 overflow-auto" style="max-height: 400px;">
+                            
+                            <p class="position-absolute px-2 bg-white fw-semibold" style="margin-top: -18px; margin-left: 2px;">Crops</p>
+
+                            <div>';
+
+                                if (!empty($crops)) {
+
+                                    $top = "mt-2";
+
+                                    foreach ($crops as $k) {
+                                        $this->html .= '
+                                            <div class="p-1 '.$top.'">
+                                                <div class="form-check">
+                                                    <input class="form-check-input cursor-select filter-crop" type="checkbox" value="'.$k["id"].','.$k["categorie"].'" id="checkChartCrop'.$k["id"].'">
+                                                    <label class="form-check-label cursor-select" for="checkChartCrop'.$k["id"].'">
+                                                        '.$k["categorie"].'
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        ';
+
+                                        $top = null;
+                                    }
+                                }
+
+                            $this->html .= '
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 mt-4">
+                        <div class="border border-dark border-opacity-10 p-2 rounded-3 overflow-auto" style="max-height: 400px;">
+                            
+                            <p class="position-absolute px-2 bg-white fw-semibold" style="margin-top: -18px; margin-left: 2px;">Varieties</p>
+
+                            <div>';
+
+                                if (!empty($varieties)) {
+
+                                    $top = "mt-2";
+
+                                    /* if(count($varieties) >= 2) $this->html .= '<div class="pt-3"><input type="text" class="form-control form-control-sm" placeholder="Search..."></div>'; */
+
+                                    foreach ($varieties as $k) {
+                                        $this->html .= '
+                                            <div class="p-1 '.$top.'">
+                                                <div class="form-check">
+                                                    <input class="form-check-input cursor-select filter-variety" type="checkbox" value="'.$k["id"].','.$k["categorie"].'" id="checkChartVar'.$k["id"].'">
+                                                    <label class="form-check-label cursor-select" for="checkChartVar'.$k["id"].'">
+                                                        '.$k["categorie"].'
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        ';
+
+                                        $top = null;
+                                    }
+                                }
+
+                            $this->html .= '
+                            </div>
+                        </div>
+                    </div>
+                ';
+
+                $this->arrResponse = array(
+                    'status' => true, 
+                    'res' => $this->html
+                );
+
+            }else
+            $this->arrResponse = array(
+                'status' => false, 
+                'res' => 'Parameter fail!'
+            );
 
             echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
         }
@@ -716,27 +1023,43 @@
 
         public  function loadParametersCompare()
         {
-            $response = $this->model->getParameters();
+            if (isset($_GET["from"]) AND isset($_GET["to"]) AND $_GET["from"] AND $_GET["to"]) {
 
-            if (!empty($response)) {
+                $week1 = explode("-W", $_GET["from"])[1];
+                $year1 = explode("-W", $_GET["from"])[0];
 
-                foreach ($response as $k) {
-                    $this->html .= '
-                        <div class="p-1">
-                            <input id="checkCompareParameter'.$k["id"].'" type="checkbox" value="'.$k["id"].','.$k["parameter"].','.$k["type"].'">
-                            <label class="rounded-3" for="checkCompareParameter'.$k["id"].'">'.$k["parameter"].'</label>
-                        </div>
-                    ';
+                $week2 = explode("-W", $_GET["to"])[1];
+                $year2 = explode("-W", $_GET["to"])[0];
+
+                $response = $this->model->getParametersBetweenWeeks($year1, $week1, $year2, $week2);
+
+                if (!empty($response)) {
+
+                    foreach ($response as $k) {
+
+                        $this->html .= '
+                            <div class="p-1">
+                                <input id="checkCompareParameter'.$k["id"].'" type="checkbox" value="'.$k["id"].','.$k["parameter"].','.$k["type"].'">
+                                <label class="rounded-3" for="checkCompareParameter'.$k["id"].'">'.$k["parameter"].'</label>
+                            </div>
+                        ';
+
+                    }
+
+                    $this->arrResponse = array(
+                        'status' => true, 
+                        'res' => $this->html
+                    );
+                }else{
+                    $this->arrResponse = array(
+                        'status' => true, 
+                        'res' => 'No data!'
+                    );
                 }
-
-                $this->arrResponse = array(
-                    'status' => true, 
-                    'res' => $this->html
-                );
             }else{
                 $this->arrResponse = array(
-                    'status' => true, 
-                    'res' => 'No data!'
+                    'status' => false, 
+                    'res' => 'Parameter fail!'
                 );
             }
 
@@ -777,10 +1100,10 @@
                     <table class="table table-bordered table-hover text-center fs-0-8" id="table-compare" style="width:100%">
                         <thead>
                             <tr>
+                                <th rowspan="2" class="bg-white text-center align-middle" style="z-index: 2;">Variety</th>
                                 <th rowspan="2" class="bg-white text-center align-middle" style="z-index: 1;">Order No</th>
                                 <th rowspan="2" class="bg-white text-center align-middle" style="z-index: 1;">Sec Cust</th>
                                 <th rowspan="2" class="bg-white text-center align-middle" style="z-index: 1;">User</th>
-                                <th rowspan="2" class="bg-white text-center align-middle" style="z-index: 2;">Variety</th>
                                 <th class="text-center align-middle" rowspan="2">Week</th>
                                 <th class="text-center align-middle" rowspan="2">Date</th>
                                 <th colspan="'.count($parameters).'" class="text-center">Parameters</th>
@@ -802,10 +1125,10 @@
                                 foreach ($response as $k) {
                                     $this->html .= '
                                         <tr>
+                                            <th class="bg-white align-middle" style="z-index: 1;">'.$k["variety"].'</th>
                                             <td class="bg-white align-middle" style="z-index: 1;">'.$k["order_no"].'</td>
                                             <td class="bg-white align-middle" style="z-index: 1;">'.$k["sec_cust"].'</td>
                                             <td class="bg-white align-middle" style="z-index: 1;">'.$k["user"].'</td>
-                                            <th class="bg-white align-middle" style="z-index: 1;">'.$k["variety"].'</th>
                                             <td class="text-center align-middle">W'.$k["week"].' '.$k["year"].'</td>
                                             <td class="text-center align-middle">'.$k["date"].'</td>';
 
@@ -879,7 +1202,7 @@
                                                                     </td>
                                                                 ';
                                                             }
-                                                            else $this->html .= '<td class="text-center align-middle">'.$d["value"].'</td>';
+                                                            else $this->html .= '<td class="text-center align-middle">'.$d["value"]."/".$parameter[2].'</td>';
 
                                                             $isset = true;
                                                         }
@@ -2334,7 +2657,7 @@
                     }
 
                     $this->html = '
-                        <table class="table table-bordered text-center" style="table-layout: fixed;">
+                        <table class="table table-bordered text-center" id="table-calendar" style="table-layout: fixed;">
                             <thead>
                                 <tr>
                                     <th>M<!--<br><i class="text-muted fw-light">('.$days[0].')</i>--></th>

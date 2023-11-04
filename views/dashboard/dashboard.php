@@ -85,7 +85,7 @@
                                             <label for="week-end">To</label>
                                             <input type="week" name="to" id="week-to" required class="form-control" min="2023-W01" max="<?= date('Y').'-W'.date('W'); ?>" value="<?= date('Y').'-W'.date('W'); ?>">
                                         </div>
-                                        <div class="col-auto">
+                                        <div class="col-12 col-md-auto mt-2 mt-md-0">
                                             <button class="form-control btn btn-success" id="download-btn">
                                                 <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true" id="download-loading"></span>
                                                 <span id="download-text">Download</span>
@@ -96,28 +96,153 @@
                             </div>
                             <div class="card-body">
 
-                                <div class="row">
-                                    <div class="col">
-                                        <div class="mt-3 d-flex justify-content-center align-items-center" id="chart" style="height: 50vh;">
-                                            <i class="spinner spinner-border"></i>
+                                <div class="mt-2">
+                                    <nav class="d-flex align-items-center">
+                                        <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                                            <button onclick="loadCharts()" class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-customers" type="button" role="tab" aria-controls="nav-customers" aria-selected="true">Customers</button>
+                                            <button onclick="loadCharts()" class="nav-link" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-users" type="button" role="tab" aria-controls="nav-users" aria-selected="false">Users</button>
+                                            <button onclick="loadCharts()" class="nav-link" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-crops" type="button" role="tab" aria-controls="nav-crops" aria-selected="false">Crops</button>
+                                            <button onclick="loadCharts()" class="nav-link" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-varieties" type="button" role="tab" aria-controls="nav-varieties" aria-selected="false">Varieties</button>
                                         </div>
+                                        <div>
+                                            <div class="btn-group dropdown">
+                                                <button class="btn btn-light rounded-circle p-2 h-auto w-auto ms-3 position-relative" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" style="width: 60px; height: 60px;">
+                                                    <i class="bi bi-funnel"></i>
+                                                    <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle d-none" id="chart-filters-notify" style="margin-top: 7; margin-left: -7;">
+                                                        <span class="visually-hidden">New alerts</span>
+                                                    </span>
+                                                </button>
+
+                                                <div class="dropdown-menu dropdown-menu-end dropdown-menu-md-start rounded-3 px-2 py-4" id="miDropdown" style="width: 600px;">
+                                                    <div class="row" id="filters-chart">
+                                                        <div class="col-4">
+                                                            <div class="border border-dark border-opacity-10 rounded-3" style="height: 150px;">
+                                                                <div>
+                                                                    <p class="placeholder-glow m-2 mt-3">
+                                                                        <span class="placeholder rounded-2 col-8 bg-dark bg-opacity-25"></span>
+                                                                    </p>
+                                                                    <p class="placeholder-glow m-2">
+                                                                        <span class="placeholder rounded-2 col-8 bg-dark bg-opacity-25"></span>
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-4">
+                                                            <div class="border border-dark border-opacity-10 rounded-3 overflow-auto" style="height: 150px;">
+                                                                <div>
+                                                                    <p class="placeholder-glow m-2 mt-3">
+                                                                        <span class="placeholder rounded-2 col-8 bg-dark bg-opacity-25"></span>
+                                                                    </p>
+                                                                    <p class="placeholder-glow m-2">
+                                                                        <span class="placeholder rounded-2 col-8 bg-dark bg-opacity-25"></span>
+                                                                    </p>
+                                                                    <p class="placeholder-glow m-2">
+                                                                        <span class="placeholder rounded-2 col-8 bg-dark bg-opacity-25"></span>
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-4">
+                                                            <div class="border border-dark border-opacity-10 rounded-3 overflow-auto" style="height: 150px;">
+                                                                <div>
+                                                                    <p class="placeholder-glow m-2 mt-3">
+                                                                        <span class="placeholder rounded-2 col-8 bg-dark bg-opacity-25"></span>
+                                                                    </p>
+                                                                    <p class="placeholder-glow m-2">
+                                                                        <span class="placeholder rounded-2 col-8 bg-dark bg-opacity-25"></span>
+                                                                    </p>
+                                                                    <p class="placeholder-glow m-2">
+                                                                        <span class="placeholder rounded-2 col-8 bg-dark bg-opacity-25"></span>
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-6 mt-4">
+                                                            <div class="border border-dark border-opacity-10 rounded-3 overflow-auto" style="height: 150px;">
+                                                                <div>
+                                                                    <p class="placeholder-glow m-2 mt-3">
+                                                                        <span class="placeholder rounded-2 col-8 bg-dark bg-opacity-25"></span>
+                                                                    </p>
+                                                                    <p class="placeholder-glow m-2">
+                                                                        <span class="placeholder rounded-2 col-8 bg-dark bg-opacity-25"></span>
+                                                                    </p>
+                                                                    <p class="placeholder-glow m-2">
+                                                                        <span class="placeholder rounded-2 col-8 bg-dark bg-opacity-25"></span>
+                                                                    </p>
+                                                                    <p class="placeholder-glow m-2">
+                                                                        <span class="placeholder rounded-2 col-8 bg-dark bg-opacity-25"></span>
+                                                                    </p>
+                                                                    <p class="placeholder-glow m-2">
+                                                                        <span class="placeholder rounded-2 col-8 bg-dark bg-opacity-25"></span>
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-6 mt-4">
+                                                            <div class="border border-dark border-opacity-10 rounded-3 overflow-auto" style="height: 150px;">
+                                                                <div>
+                                                                    <p class="placeholder-glow m-2 mt-3">
+                                                                        <span class="placeholder rounded-2 col-12 bg-dark bg-opacity-25"></span>
+                                                                    </p>
+                                                                    <p class="placeholder-glow m-2">
+                                                                        <span class="placeholder rounded-2 col-12 bg-dark bg-opacity-25"></span>
+                                                                    </p>
+                                                                    <p class="placeholder-glow m-2">
+                                                                        <span class="placeholder rounded-2 col-12 bg-dark bg-opacity-25"></span>
+                                                                    </p>
+                                                                    <p class="placeholder-glow m-2">
+                                                                        <span class="placeholder rounded-2 col-12 bg-dark bg-opacity-25"></span>
+                                                                    </p>
+                                                                    <p class="placeholder-glow m-2">
+                                                                        <span class="placeholder rounded-2 col-12 bg-dark bg-opacity-25"></span>
+                                                                    </p>
+                                                                    <p class="placeholder-glow m-2">
+                                                                        <span class="placeholder rounded-2 col-12 bg-dark bg-opacity-25"></span>
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div><hr>
+                                                    <div class="text-center">
+                                                        <button class="btn btn-primary" id="filters-chart-btn">Apply</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- <i class="bi bi-funnel"></i>
+                                            <i class="bi bi-airplane-fill me-2"></i>
+                                            <select class="form-select form-select-sm" name="" id="">
+                                                <option value="">All</option>
+                                                <option value="">Bog</option>
+                                                <option value="">Med</option>
+                                            </select> -->
+                                        </div>
+                                    </nav>
+                                    <div class="tab-content" id="nav-tabContent">
+                                        <div class="tab-pane fade show active text-center" id="nav-customers" style="height: 50vh;" role="tabpanel" aria-labelledby="nav-home-tab" tabindex="0">
+                                            <div class="d-flex justify-content-center align-items-center h-100">
+                                                <i class="spinner spinner-border"></i>
+                                            </div>
+                                        </div>
+                                        <div class="tab-pane fade" id="nav-users" style="height: 50vh;" role="tabpanel" aria-labelledby="nav-users-tab" tabindex="0">...</div>
+                                        <div class="tab-pane fade" id="nav-crops" style="height: 50vh;" role="tabpanel" aria-labelledby="nav-crops-tab" tabindex="0">...</div>
+                                        <div class="tab-pane fade" id="nav-varieties" style="height: 50vh;" role="tabpanel" aria-labelledby="nav-varieties-tab" tabindex="0">...</div>
                                     </div>
                                 </div>
 
-                                <hr>
-
                                 <div class="mt-4">
-                                    <h5>Compare varieties <i class="bi bi-caret-down-fill"></i></h5>
+                                    <hr>
+                                    <h6 class="p-2 text-success">Compare varieties<i class="bi bi-caret-down-fill ms-1"></i></h6>
+                                    <hr>
 
                                     <div class="row mt-4">
-                                        <div class="col-6 btn btn-light m-2 border overflow-auto" style="height: 100px;" data-bs-toggle="modal" data-bs-target="#modal-compare-varieties">
+                                        <div class="col-6 btn btn-light m-2 border overflow-auto" id="varieties-compare-btn" style="height: 80px;">
                                             <p class="position-absolute bg-white bg-opacity-50 rounded-3 px-2" style="margin-top: -18px;">Varieties</p>
                                             <div class="py-3 h-100 d-flex flex-wrap justify-content-center align-items-center mtm-checkbox-filter" id="compare-varieties-selected">
                                                 <h6>Clic here.</h6>
                                             </div>
                                         </div>
 
-                                        <div class="col btn btn-light m-2 border overflow-auto" style="height: 100px;" data-bs-toggle="modal" data-bs-target="#modal-compare-parameters">
+                                        <div class="col btn btn-light m-2 border overflow-auto" id="parameters-compare-btn" style="height: 80px;">
                                             <p class="position-absolute bg-white bg-opacity-50 rounded-3 px-2" style="margin-top: -18px;">Parameters</p>
                                             <div class="py-3 h-100 d-flex flex-wrap justify-content-center align-items-center mtm-checkbox-filter" id="compare-parameters-selected">
                                                 <h6>Clic here.</h6>
@@ -301,7 +426,9 @@
                     <div class="col">
 
                         <div class="card">
-                            <div class="card-body p-2" id="calendar"></div>
+                            <div class="card-body p-2">
+                                <div class="table-responsive" id="calendar"></div>
+                            </div>
                         </div>
 
                     </div>
