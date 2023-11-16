@@ -27,9 +27,9 @@ class Qr extends Controllers
 
     public function event()
     {
-        if (isset($_GET["id_event"]) AND $_GET["id_event"]) {
+        if (isset($_GET["id_event"]) AND isset($_GET["year"]) AND $_GET["id_event"] AND $_GET["year"]) {
             
-            $response = $this->model->getData($_GET["id_event"]);
+            $response = $this->model->getData($_GET["id_event"], $_GET["year"]);
 
             if (!empty($response)) {
                 

@@ -18,7 +18,7 @@
         $week = $weeks;
     }
 
-    $week = $year.'-W'.$week;
+    $week = $year."-W".($week < 10 ? "0".$week : $week);
 ?>
 
 <!DOCTYPE html>
@@ -26,7 +26,7 @@
 
     <?= get_view("header", $data) ?>
 
-    <body>
+    <body class="toggle-sidebar">
 
         <?= get_view("top_bar") ?>
 
@@ -35,8 +35,8 @@
         <main id="main" class="main">
 
             <div class="pagetitle d-flex justify-content-between align-items-center">
-                <div>
-                    <h1>Dashboard</h1>
+                <div><!-- 
+                    <h1>Dashboard</h1> -->
                     <nav>
                         <ol class="breadcrumb">
                             <li class="breadcrumb-item"><a href="<?= base_url() ?>dashboard">Home</a></li>
@@ -46,7 +46,7 @@
                 </div>
 
                 <div class="me-3">
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-upload-orders"><i class="bi bi-cloud-arrow-up-fill"></i></button>
+                    <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modal-upload-orders"><i class="bi bi-cloud-arrow-up-fill"></i></button>
                 </div>
             </div><!-- End Page Title -->
 
@@ -77,19 +77,26 @@
                             <div class="card-header">
                                 <form class="mb-0" action="#" id="form-download" method="POST">
                                     <div class="row mb-3 align-items-end">
-                                        <div class="col">
-                                            <label for="week-in">From</label>
+                                        <div class="col-5">
+                                            <label for="week-from">From</label>
                                             <input type="week" name="from" id="week-from" min="2023-W01" max="<?= date('Y').'-W'.date('W'); ?>" value="<?= $week; ?>" required class="form-control">
                                         </div>
-                                        <div class="col">
-                                            <label for="week-end">To</label>
+                                        <div class="col-5">
+                                            <label for="week-to">To</label>
                                             <input type="week" name="to" id="week-to" required class="form-control" min="2023-W01" max="<?= date('Y').'-W'.date('W'); ?>" value="<?= date('Y').'-W'.date('W'); ?>">
                                         </div>
-                                        <div class="col-12 col-md-auto mt-2 mt-md-0">
-                                            <button class="form-control btn btn-success" id="download-btn">
+                                        <div class="col col-md-auto mt-2 mt-md-0 text-end">
+                                            <div class="dropdown" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="More">
+                                                <button class="btn btn-light border rounded-pill p-2 shadow-sm" type="button" data-bs-toggle="dropdown" aria-expanded="true"><i class="bi bi-three-dots-vertical"></i></button>
+                                                <ul class="dropdown-menu position-fixed" style="position: absolute; inset: 0px auto auto 0px; margin: 0px; transform: translate3d(1096.5px, 336px, 0px);" data-popper-placement="bottom-start">
+                                                    <li><button class="dropdown-item" type="button" onclick="viewReport()"><i class="bi bi-file-earmark-pdf me-2"></i>Report</button></li>
+                                                    <li><button class="dropdown-item" type="submit" id="download-btn"><i class="bi bi-file-earmark-excel me-2"></i>Download evaluated</button></li>
+                                                </ul>
+                                            </div>
+                                            <!-- <button class="form-control btn btn-success d-none" id="download-btn">
                                                 <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true" id="download-loading"></span>
                                                 <span id="download-text">Download</span>
-                                            </button>
+                                            </button> -->
                                         </div>
                                     </div>
                                 </form>
@@ -98,6 +105,7 @@
 
                                 <div class="mt-2">
                                     <nav class="d-flex align-items-center">
+
                                         <div class="nav nav-tabs" id="nav-tab" role="tablist">
                                             <button onclick="loadCharts()" class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-customers" type="button" role="tab" aria-controls="nav-customers" aria-selected="true">Customers</button>
                                             <button onclick="loadCharts()" class="nav-link" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-users" type="button" role="tab" aria-controls="nav-users" aria-selected="false">Users</button>
@@ -105,7 +113,7 @@
                                             <button onclick="loadCharts()" class="nav-link" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-varieties" type="button" role="tab" aria-controls="nav-varieties" aria-selected="false">Varieties</button>
                                         </div>
                                         <div>
-                                            <div class="btn-group dropdown">
+                                            <div class="btn-group">
                                                 <button class="btn btn-light rounded-circle p-2 h-auto w-auto ms-3 position-relative" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" style="width: 60px; height: 60px;">
                                                     <i class="bi bi-funnel"></i>
                                                     <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle d-none" id="chart-filters-notify" style="margin-top: 7; margin-left: -7;">
@@ -208,24 +216,45 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <!-- <i class="bi bi-funnel"></i>
-                                            <i class="bi bi-airplane-fill me-2"></i>
-                                            <select class="form-select form-select-sm" name="" id="">
-                                                <option value="">All</option>
-                                                <option value="">Bog</option>
-                                                <option value="">Med</option>
-                                            </select> -->
                                         </div>
+                                        
                                     </nav>
                                     <div class="tab-content" id="nav-tabContent">
-                                        <div class="tab-pane fade show active text-center" id="nav-customers" style="height: 50vh;" role="tabpanel" aria-labelledby="nav-home-tab" tabindex="0">
-                                            <div class="d-flex justify-content-center align-items-center h-100">
-                                                <i class="spinner spinner-border"></i>
+                                        <div class="d-none d-sm-block position-absolute end-0" style="z-index: 999; margin-right:50px; margin-top:3px;">
+                                            <button class="btn btn-sm btn-default p-1" id="fullscreenButton"><i class="bi bi-arrows-fullscreen fs-0-7"></i></button>
+                                        </div>
+                                        <div class="tab-pane fade show active text-center" id="nav-customers" role="tabpanel" aria-labelledby="nav-home-tab" tabindex="0">
+                                            <div class="row tab-pane-row pt-3 pt-md-0">
+                                                <div class="col-12 col-md-3" id="nav-customers-table">
+                                                    <div class="d-flex justify-content-center align-items-center h-100">
+                                                        <i class="spinner spinner-border spinner-border-sm"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12 col-md-9 d-none d-md-block bg-white" id="nav-customers-chart">
+                                                    <!-- <div class="d-flex justify-content-center align-items-center h-100">
+                                                        <i class="spinner spinner-border spinner-border-sm"></i>
+                                                    </div> -->
+                                                </div>
                                             </div>
                                         </div>
-                                        <div class="tab-pane fade" id="nav-users" style="height: 50vh;" role="tabpanel" aria-labelledby="nav-users-tab" tabindex="0">...</div>
-                                        <div class="tab-pane fade" id="nav-crops" style="height: 50vh;" role="tabpanel" aria-labelledby="nav-crops-tab" tabindex="0">...</div>
-                                        <div class="tab-pane fade" id="nav-varieties" style="height: 50vh;" role="tabpanel" aria-labelledby="nav-varieties-tab" tabindex="0">...</div>
+                                        <div class="tab-pane fade" id="nav-users" role="tabpanel" aria-labelledby="nav-users-tab" tabindex="0">
+                                            <div class="row tab-pane-row pt-3 pt-md-0">
+                                                <div class="col-12 col-md-3" id="nav-users-table"></div>
+                                                <div class="col-12 col-md-9 d-none d-md-block bg-white" id="nav-users-chart"></div>
+                                            </div>
+                                        </div>
+                                        <div class="tab-pane fade" id="nav-crops" role="tabpanel" aria-labelledby="nav-crops-tab" tabindex="0">
+                                            <div class="row tab-pane-row pt-3 pt-md-0">
+                                                <div class="col-12 col-md-3" id="nav-crops-table"></div>
+                                                <div class="col-12 col-md-9 d-none d-md-block bg-white" id="nav-crops-chart"></div>
+                                            </div>
+                                        </div>
+                                        <div class="tab-pane fade" id="nav-varieties" role="tabpanel" aria-labelledby="nav-varieties-tab" tabindex="0">
+                                            <div class="row tab-pane-row pt-3 pt-md-0">
+                                                <div class="col-12 col-md-3" id="nav-varieties-table"></div>
+                                                <div class="col-12 col-md-9 d-none d-md-block bg-white" id="nav-varieties-chart"></div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -235,14 +264,14 @@
                                     <hr>
 
                                     <div class="row mt-4">
-                                        <div class="col-6 btn btn-light m-2 border overflow-auto" id="varieties-compare-btn" style="height: 80px;">
+                                        <div class="col-6 btn btn-outline-light text-dark m-2 border overflow-auto" id="varieties-compare-btn" style="height: 80px;">
                                             <p class="position-absolute bg-white bg-opacity-50 rounded-3 px-2" style="margin-top: -18px;">Varieties</p>
                                             <div class="py-3 h-100 d-flex flex-wrap justify-content-center align-items-center mtm-checkbox-filter" id="compare-varieties-selected">
                                                 <h6>Clic here.</h6>
                                             </div>
                                         </div>
 
-                                        <div class="col btn btn-light m-2 border overflow-auto" id="parameters-compare-btn" style="height: 80px;">
+                                        <div class="col btn btn-outline-light text-dark m-2 border overflow-auto" id="parameters-compare-btn" style="height: 80px;">
                                             <p class="position-absolute bg-white bg-opacity-50 rounded-3 px-2" style="margin-top: -18px;">Parameters</p>
                                             <div class="py-3 h-100 d-flex flex-wrap justify-content-center align-items-center mtm-checkbox-filter" id="compare-parameters-selected">
                                                 <h6>Clic here.</h6>
@@ -250,15 +279,29 @@
                                         </div>
                                     </div>
 
-                                    <div class="row mt-3" style="min-height: 57vh;">
-                                        <div class="pt-1" id="compare-table">
-                                            
-                                            <div class="text-center mt-5">
-                                                <i class="bi bi-exclamation-circle display-6"></i>
-                                                <p class="mt-3">Select the items to compare!</p>
+                                    <div class="row mt-4">
+                                        <nav>
+                                            <div class="nav nav-tabs" id="nav-tab-table-compare" role="tablist">
+                                                <button class="nav-link active" id="nav-resume-tab" data-bs-toggle="tab" data-bs-target="#nav-resume" type="button" role="tab" aria-controls="nav-resume" aria-selected="true" onclick="tableCompareChangeTab()">Resume</button>
+                                                <button class="nav-link" id="nav-detail-tab" data-bs-toggle="tab" data-bs-target="#nav-detail" type="button" role="tab" aria-controls="nav-detail" aria-selected="false" onclick="tableCompareChangeTab()">Detail</button>
                                             </div>
-
+                                        </nav>
+                                        <div class="tab-content" id="nav-tabContent">
+                                            <div class="tab-pane fade pt-3 show active" id="nav-resume" role="tabpanel" aria-labelledby="nav-resume-tab" tabindex="0" style="min-height: 77vh;">
+                                                <div class="d-flex flex-column justify-content-center align-items-center h-100">
+                                                    <i class="bi bi-exclamation-circle display-6"></i>
+                                                    <p class="mt-3">No data!</p>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="tab-pane fade pt-3" id="nav-detail" role="tabpanel" aria-labelledby="nav-detail-tab" tabindex="0" style="min-height: 77vh;">
+                                                <div class="d-flex flex-column justify-content-center align-items-center h-100">
+                                                    <i class="bi bi-exclamation-circle display-6"></i>
+                                                    <p class="mt-3">Select the items to compare!</p>
+                                                </div>
+                                            </div>
                                         </div>
+                                        
                                     </div>
                                     
                                 </div>

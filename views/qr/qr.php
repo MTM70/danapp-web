@@ -1,6 +1,7 @@
 <script>
     const base_url = "<?= base_url(); ?>";
     const idEvent = "<?= explode('/', $_GET['url'])[3]; ?>";
+    const year = "<?= explode('/', $_GET['url'])[4]; ?>";
 </script>
 
 <!DOCTYPE html>
@@ -27,7 +28,7 @@
                             <option value="">Choose...</option>
                         </select>
                     </div> -->
-                    <p class="display-6 fs-1-3 fw-semibold m-0"><i class="bi bi-calendar-event text-success"></i> Proflora 2023</p>
+                    <p class="display-6 fs-1-3 fw-semibold m-0"><i class="bi bi-calendar-event text-success"></i> <?= explode('/', $_GET['url'])[5]; ?></p>
                 </div>
                 <div class="">
                     <img src="<?= media() ?>/img/logo.png" alt="" width="100">

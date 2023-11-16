@@ -96,7 +96,7 @@ async function loadUsers() {
                         let table = new DataTable('#table-users', {
                             "processing": true,
                             "scrollY": false,
-                            "scrollX": (isMobile()) ? true : false,
+                            "scrollX": (isMobile) ? true : false,
                             "iDisplayLength": 50,
                             "stateSave": true,
                             scrollY: '53vh',

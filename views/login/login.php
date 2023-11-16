@@ -1,8 +1,9 @@
+<!DOCTYPE html>
+
 <script>
     const base_url = "<?= base_url(); ?>";
 </script>
 
-<!DOCTYPE html>
 <html lang="en">
 
 <?= get_view("header", $data) ?>
@@ -14,9 +15,15 @@
 
             <div class="w-100 h-100 start-0 position-absolute">
                 <div class="col secondary" style="height: 40vh;">
-                    <div class="rounded-circle position-absolute bubble" style="width: 100px; height: 100px; left:100px; top:50px;"></div>
-                    <div class="rounded-circle position-absolute bubble" style="width: 100px; height: 100px; right:100px; top:100px;"></div>
-                    <div class="rounded-circle position-absolute bubble" style="width: 100px; height: 100px; left:450px; top:130px;"></div>
+                    <div class="rounded-circle position-fixed bubble opacity-25" style="width: 100px; height: 100px; left:100px; top:50px;">
+                        <img src="<?= media()."/img/icon-512.png" ?>" width="100%" alt="">
+                    </div>
+                    <div class="rounded-circle position-fixed bubble opacity-25" style="width: 100px; height: 100px; right:100px; top:100px;">
+                        <img src="<?= media()."/img/icon-512.png" ?>" width="100%" alt="">
+                    </div>
+                    <div class="rounded-circle position-fixed bubble opacity-25" style="width: 100px; height: 100px; left:450px; top:130px;">
+                        <img src="<?= media()."/img/icon-512.png" ?>" width="100%" alt="">
+                    </div>
                 </div>
                 <div class="col bg-white" style="height: 60vh;">
 

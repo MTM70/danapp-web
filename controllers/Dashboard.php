@@ -795,10 +795,10 @@
                 $varieties = $this->model->getDataCountBetweenWeeksGroupVariety($year1, $week1, $year2, $week2);
 
                 $this->html .= '
-                    <div class="col-12 col-md-3 mt-4 mt-md-0">
+                    <div class="col-12 col-md-3 mt-4 mt-md-0" id="filters-chart-destinations">
                         <div class="border border-dark border-opacity-10 p-2 rounded-3 overflow-auto" style="max-height: 150px;">
                             
-                            <p class="position-absolute bg-white fw-semibold" style="margin-top: -18px; margin-left: 2px;">Destinations</p>
+                            <p class="position-absolute bg-white fw-semibold" style="margin-top: -18px; margin-left: 2px;"><i class="bi bi-airplane-fill me-1"></i>Destinations</p>
 
                             <div>';
 
@@ -826,10 +826,10 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-12 col-md-5 mt-4 mt-md-0">
+                    <div class="col-12 col-md-5 mt-4 mt-md-0" id="filters-chart-types">
                         <div class="border border-dark border-opacity-10 p-2 rounded-3 overflow-auto" style="max-height: 150px;">
                             
-                            <p class="position-absolute px-2 bg-white fw-semibold" style="margin-top: -18px; margin-left: 2px;">Order types</p>
+                            <p class="position-absolute px-2 bg-white fw-semibold" style="margin-top: -18px; margin-left: 2px;"><i class="bi bi-building-fill-check me-1"></i>Order types</p>
 
                             <div>';
 
@@ -841,7 +841,7 @@
                                         $this->html .= '
                                             <div class="p-1 '.$top.'">
                                                 <div class="form-check">
-                                                    <input class="form-check-input cursor-select filter-type" type="checkbox" value="'.$k["id"].','.$k["categorie"].'" id="checkChartType'.$k["id"].'">
+                                                    <input class="form-check-input cursor-select filter-type" type="checkbox" value="'.$k["id"].','.$k["categorie"].'" id="checkChartType'.$k["id"].'" '.($k["id"] == 1 ? 'checked' : '' ).'>
                                                     <label class="form-check-label cursor-select" for="checkChartType'.$k["id"].'">
                                                         '.$k["categorie"].'
                                                     </label>
@@ -858,10 +858,10 @@
 
                         </div>
                     </div>
-                    <div class="col-12 col-md-4 mt-4 mt-md-0">
+                    <div class="col-12 col-md-4 mt-4 mt-md-0" id="filters-chart-products">
                         <div class="border border-dark border-opacity-10 p-2 rounded-3 overflow-auto" style="max-height: 150px;">
                             
-                            <p class="position-absolute px-2 bg-white fw-semibold" style="margin-top: -18px; margin-left: 2px;">Products</p>
+                            <p class="position-absolute px-2 bg-white fw-semibold" style="margin-top: -18px; margin-left: 2px;"><i class="bi bi-bookmark-fill me-1"></i>Products</p>
 
                             <div>';
 
@@ -890,10 +890,10 @@
 
                         </div>
                     </div>
-                    <div class="col-12 col-md-6 mt-4">
+                    <div class="col-12 col-md-6 mt-4" id="filters-chart-crops">
                         <div class="border border-dark border-opacity-10 p-2 rounded-3 overflow-auto" style="max-height: 400px;">
                             
-                            <p class="position-absolute px-2 bg-white fw-semibold" style="margin-top: -18px; margin-left: 2px;">Crops</p>
+                            <p class="position-absolute px-2 bg-white fw-semibold" style="margin-top: -18px; margin-left: 2px;"><i class="bi bi-flower2 me-1"></i>Crops</p>
 
                             <div>';
 
@@ -922,10 +922,10 @@
 
                         </div>
                     </div>
-                    <div class="col-12 col-md-6 mt-4">
+                    <div class="col-12 col-md-6 mt-4" id="filters-chart-varieties">
                         <div class="border border-dark border-opacity-10 p-2 rounded-3 overflow-auto" style="max-height: 400px;">
                             
-                            <p class="position-absolute px-2 bg-white fw-semibold" style="margin-top: -18px; margin-left: 2px;">Varieties</p>
+                            <p class="position-absolute px-2 bg-white fw-semibold" style="margin-top: -18px; margin-left: 2px;"><i class="bi bi-flower3 me-1"></i>Varieties</p>
 
                             <div>';
 
@@ -993,7 +993,7 @@
 
                         $this->html .= '
                             <div class="p-1">
-                                <input id="checkCompareVariety'.$k["id"].'" type="checkbox" value="'.$k["id"].','.$k["variety"].'">
+                                <input id="checkCompareVariety'.$k["id"].'" type="checkbox" value="'.$k["id"].','.$k["variety"].'" checked>
                                 <label class="rounded-3" for="checkCompareVariety'.$k["id"].'">'.$k["variety"].'</label>
                             </div>
                         ';
@@ -1035,12 +1035,31 @@
 
                 if (!empty($response)) {
 
+                    $this->html .= '<div class="col-12 mb-1">Client</div>';
+
                     foreach ($response as $k) {
+
+                        if ($k["category"] == 2) continue;
 
                         $this->html .= '
                             <div class="p-1">
-                                <input id="checkCompareParameter'.$k["id"].'" type="checkbox" value="'.$k["id"].','.$k["parameter"].','.$k["type"].'">
-                                <label class="rounded-3" for="checkCompareParameter'.$k["id"].'">'.$k["parameter"].'</label>
+                                <input id="checkCompareParameter'.$k["id"].'_1" type="checkbox" value="'.$k["id"].','.$k["parameter"].','.$k["type"].'" '.( $k["id"] == 28 ? 'checked' : '' ).'>
+                                <label class="rounded-3" for="checkCompareParameter'.$k["id"].'_1">'.$k["parameter"].'</label>
+                            </div>
+                        ';
+
+                    }
+
+                    $this->html .= '<hr class="col-12"><div class="col-12 mb-1">Technical</div>';
+
+                    foreach ($response as $k) {
+
+                        if ($k["category"] == 1) continue;
+
+                        $this->html .= '
+                            <div class="p-1">
+                                <input id="checkCompareParameter'.$k["id"].'_2" type="checkbox" value="'.$k["id"].','.$k["parameter"].','.$k["type"].'">
+                                <label class="rounded-3" for="checkCompareParameter'.$k["id"].'_2">'.$k["parameter"].'</label>
                             </div>
                         ';
 
@@ -1068,7 +1087,7 @@
 
         public  function loadTableCompare()
         {
-            if (isset($_GET["from"]) AND isset($_GET["to"]) AND $_GET["from"] AND $_GET["to"] AND isset($_GET["varieties"]) AND isset($_GET["parameters"]) AND $_GET["varieties"] AND $_GET["parameters"]) {
+            if (isset($_GET["from"]) AND isset($_GET["to"]) AND $_GET["from"] AND $_GET["to"] AND isset($_GET["varieties"]) AND isset($_GET["parameters"]) AND isset($_GET["filters"]) AND $_GET["varieties"] AND $_GET["parameters"]) {
 
                 $week1 = explode("-W", $_GET["from"])[1];
                 $year1 = explode("-W", $_GET["from"])[0];
@@ -1093,19 +1112,96 @@
                 $varietiesSearch = implode(",", $varietiesSearch);
                 $parametersSearch = implode(",", $parametersSearch);
 
-                $response = $this->model->getVarietiesBetweenWeeksDistinctOrders($year1, $week1, $year2, $week2, $varietiesSearch);
+                //*===================Filters============================================================
+
+                $filters = json_decode($_GET["filters"], true);
+
+                $filterCompleted = "";
+
+                if (count($filters["destinations"]) OR count($filters["types"]) OR count($filters["products"]) OR count($filters["crops"]) OR count($filters["varieties"])) {
+                    
+                    $and = "";
+
+                    if (count($filters["destinations"])) {
+
+                        $array = array_map(function($element) {
+                            return "'" . explode(",",$element)[0] . "'";
+                        }, $filters["destinations"]);
+
+                        $and .= "AND o.destination IN (".implode(',', $array).") ";
+                    }
+
+                    if (count($filters["types"])) {
+
+                        $array = array_map(function($element) {
+                            return explode(",",$element)[0];
+                        }, $filters["types"]);
+
+                        $and .= "AND o.id_type IN (".implode(',', $array).") ";
+                    }
+
+                    if (count($filters["products"])) {
+
+                        $array = array_map(function($element) {
+                            return explode(",",$element)[0];
+                        }, $filters["products"]);
+
+                        $and .= "AND o.id_product IN (".implode(',', $array).") ";
+                    }
+
+                    if (count($filters["crops"])) {
+
+                        $array = array_map(function($element) {
+                            return explode(",",$element)[0];
+                        }, $filters["crops"]);
+
+                        $and .= "AND c.id IN (".implode(',', $array).") ";
+                    }
+
+                    if (count($filters["varieties"])) {
+
+                        $array = array_map(function($element) {
+                            return explode(",",$element)[0];
+                        }, $filters["varieties"]);
+
+                        $and .= "AND v.id IN (".implode(',', $array).") ";
+                    }
+
+                    $filterCompleted = "
+                        INNER JOIN (
+                            SELECT DISTINCT op.id_order 
+                            FROM orders_parameters AS op 
+                            INNER JOIN orders AS o ON o.id = op.id_order 
+                            INNER JOIN orders_closed AS oc ON oc.id_order = op.id_order 
+                            INNER JOIN varieties AS v ON v.id = op.id_variety 
+                            INNER JOIN crops AS c ON c.id = v.id_crop 
+                            WHERE 
+                                (YEAR(oc.date) BETWEEN :value0 AND :value2) AND (WEEK(oc.date) BETWEEN :value1 AND :value3) 
+                                $and 
+                        ) AS filter ON filter.id_order = o.id 
+                    ";
+
+                }
+
+                //*===================Filters============================================================
+
+                $response = $this->model->getVarietiesBetweenWeeksDistinctOrders($year1, $week1, $year2, $week2, $varietiesSearch, $filterCompleted);
                 $data = $this->model->getDataCompareBetweenWeeksOrders($year1, $week1, $year2, $week2, $varietiesSearch, $parametersSearch);
 
                 $this->html .= '
-                    <table class="table table-bordered table-hover text-center fs-0-8" id="table-compare" style="width:100%">
+                    <table class="table table-bordered table-hover text-center w-100 fs-0-8" id="table-compare">
                         <thead>
                             <tr>
-                                <th rowspan="2" class="bg-white text-center align-middle" style="z-index: 2;">Variety</th>
-                                <th rowspan="2" class="bg-white text-center align-middle" style="z-index: 1;">Order No</th>
-                                <th rowspan="2" class="bg-white text-center align-middle" style="z-index: 1;">Sec Cust</th>
-                                <th rowspan="2" class="bg-white text-center align-middle" style="z-index: 1;">User</th>
-                                <th class="text-center align-middle" rowspan="2">Week</th>
-                                <th class="text-center align-middle" rowspan="2">Date</th>
+                                <th rowspan="2" class="text-center align-middle">Variety</th>
+                                <!--<th rowspan="2" class="text-center align-middle">Order No</th>-->
+                                <th rowspan="2" class="text-center align-middle">Sec Cust</th>
+                                <th rowspan="2" class="text-center align-middle">User</th>
+                                <!--<th class="text-center align-middle" rowspan="2">Week</th>-->
+                                <!--<th class="text-center align-middle" rowspan="2">Date</th>-->
+                                <th rowspan="2">idCust</th>
+                                <th rowspan="2">idUser</th>
+                                <th rowspan="2">idCrop</th>
+                                <th rowspan="2">idVariety</th>
                                 <th colspan="'.count($parameters).'" class="text-center">Parameters</th>
                             </tr>
                             <tr>';
@@ -1123,14 +1219,40 @@
 
                             if (!empty($response)) {
                                 foreach ($response as $k) {
+
+                                    $stateFilters = false;
+
+                                    if ($filters["varieties"]) {
+                                        foreach ($filters["varieties"] as $value) {
+                                            if (explode(",",$value)[0] == $k["id_variety"]) {
+                                                $stateFilters = true;
+                                                break;
+                                            }
+                                        }
+                                    }elseif ($filters["crops"]) {
+                                        foreach ($filters["crops"] as $value) {
+                                            if (explode(",",$value)[0] == $k["id_crop"]) {
+                                                $stateFilters = true;
+                                                break;
+                                            }
+                                        }
+                                    }elseif (!$stateFilters) $stateFilters = true;
+
+
+                                    if (!$stateFilters) continue;
+
                                     $this->html .= '
                                         <tr>
-                                            <th class="bg-white align-middle" style="z-index: 1;">'.$k["variety"].'</th>
-                                            <td class="bg-white align-middle" style="z-index: 1;">'.$k["order_no"].'</td>
-                                            <td class="bg-white align-middle" style="z-index: 1;">'.$k["sec_cust"].'</td>
-                                            <td class="bg-white align-middle" style="z-index: 1;">'.$k["user"].'</td>
-                                            <td class="text-center align-middle">W'.$k["week"].' '.$k["year"].'</td>
-                                            <td class="text-center align-middle">'.$k["date"].'</td>';
+                                            <th class="align-middle">'.$k["variety"].'</th>
+                                            <!--<td class="align-middle">'.$k["order_no"].'</td>-->
+                                            <td class="align-middle">'.$k["sec_cust"].'</td>
+                                            <td class="align-middle">'.$k["user"].'</td>
+                                            <!--<td class="text-center align-middle">W'.$k["week"].' '.$k["year"].'</td>-->
+                                            <!--<td class="text-center align-middle">'.$k["date"].'</td>-->
+                                            <td>'.$k["id_cust"].'</td>
+                                            <td>'.$k["id_user"].'</td>
+                                            <td>'.$k["id_crop"].'</td>
+                                            <td>'.$k["id_variety"].'</td>';
 
                                             $indexImg = 0;
 
@@ -1144,18 +1266,19 @@
                                                     foreach ($data as $d) {
                                                         if ($d["id_order"] == $k["id_order"] AND $d["id_user"] == $k["id_user"] AND $d["id_variety"] == $k["id_variety"] AND $d["id_parameter"] == $parameter[0]) {
 
-                                                            if ($parameter[2] == 4) {
+                                                            if ($parameter[2] == 4 AND strpos($d["value"], 'jpg') !== false) {
                                                                 //'.base_url().'
 
-                                                                $route = base_url()."/uploads/".$d["value"]; 
+                                                                $route = base_url()."/uploads/".$d["value"];
 
                                                                 $this->html .= '
                                                                     <td class="text-center align-middle">
                                                                         <img 
                                                                             class="cursor-select" 
-                                                                            src="'.$route.'" 
+                                                                            src="' . /* imageQuality($route) */$route . '" 
                                                                             alt="Imagen" 
-                                                                            width="100px"
+                                                                            height="100px"
+                                                                            data-url="'.$route.'"
                                                                             data-index="'.$indexImg.'" 
                                                                             data-parameter="'.$parameter[1].'" 
                                                                             data-obs="'.$d["obs"].'" 
@@ -1172,7 +1295,7 @@
                                                                 
                                                                 $this->html .= '
                                                                     <td class="text-center align-middle">
-                                                                        <table class="table table-bordered text-center bg-light mb-0 fs-0-9">
+                                                                        <table class="table table-bordered text-center bg-light mb-0 fs-0-7">
                                                                             <tr>
                                                                                 <th class="bg-secondary bg-opacity-50 text-white align-middle" rowspan="2" width="40px">B-9 ppm</th>';
 
@@ -1202,7 +1325,7 @@
                                                                     </td>
                                                                 ';
                                                             }
-                                                            else $this->html .= '<td class="text-center align-middle">'.$d["value"]."/".$parameter[2].'</td>';
+                                                            else $this->html .= '<td class="text-center align-middle">'.$d["value"].'</td>';
 
                                                             $isset = true;
                                                         }
@@ -1221,6 +1344,11 @@
                     </table>
                 ';
 
+                $search = array('/\>[^\S ]+/s','/[^\S ]+\</s','/(\s)+/s','/<!--(.|\s)*?-->/');
+                $replace = array('>', '<', '\\1');
+        
+                $this->html = preg_replace($search, $replace, $this->html);
+
                 $this->arrResponse = array(
                     'status' => true, 
                     'res' => $this->html
@@ -1234,6 +1362,32 @@
 
             echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
         }
+
+        /* public function imageQuality($rutaImagen) {
+            // Crear una nueva imagen desde el archivo original
+            $imagenOriginal = imagecreatefromjpeg($rutaImagen);
+
+            list($width, $heigth) = getimagesize($rutaImagen);
+
+            // Crear una nueva imagen con la calidad deseada
+            $imagenOptimizada = imagecreatetruecolor($width, $heigth);
+            imagecopyresampled($imagenOptimizada, $imagenOriginal, 0, 0, 0, 0, $width, $heigth, $width, $heigth);
+
+            // Redimensionar la imagen
+            $imagenOptimizada = imagescale($imagenOptimizada, $width * 0.2, $heigth * 0.2);
+        
+            // Crear una nueva imagen con la calidad deseada
+            ob_start();
+            $img = imagerotate($imagenOptimizada, 270, 0); 
+            imagejpeg($img, null, 10);
+            $contenidoImagen = ob_get_clean();
+            $enlaceDatos = 'data:image/jpeg;base64,' . base64_encode($contenidoImagen);
+        
+            // Liberar memoria
+            imagedestroy($imagenOriginal);
+        
+            return $enlaceDatos;
+        } */
 
         //TODO Events --------------------------------------------------------------------
         public function loadEvents()
@@ -1252,7 +1406,7 @@
                     $stateImg = ($k["state"]) ? '' : 'opacity: 0.3;' ;
 
                     $this->html .= '
-                        <div class="card cursor-select shadow-none border border-light me-2 '.$state.'" style="height:65vh;" onclick="openModalViewEvent('.$k["id"].', '."'".$k["name"]."'".')">
+                        <div class="card cursor-select shadow-none border border-light me-2 '.$state.'" style="height:65vh; max-width:41vh;" onclick="openModalViewEvent('.$k["id"].', '."'".$k["name"]."'".')">
                             <div class="img-hover-zoom">
                                 <div class="card-img-top" style="background-image: url('.base_url().'/uploads/events/'.$k["image"].'); background-position-y: center; '.$stateImg.'"></div>
                             </div>
@@ -1260,7 +1414,7 @@
                             <div class="card-body">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <h5 class="card-title">'.$k["name"].'</h5>
-                                    <button class="btn btn-light" onclick="loadEventEdit('.$k["id"].', event);" data-bs-toggle="modal" data-bs-target="#modalAddEvent"><i class="bi bi-pencil"></i></button>
+                                    <button class="btn btn-light" onclick="loadEventEdit('.$k["id"].', event);" data-bs-toggle="modal" data-bs-target="#modalAddEvent"><i class="bi bi-pencil" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="More"></i></button>
                                 </div>
                                 <p class="card-text">'.$k["description"].'</p>
                                 <p class="card-text"><small class="text-success"><i class="bi bi-calendar-range me-1"></i>Week '.$k["start_week"].' to Week '.$k["end_week"].'</small></p>
@@ -1412,6 +1566,105 @@
             echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
         }
 
+        public function setEventYear()
+        {
+            if (isset($_POST["event-add-year-id"]) AND isset($_POST["event-add-year-year"]) AND $_POST["event-add-year-id"] AND $_POST["event-add-year-year"]) {
+                
+                $id = $this->model->setEventYear(str_ucfirst($_POST["event-add-year-id"]), $_POST["event-add-year-year"]);
+
+                if (!$id) {
+                    $this->arrResponse = array(
+                        'status' => false, 
+                        'res' => 'Add event year fail!'
+                    );
+
+                    exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
+                }
+
+                $this->arrResponse = array(
+                    'status' => true, 
+                    'res' => 'Add event year success',
+                    'id' => $id
+                );
+            }else{
+                $this->arrResponse = array(
+                    'status' => false, 
+                    'res' => 'No data!'
+                );
+            }
+
+            echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
+        }
+
+        public function setEventMap()
+        {
+            if (isset($_POST["idEvent"]) AND isset($_POST["year"]) AND isset($_POST["data"]) AND $_POST["idEvent"] AND $_POST["year"] AND $_POST["data"]) {
+
+                $data = json_decode($_POST["data"], true);
+
+                if (empty($data)) {
+                    $this->arrResponse = array(
+                        'status' => false, 
+                        'res' => 'No data selected!'
+                    );
+
+                    exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
+                }
+
+                if ($_POST["year"] < date('Y')) {
+                    $this->arrResponse = array(
+                        'status' => false, 
+                        'res' => 'Year not available!'
+                    );
+
+                    exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
+                }
+
+                if(!empty($this->model->getIsStartedEvent($_POST["idEvent"], $_POST["year"]))){
+                    $this->arrResponse = array(
+                        'status' => false, 
+                        'res' => 'Event started!'
+                    );
+
+                    exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
+                }
+
+                if(!$this->model->deleteEventMapByYear($_POST["idEvent"], $_POST["year"])){
+                    $this->arrResponse = array(
+                        'status' => false, 
+                        'res' => 'Error deleting data!'
+                    );
+
+                    exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
+                }
+
+                foreach ($data as $k) {
+                    $id = $this->model->setEventMap($_POST["idEvent"], $_POST["year"], $k["value"], trim($k["greenhouse"]), trim($k["position"]), trim($k["management"]));
+
+                    if (!$id) {
+                        $this->arrResponse = array(
+                            'status' => false, 
+                            'res' => 'Add event map fail!'
+                        );
+
+                        exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
+                    }
+                }
+
+                $this->arrResponse = array(
+                    'status' => true, 
+                    'res' => 'Add event map success ('.number_format(count($data)).' rows)'
+                );
+            }else{
+                $this->arrResponse = array(
+                    'status' => false, 
+                    'res' => 'No data!'
+                );
+            }
+
+            echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
+        }
+
         public function loadEventEdit()
         {
             if (isset($_GET["id"]) AND $_GET["id"]) {
@@ -1446,11 +1699,13 @@
                 if (!empty($response)) {
 
                     $this->html.='
-                    <table class="table table-hover text-center" id="table-users" style="font-size:14px;">
+                    <table class="table table-hover text-center fs-0-8 w-100">
                         <thead>
                             <tr>
                                 <th>Year</th>
-                                <th>Number of orders</th>
+                                <th>Map data</th>
+                                <th>Number of requests</th>
+                                <!--<th></th>-->
                                 <th></th>
                             </tr>
                         </thead>
@@ -1461,9 +1716,9 @@
                         $this->html .= '
                             <tr>
                                 <td class="align-middle">'.$k["year"].'</td>
-                                <td class="align-middle">'.$k["orders"].'</td>
-                                <td>
-                                    <!--<button class="btn btn-primary" onclick="downloadDataEventByYear('.$k["year"].', '.$_GET["id"].')">Download</button>-->
+                                <td class="align-middle"><i class="'.($k["map_data"] ? 'bi bi-check-circle-fill text-success' : 'bi bi-x-circle-fill text-danger' ).'"></i></td>
+                                <td class="align-middle">'.($k["orders"] ? $k["orders"] : '-').'</td>
+                                <!--<td>
                                     <div class="dropdown">
                                         <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                             Download
@@ -1471,8 +1726,17 @@
                                         <ul class="dropdown-menu position-fixed">
                                             <li><a class="dropdown-item" href="#" onclick="downloadDataEventByYear('.$k["year"].', '.$_GET["id"].')">Company</a></li>';
 
-                                            if ($k["ordersBck"] > 0) $this->html .= '<li><a class="dropdown-item" href="#">Customers ('.$k["ordersBck"].')</a></li>';
+                                            /* if ($k["ordersBck"] > 0) $this->html .= '<li><a class="dropdown-item" href="#">Customers ('.$k["ordersBck"].')</a></li>'; */
                                             $this->html .= '
+                                        </ul>
+                                    </div>
+                                </td>-->
+                                <td>
+                                    <div class="dropdown" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="More">
+                                        <button class="btn btn-light rounded-pill p-2 shadow-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-three-dots-vertical"></i></button>
+                                        <ul class="dropdown-menu position-fixed">
+                                            <li><button class="dropdown-item" type="button" '.($k["orders"] ? 'enabled' : 'disabled').' onclick="downloadDataEventByYear('.$k["year"].', '.$_GET["id"].')"><i class="bi bi-file-earmark-arrow-down me-2"></i>Download</button></li>
+                                            <li><button class="dropdown-item" type="button" data-bs-target="#modalViewEventMap" data-bs-toggle="modal" onclick="isEditMap = false; document.querySelector('."'"."#editModeMap"."'".').checked = false; openModalViewEventMap('.$_GET["id"].', '.$k["year"].')"><i class="bi bi-border-style me-2"></i>Map data</button></li>
                                         </ul>
                                     </div>
                                 </td>
@@ -1491,7 +1755,7 @@
                     );
                 }else{
                     $this->arrResponse = array(
-                        'status' => false, 
+                        'status' => true, 
                         'res' => 'No data!'
                     );
                 }
@@ -1696,6 +1960,396 @@
 
             //echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
         }
+
+        public function uploadFileMap()
+        {
+            if (isset($_FILES['excel']['tmp_name']) AND isset($_POST["selected"])) {      //Si existe file
+                
+                $file = $_FILES['excel']['tmp_name'];
+                $selected = json_decode($_POST['selected'], true);
+
+                /* $this->arrResponse = array(
+                    'status' => true, 
+                    'res' => json_encode($selected),
+                    'issues' => 0
+                );
+
+                exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE)); */
+
+                $crops = $this->model->getCrops();
+                $optionsCrop = null;
+                if (!empty($crops)) {
+                    foreach ($crops as $crop) {
+                        $optionsCrop .= '<option value="'.$crop["id"].'">'. $crop['crop'] .'</option>';
+                    }
+                }
+
+                $documento = IOFactory::load($file);        //Cargamos en libreria
+
+                $hojaActual = $documento->getSheet(0);      //Hoja 0
+
+                //Nombre columnas
+                $columns = array("Greenhouse", "Position", "Variety name", 'Management');
+                $data = array(); //Array donde guardaremos los datos de cada fila
+                $issues = 0;
+
+                # Iterar filas
+                $f = 0;
+
+                $this->html .= '
+                    <table class="table table-bordered table-hover fs-0-8 w-100" id="table-upload-map">
+                        <thead>
+                            <tr>
+                                <th class="text-center">Row</th>';
+
+                foreach ($hojaActual->getRowIterator() as $fila) {  //Por cada fila
+
+                    # Iterar filas
+                    $c = 0;
+
+                    $data[$f] = array(); //Array con posicion de la fila para insertar columnas
+
+                    foreach ($fila->getCellIterator() as $celda) {  //Por cada columna
+
+                        $celdaValue = trim($celda->getValue());
+
+                        if (!$f) {  //Si fila es igual a 0 (encabezado)
+                            if ($celdaValue != $columns[$c]) {
+                                $this->arrResponse = array(
+                                    'status' => false, 
+                                    'res' => 'Column does not match! -> '.$columns[$c]
+                                );
+    
+                                exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
+                            }
+
+                            $this->html .= '
+                                <th>'.$columns[$c].'</th>
+                            ';
+                        }else{
+                            $data[$f][$c] = $celdaValue;
+                        }
+
+                        $c++;
+
+                    }
+
+                    $f++;
+                }
+
+                $this->html .= '
+                            <th class="text-center">Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>';
+
+                for ($i = 1; $i < count($data); $i++) { //Por cada dato del arreglo de datos
+
+                    $exist = $this->model->getVarietyByName($data[$i][2]);
+
+                    $options = false;
+                    $optionsRadio = null;
+                    $isChecked = false;
+
+                    if (!$exist) {
+                        $options = $this->model->getVarietyByNameAdvance($data[$i][2]);
+
+                        if (!empty($options)) {
+
+                            $optionsRadio .= '<p class="d-none d-md-block">Variety not found, check the name in the file or select option:</p>';
+
+                            foreach ($options as $k) {
+
+                                $checked = null;
+
+                                if ($selected) {
+                                    foreach ($selected as $s) {
+                                        if ($s["value"] == $k["id"] AND $s["row"] == $i) {
+                                            $checked = "checked";
+                                            $isChecked = true;
+                                        }
+                                    }
+                                }
+
+                                $optionsRadio .= '
+                                    <div class="col-md-6 p-1">
+                                        <div class="form-check">
+                                            <input class="form-check-input cursor-select" type="radio" name="optionVariety'.$i.'" value="'.$k["id"].'" id="checkOptionVariety'.$i.'_'.$k["id"].'" onchange="selectedOptionMap(this, false, '.$i.')" '.$checked.'>
+                                            <label class="form-check-label cursor-select" for="checkOptionVariety'.$i.'_'.$k["id"].'">
+                                                <b>'.$k["variety"].'</b> ('.$k["variety_code"].' - '.substr($k["crop"], 0, 5).')
+                                            </label>
+                                        </div>
+                                    </div>
+                                ';
+                            }
+                        }else{
+                            $optionsRadio .= '<p class="d-none d-md-block text-danger fw-bold">Variety not found, check the name in the file or add variety:</p>';
+                        }
+
+                        $optionsRadio .= '
+                            <div class="row m-0 align-items-center border border-white py-2 rounded-2">
+                                <div class="col-12 col-md-auto pt-1">
+                                    <div class="form-check">
+                                        <input class="form-check-input cursor-select" type="radio" name="optionVariety'.$i.'" value="add" id="checkOptionVariety'.$i.'_add" '.(!$options ? 'checked' : '').'  onchange="selectedOptionMap(this, true, '.$i.')">
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-md">
+                                    <form class="row m-0 p-0" action="#" method="POST" id="formAddVariety'.$i.'">
+                                        <div class="col-6 col-md">
+                                            <div class="input-group input-group-sm">
+                                                <span class="input-group-text">Crop</span>
+                                                <select name="add-variety-map-crop" class="form-select form-select-sm" '.($options ? 'disabled' : '').'>
+                                                    <option value="">Choose</option>
+                                                    '.$optionsCrop.'
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-6 col-md-3">
+                                            <div class="input-group input-group-sm">
+                                                <span class="input-group-text">Code</span>
+                                                <input class="form-control form-control-sm" type="number" value="0" name="add-variety-map-code" required '.($options ? 'disabled' : '').'>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-6 col-md-4 mt-1 mt-md-0">
+                                            <div class="input-group input-group-sm">
+                                                <span class="input-group-text">Name</span>
+                                                <input class="form-control form-control-sm" type="text" value="'.$data[$i][2].'" name="add-variety-map-name"  required '.($options ? 'disabled' : '').'>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-6 col-md-auto mt-1 mt-md-0">
+                                            <button class="form-control btn btn-sm btn-light"  type="button" '.($options ? 'disabled' : '').' onclick="setVarietyFromMap('."'".'formAddVariety'.$i."'".')">Add</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        ';
+
+                        if(!$isChecked) $issues++;
+
+                    }else{
+                        $optionsRadio .= '
+                            <div class="col-md-6 p-1">
+                                <div class="form-check">
+                                    <input class="form-check-input cursor-select" type="radio" name="optionVariety'.$i.'" value="'.$exist["id"].'" checked id="checkOptionVariety'.$i.'_'.$exist["id"].'">
+                                    <label class="form-check-label cursor-select" for="checkOptionVariety'.$i.'_'.$exist["id"].'">
+                                        <b>'.$exist["variety"].'</b> ('.$exist["variety_code"].' - '.substr($exist["crop"], 0, 5).')
+                                    </label>
+                                </div>
+                            </div>
+                        ';
+
+                        $isset = false;
+                        if ($selected)
+                        foreach ($selected as $s) {
+                            if($i == $s["row"]){
+                                $s["greenhouse"] = $data[$i][0];
+                                $s["position"] = $data[$i][1];
+                                $s["value"] = $exist["id"];
+                                $s["management"] = $data[$i][3];
+                                $isset = true;
+                            }
+                        }
+
+                        if(!$isset) array_push($selected, array("row" => $i, "greenhouse" => $data[$i][0], "position" => $data[$i][1], "value" => $exist["id"], "management" => $data[$i][3], "isForm" => false));
+                    }
+
+                    $this->html .= '
+                        <tr class="'.((!$exist AND !$isChecked) ? !$options ? 'bg-danger bg-opacity-25' : 'bg-warning bg-opacity-10' : 'bg-success bg-opacity-10').'">
+                            <td class="align-middle">'.$i.'</td>
+                            <td class="align-middle">'.$data[$i][0].'</td>
+                            <td class="align-middle">'.$data[$i][1].'</td>
+                            <th class="align-middle">'.$data[$i][2].'</th>
+                            <td class="align-middle">'.$data[$i][3].'</td>
+                            <td class="text-center align-middle">'.(!$exist ? !$options ? '<i class="bi bi-x-circle-fill text-danger"> 3</i>' : '<i class="bi bi-info-circle-fill text-warning"> 2</i>' : '<i class="bi bi-check-circle-fill text-success"> 1</i>').'</td>
+                            <td class="align-middle" width="50%"><div class="row m-0 px-4 py-0 overflow-auto" style="max-height:120px;">'.$optionsRadio.'</div></td>
+                        </tr>
+                    ';
+                }
+
+                $this->html .= '
+                        </tbody>
+                    </table>
+                ';
+
+                $this->arrResponse = array(
+                    'status' => true, 
+                    'res' => $this->html,
+                    'selected' => $selected,
+                    'issues' => $issues
+                );
+                
+            }else{
+                $this->arrResponse = array(
+                    'status' => false, 
+                    'res' => 'No file!'
+                );
+            }
+
+            echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
+
+        }
+
+        public function loadEventMap()
+        {
+            if (isset($_GET["id_event"]) AND isset($_GET["year"]) AND isset($_GET["isEditMap"]) AND $_GET["id_event"] AND $_GET["year"] AND $_GET["isEditMap"]) {
+
+                $response = $this->model->getEventMapByYear($_GET["id_event"], $_GET["year"]);
+
+                if (!empty($response)) {
+
+                    $varieties = $this->model->getVarieties();
+                    $options = null;
+
+                    if (!empty($varieties)) {
+                        foreach($varieties as $v) {
+                            $options .= '<option value="'.$v["id"].'" data-crop="'.$v["crop"].'">'.$v["variety"].' ('.$v["variety_code"].')</option>';
+                        }
+                    }
+
+                    $this->html.='
+                        <table class="table table-hover w-100 fs-0-8" id="table-event-map">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Id</th>
+                                    <th scope="col">Greenhouse</th>
+                                    <th scope="col">Position</th>
+                                    <th scope="col">Crop</th>
+                                    <th scope="col">Variety</th>
+                                    <th scope="col">Management</th>
+                                </tr>
+                            </thead>
+                            <tbody>';
+
+                    foreach ($response as $k) {
+
+                        $this->html .= '
+                            <tr>
+                                <td class="text-muted">'.$k["id"].'</td>
+                                <td>'.$k["greenhouse"].'</td>
+                                <th>'.$k["position"].'</th>
+                                <td>'.$k["crop"].'</td>
+                                <td>
+                                    <select class="form-select form-select-sm w-auto" onchange="updateVarietyMap(this, '.$k["id"].')" '.($_GET["isEditMap"] == "false" ? 'disabled' : '').'>
+                                        <option value="'.$k["id_variety"].'" data-crop="'.$v["crop"].'">'.$k["variety"].' ('.$k["variety_code"].')</option>
+                                        '.($_GET["isEditMap"] == "true" ? $options : '').'
+                                    </select>
+                                </td>
+                                <td>'.$k["management"].'</td>
+                            </tr>
+                        ';
+                    }
+
+                    $this->html .= '
+                            </tbody>
+                        </table>
+                    ';
+
+                    $this->arrResponse = array(
+                        'status' => true, 
+                        'res' => $this->html 
+                    );
+                }else{
+                    $this->arrResponse = array(
+                        'status' => true, 
+                        'res' => 'No data!'
+                    );
+                }
+            }else{
+                $this->arrResponse = array(
+                    'status' => false, 
+                    'res' => 'Parameter fail!'
+                );
+            }
+
+            echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
+        }
+
+        public function setVarietyFromMap()
+        {
+            if (isset($_POST["add-variety-map-crop"]) AND isset($_POST["add-variety-map-code"]) AND isset($_POST["add-variety-map-name"]) AND $_POST["add-variety-map-crop"] AND $_POST["add-variety-map-name"]) {
+
+                if ($this->model->getVarietyByNo($_POST["add-variety-map-crop"], $_POST["add-variety-map-code"])) {
+                    $this->arrResponse = array(
+                        'status' => false, 
+                        'res' => 'variety exist!'
+                    );
+
+                    exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
+                }
+                
+                $id = $this->model->setVariety($_POST["add-variety-map-crop"], $_POST["add-variety-map-code"], trim($_POST["add-variety-map-name"]));
+
+                if (!$id) {
+                    $this->arrResponse = array(
+                        'status' => false, 
+                        'res' => 'Add variety fail!'
+                    );
+
+                    exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
+                }
+
+                $this->arrResponse = array(
+                    'status' => true, 
+                    'res' => 'Add variety success'
+                );
+            }else{
+                $this->arrResponse = array(
+                    'status' => false, 
+                    'res' => 'Parameter fail!'
+                );
+            }
+
+            echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
+        }
+
+        public function updateVarietyMap()
+        {   
+            if (isset($_POST["idEvent"]) AND isset($_POST["year"]) AND isset($_POST["idMap"]) AND isset($_POST["idVariety"]) AND $_POST["idEvent"] AND $_POST["year"] AND $_POST["idMap"] AND $_POST["idVariety"]) {
+
+                if ($_POST["year"] < date('Y')) {
+                    $this->arrResponse = array(
+                        'status' => false, 
+                        'res' => 'Year not available!'
+                    );
+
+                    exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
+                }
+
+                if(!empty($this->model->getIsStartedEvent($_POST["idEvent"], $_POST["year"]))){
+                    $this->arrResponse = array(
+                        'status' => false, 
+                        'res' => 'Event started!'
+                    );
+
+                    exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
+                }
+                
+                if ($this->model->updateVarietyMap($_POST["idMap"], $_POST["idVariety"])) {
+                    $this->arrResponse = array(
+                        'status' => true, 
+                        'res' => 'Update successfull'
+                    );
+                }else{
+                    $this->arrResponse = array(
+                        'status' => false, 
+                        'res' => 'Update variety failed!'
+                    );
+                }
+
+            }else{
+                $this->arrResponse = array(
+                    'status' => false, 
+                    'res' => 'No data!'
+                );
+            }
+
+            echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
+        }
         //TODO Events --------------------------------------------------------------------
 
 
@@ -1707,7 +2361,7 @@
             if (!empty($response)) {
 
                 $this->html.='
-                    <table class="table table-hover" id="table-parameters" style="font-size:14px;">
+                    <table class="table table-hover w-100 fs-0-8" id="table-parameters">
                         <thead>
                             <tr>
                                 <th scope="col">Parameter</th>
@@ -1903,7 +2557,7 @@
                 }else {
                     if (isset($_POST["parameter-id"]) AND isset($_POST["parameter-name"]) AND isset($_POST["parameter-type"]) AND isset($_POST["parameter-category"]) AND isset($_POST["parameter-label"]) 
                         AND isset($_POST["parameter-remark"]) AND isset($_POST["crops"]) AND isset($_POST["parameter-position"]) AND isset($_POST["options"]) AND $_POST["parameter-id"] 
-                        AND $_POST["parameter-name"] AND $_POST["parameter-type"] AND $_POST["parameter-category"] AND $_POST["crops"] AND $_POST["parameter-position"] AND $_POST["options"]) {
+                        AND $_POST["parameter-name"] AND $_POST["parameter-category"] AND $_POST["crops"] AND $_POST["parameter-position"] AND $_POST["options"]) {
 
                         $all = (isset($_POST["parameter-all"])) ? 1 : 0 ;
 
@@ -2016,7 +2670,7 @@
             if (!empty($response)) {
 
                 $this->html.='
-                    <table class="table table-hover" id="table-users" style="font-size:14px;">
+                    <table class="table table-hover w-100 fs-0-8" id="table-users">
                         <thead>
                             <tr>
                                 <th scope="col">User</th>
@@ -2342,7 +2996,7 @@
             if (!empty($response)) {
 
                 $this->html.='
-                    <table class="table table-hover" id="table-customers" style="font-size:14px;">
+                    <table class="table table-hover w-100 fs-0-8" id="table-customers">
                         <thead>
                             <tr>
                                 <th scope="col">Cust No</th>
@@ -2606,7 +3260,7 @@
                 if (!empty($crops)) {
                     
                     $this->html .= '
-                        <h6><i class="bi bi-gear-fill me-1"></i>Crops</h6>
+                        <h6><i class="bi bi-flower2 me-1"></i>Crops</h6>
                         <div class="d-flex flex-wrap mtm-checkbox-filter" id="calendar-filters-crops">
                     ';
 

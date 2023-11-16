@@ -111,10 +111,10 @@ async function loadCustomers() {
 
                     if(objData.status == true){
                         $('#customers').html(objData.res);
-                        let table = new DataTable('#table-customers', {
+                        new DataTable('#table-customers', {
                             "processing": true,
                             "scrollY": false,
-                            "scrollX": (isMobile()) ? true : false,
+                            "scrollX": (isMobile) ? true : false,
                             "iDisplayLength": 50,
                             "stateSave": true,
                             order: [[1, 'asc']],

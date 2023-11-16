@@ -99,7 +99,7 @@ $(document).ready(function() {
         .done(function(response){
             console.log(response);
             try {
-                var objData = JSON.parse(response);
+                const objData = JSON.parse(response);
 
                 if(objData.status == true){
                     alert(objData.res);
@@ -142,14 +142,14 @@ async function loadParameters() {
 
             success:  function(response) {
                 try {
-                    var objData = JSON.parse(response);
+                    const objData = JSON.parse(response);
 
                     if(objData.status == true){
                         $('#parameters').html(objData.res);
                         let table = new DataTable('#table-parameters', {
                             "processing": true,
                             "scrollY": false,
-                            "scrollX": (isMobile()) ? true : false,
+                            "scrollX": (isMobile) ? true : false,
                             "iDisplayLength": 50,
                             "stateSave": true,
                             scrollY: '53vh',
@@ -194,7 +194,7 @@ async function loadCrops() {
 
             success:  function(response) {
                 try {
-                    var objData = JSON.parse(response);
+                    const objData = JSON.parse(response);
 
                     if(objData.status == true){
                         $('#parameter-crops').html(objData.res);
@@ -293,7 +293,7 @@ async function loadParameterEdit(id) {
 
             success:  function(response) {
                 try {
-                    var objData = JSON.parse(response);
+                    const objData = JSON.parse(response);
 
                     if(objData.status == true){
                         let data = JSON.parse(objData.res);

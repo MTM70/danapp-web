@@ -11,7 +11,7 @@ const loadQr = async () => {
         $.ajax({
             url: base_url+"/Qr/event",
             type: 'GET',
-            data: {'id_event': idEvent},
+            data: { 'id_event': idEvent, 'year': year },
             cache: false,
 
             beforeSend: function() {

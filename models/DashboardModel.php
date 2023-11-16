@@ -124,16 +124,57 @@
             $array = array($idCropGeneral, $cropNo, $crop);
             return $this->insert($sql, $array);
         }
+
+        public function getVarieties()
+        {
+            $sql = "SELECT v.*, c.crop 
+                    FROM varieties AS v 
+                    INNER JOIN crops AS c ON c.id = v.id_crop 
+                    WHERE TRIM(variety) != '' AND TRIM(variety) != '..' 
+                    ORDER BY variety";
+
+            return $this->select($sql);
+        }
         
         public function getVarietyByNo(int $idCrop, int $number)
         {
-            $sql = 'SELECT id 
+            $sql = "SELECT id 
                     FROM varieties 
-                    WHERE id_crop = :value0 AND variety_code = :value1 
-                    LIMIT 1';
+                    WHERE id_crop = :value0 AND 
+                        CASE 
+                            WHEN :value1 != 0 THEN :value1 
+                            ELSE -1 
+                        END = variety_code 
+                    LIMIT 1";
 
             $array = array($idCrop, $number);
             return $this->selectOne($sql, $array);
+        }
+
+        public function getVarietyByName(string $name)
+        {
+            $sql = 'SELECT v.id, variety, variety_code, crop 
+                    FROM varieties AS v 
+                    INNER JOIN crops AS c ON c.id = v.id_crop 
+                    WHERE variety = :value0 
+                    LIMIT 1';
+
+            $array = array($name);
+            return $this->selectOne($sql, $array);
+        }
+
+        public function getVarietyByNameAdvance(string $name)
+        {
+            $sql = "SELECT 
+                        v.id, variety, variety_code, crop, 
+                        MATCH(variety) AGAINST(:value0) AS relevancia 
+                    FROM varieties AS v 
+                    INNER JOIN crops AS c ON c.id = v.id_crop 
+                    WHERE MATCH(variety) AGAINST(:value0) 
+                    ORDER BY relevancia DESC,variety";
+
+            $array = array($name);
+            return $this->select($sql, $array);
         }
 
         public function setVariety(int $idCrop, int $varietyCode, String $variety)
@@ -248,14 +289,14 @@
         public function getDataCountBetweenWeeksGroupCust(int $year1, int $week1, int $year2, int $week2, string $filterUploads, string $filterCompleted)
         {
             $sql = "SELECT 
-                        cust AS categorie, SUM(completed) AS count, SUM(goal) AS goal 
+                        id_cust AS id, cust AS categorie, SUM(completed) AS count, SUM(goal) AS goal 
                     FROM (
                         SELECT c.id AS id_cust, c.cust, 0 AS completed, COUNT(*) AS goal 
                         FROM orders AS o 
                         INNER JOIN sec_customers AS sc ON sc.id = o.id_sec_cust 
                         INNER JOIN customers AS c ON c.id = sc.id_cust 
                         $filterUploads 
-                        WHERE (YEAR(visit_day) BETWEEN :value0 AND :value2) AND (WEEK(visit_day) BETWEEN :value1 AND :value3) AND o.id_type = 1 
+                        WHERE (YEAR(visit_day) BETWEEN :value0 AND :value2) AND (WEEK(visit_day) BETWEEN :value1 AND :value3) 
                         GROUP BY c.id 
 
                         UNION ALL 
@@ -272,72 +313,29 @@
                         ) AS d2 
                         GROUP BY id_cust 
                     ) AS d 
-                    GROUP BY id_cust";
+                    GROUP BY id_cust 
+                    ORDER BY SUM(completed) DESC, cust";
 
             $array = array($year1, $week1, $year2, $week2);
             return $this->select($sql, $array);
         }
 
-        /* public function getDataCountBetweenWeeksGroupCust2(int $year1, int $week1, int $year2, int $week2)
-        {
-            $sql = "SELECT 
-                        d.cust AS categorie,
-                        COUNT(*) AS count, 
-                        IFNULL(g.goal, 0) AS goal 
-                    FROM (
-                        SELECT DISTINCT c.cust, o.id, sc.id_cust, op.id_user 
-                        FROM orders_parameters AS op 
-                        INNER JOIN orders AS o ON o.id = op.id_order 
-                        INNER JOIN sec_customers AS sc ON sc.id = o.id_sec_cust 
-                        INNER JOIN customers AS c ON c.id = sc.id_cust 
-                        WHERE (op.year BETWEEN :value0 AND :value2) AND (op.week BETWEEN :value1 AND :value3) 
-                    ) AS d 
-                    LEFT JOIN (
-                        SELECT c.id, COUNT(*) AS goal FROM orders AS o 
-                        INNER JOIN sec_customers AS sc ON sc.id = o.id_sec_cust 
-                        INNER JOIN customers AS c ON c.id = sc.id_cust 
-                        WHERE (YEAR(visit_day) BETWEEN :value0 AND :value2) AND (WEEK(visit_day) BETWEEN :value1 AND :value3) AND o.id_type = 1 
-                        GROUP BY c.id 
-                    ) AS g ON g.id = d.id_cust 
-                    GROUP BY d.id_cust";
-
-            $array = array($year1, $week1, $year2, $week2);
-            return $this->select($sql, $array);
-        } */
-
         public function getDataCountBetweenWeeksGroupUser(int $year1, int $week1, int $year2, int $week2, string $filterCompleted)
         {
             $sql = "SELECT 
-                        u.user AS categorie,
+                        id_user AS id, u.user AS categorie,
                         COUNT(*) AS count 
                     FROM orders_closed AS oc 
                     INNER JOIN orders AS o ON o.id = oc.id_order 
                     INNER JOIN users AS u ON u.id = id_user 
                     $filterCompleted 
                     WHERE (YEAR(oc.date) BETWEEN :value0 AND :value2) AND (WEEK(oc.date) BETWEEN :value1 AND :value3) 
-                    GROUP BY id_user";
+                    GROUP BY id_user 
+                    ORDER BY COUNT(*) DESC, u.user";
 
             $array = array($year1, $week1, $year2, $week2);
             return $this->select($sql, $array);
         }
-
-        /* public function getDataCountBetweenWeeksGroupUser(int $year1, int $week1, int $year2, int $week2)
-        {
-            $sql = "SELECT 
-                        d.user AS categorie,
-                        COUNT(*) AS count 
-                    FROM (
-                        SELECT DISTINCT u.user, o.id, op.id_user 
-                        FROM orders_parameters AS op 
-                        INNER JOIN orders AS o ON o.id = op.id_order 
-                        INNER JOIN users AS u ON u.id = op.id_user 
-                        WHERE (op.year BETWEEN :value0 AND :value2) AND (op.week BETWEEN :value1 AND :value3) 
-                    ) AS d
-                    GROUP BY d.id_user";
-
-            $array = array($year1, $week1, $year2, $week2);
-            return $this->select($sql, $array);
-        } */
 
         public function getDataCountBetweenWeeksGroupCrop(int $year1, int $week1, int $year2, int $week2, string $filterUploads = "", string $filterCompleted = "")
         {
@@ -372,43 +370,11 @@
                         GROUP BY d2.id_crop 
                     ) AS d 
                     GROUP BY id_crop 
-                    ORDER BY crop";
+                    ORDER BY SUM(completed) DESC, crop";
 
             $array = array($year1, $week1, $year2, $week2);
             return $this->select($sql, $array);
         }
-
-        /* public function getDataCountBetweenWeeksGroupCrop(int $year1, int $week1, int $year2, int $week2)
-        {
-            $sql = "SELECT 
-                        d.crop AS categorie,
-                        COUNT(*) AS count, 
-                        IFNULL(g.goal, 0) AS goal 
-                    FROM (
-                        SELECT DISTINCT c.crop, v.id_crop, o.id, op.id_user 
-                        FROM orders_parameters AS op 
-                        INNER JOIN orders AS o ON o.id = op.id_order 
-                        INNER JOIN varieties AS v ON v.id = op.id_variety 
-                        INNER JOIN crops AS c ON c.id = v.id_crop 
-                        WHERE (op.year BETWEEN :value0 AND :value2) AND (op.week BETWEEN :value1 AND :value3) 
-                    ) AS d 
-                    LEFT JOIN (
-                        SELECT d2.id_crop, COUNT(d2.id) AS goal 
-                        FROM (
-                            SELECT DISTINCT o.id, v.id_crop 
-                            FROM orders_details AS od 
-                            INNER JOIN orders AS o ON o.id = od.id_order 
-                            INNER JOIN varieties AS v ON v.id = od.id_variety 
-                            INNER JOIN crops AS c ON c.id = v.id_crop 
-                            WHERE (YEAR(visit_day) BETWEEN :value0 AND :value2) AND (WEEK(visit_day) BETWEEN :value1 AND :value3) AND o.id_type = 1 
-                        ) AS d2 
-                        GROUP BY d2.id_crop 
-                    ) AS g ON g.id_crop = d.id_crop 
-                    GROUP BY d.id_crop";
-
-            $array = array($year1, $week1, $year2, $week2);
-            return $this->select($sql, $array);
-        } */
 
         public function getDataCountBetweenWeeksGroupVariety(int $year1, int $week1, int $year2, int $week2, string $filterUploads = "", string $filterCompleted = "")
         {
@@ -422,7 +388,7 @@
                             INNER JOIN orders AS o ON o.id = od.id_order 
                             INNER JOIN varieties AS v ON v.id = od.id_variety 
                             $filterUploads 
-                            WHERE (YEAR(visit_day) BETWEEN :value0 AND :value2) AND (WEEK(visit_day) BETWEEN :value1 AND :value3) AND TRIM(variety) != '' AND o.id_type = 1 
+                            WHERE (YEAR(visit_day) BETWEEN :value0 AND :value2) AND (WEEK(visit_day) BETWEEN :value1 AND :value3) AND TRIM(variety) != '' 
                         ) AS d1 
                         GROUP BY d1.id_variety 
 
@@ -441,56 +407,24 @@
                         GROUP BY d2.id_variety 
                     ) AS d 
                     GROUP BY id_variety 
-                    ORDER BY variety";
+                    ORDER BY SUM(completed) DESC, variety";
 
             $array = array($year1, $week1, $year2, $week2);
             return $this->select($sql, $array);
         }
 
-        /* public function getDataCountBetweenWeeksGroupVariety(int $year1, int $week1, int $year2, int $week2)
-        {
-            $sql = "SELECT 
-                        d.variety AS categorie,
-                        COUNT(*) AS count 
-                    FROM (
-                        SELECT DISTINCT v.variety, op.id_variety, o.id, op.id_user 
-                        FROM orders_parameters AS op 
-                        INNER JOIN orders AS o ON o.id = op.id_order 
-                        INNER JOIN varieties AS v ON v.id = op.id_variety 
-                        WHERE (op.year BETWEEN :value0 AND :value2) AND (op.week BETWEEN :value1 AND :value3) 
-                    ) AS d
-                    GROUP BY d.id_variety";
-
-            $array = array($year1, $week1, $year2, $week2);
-            return $this->select($sql, $array);
-        } */
-
         public function getParametersBetweenWeeks(int $year1, int $week1, int $year2, int $week2)
         {
-            $sql = 'SELECT DISTINCT p.id, p.parameter, p.type 
+            $sql = 'SELECT DISTINCT p.id, p.parameter, p.type, p.category 
                     FROM orders_parameters AS op 
                     INNER JOIN orders AS o ON o.id = op.id_order 
                     INNER JOIN parameters AS p ON p.id = op.id_parameter 
                     WHERE (op.year BETWEEN :value0 AND :value2) AND (op.week BETWEEN :value1 AND :value3) 
-                    ORDER BY p.parameter';
+                    ORDER BY p.category, p.parameter';
 
             $array = array($year1, $week1, $year2, $week2);
             return $this->select($sql, $array);
         }
-
-        /* public function getCropsBetweenWeeks(int $year1, int $week1, int $year2, int $week2)
-        {
-            $sql = 'SELECT DISTINCT c.id, c.crop 
-                    FROM orders_parameters AS op 
-                    INNER JOIN orders AS o ON o.id = op.id_order 
-                    INNER JOIN varieties AS v ON v.id = op.id_variety 
-                    INNER JOIN crops AS c ON c.id = v.id_crop 
-                    WHERE (op.year BETWEEN :value0 AND :value2) AND (op.week BETWEEN :value1 AND :value3) 
-                    ORDER BY crop';
-
-            $array = array($year1, $week1, $year2, $week2);
-            return $this->select($sql, $array);
-        } */
 
         public function getDestinationsBetweenWeeks(int $year1, int $week1, int $year2, int $week2)
         {
@@ -561,23 +495,23 @@
 
         public function getVarietiesBetweenWeeks(int $year1, int $week1, int $year2, int $week2)
         {
-            $sql = 'SELECT DISTINCT v.id_crop, c.crop, v.id, v.variety 
+            $sql = "SELECT DISTINCT v.id_crop, c.crop, v.id, v.variety 
                     FROM orders_parameters AS op 
                     INNER JOIN orders AS o ON o.id = op.id_order 
                     INNER JOIN varieties AS v ON v.id = op.id_variety 
                     INNER JOIN crops AS c ON c.id = v.id_crop 
                     WHERE (op.year BETWEEN :value0 AND :value2) AND (op.week BETWEEN :value1 AND :value3) 
-                    ORDER BY v.id_crop, v.variety';
+                    ORDER BY v.id_crop, v.variety";
 
             $array = array($year1, $week1, $year2, $week2);
             return $this->select($sql, $array);
         }
 
-        public function getVarietiesBetweenWeeksDistinctOrders(int $year1, int $week1, int $year2, int $week2, string $varieties)
+        public function getVarietiesBetweenWeeksDistinctOrders(int $year1, int $week1, int $year2, int $week2, string $varieties, string $filterCompleted)
         {
             $sql = "SELECT
                         u.user, 
-                        sc.sec_cust, 
+                        sc.id_cust, sc.sec_cust, 
                         o.order_no, 
                         op.date, op.id_order, op.id_user, op.id_variety, op.year, op.week, 
                         c.crop, 
@@ -588,6 +522,7 @@
                     INNER JOIN crops AS c ON c.id = v.id_crop 
                     INNER JOIN users AS u ON u.id = op.id_user 
                     INNER JOIN sec_customers AS sc ON sc.id = o.id_sec_cust 
+                    $filterCompleted 
                     WHERE (op.year BETWEEN :value0 AND :value2) AND (op.week BETWEEN :value1 AND :value3) AND id_variety IN ($varieties) 
                     GROUP BY o.id, op.id_user, v.id 
                     ORDER BY v.id_crop, v.variety";
@@ -649,6 +584,30 @@
             return $this->insert($sql, $array);
         }
 
+        public function setEventYear(int $idEvent, int $year)
+        {
+            $sql = 'INSERT INTO events_header (id_event, year) VALUES (:value0, :value1)';
+
+            $array = array($idEvent, $year);
+            return $this->insert($sql, $array);
+        }
+
+        public function setEventMap(int $idEvent, int $year, int $idVariety, string $greenhouse, string $position)
+        {
+            $sql = 'INSERT INTO events_maps (id_event, year, id_variety, greenhouse, position) VALUES (:value0, :value1, :value2, :value3, :value4)';
+
+            $array = array($idEvent, $year, $idVariety, $greenhouse, $position);
+            return $this->insert($sql, $array);
+        }
+
+        public function updateVarietyMap(int $id, int $idVariety)
+        {
+            $sql = 'UPDATE events_maps SET id_variety = :value1 WHERE id = :value0';
+
+            $array = array($id, $idVariety);
+            return $this->update($sql, $array);
+        }
+
         public function updateEvent(int $id, String $name, int $start, int $end, String $description, string $image = null, int $state)
         {
             $sql = 'UPDATE events SET name = :value1, start_week = :value2, end_week = :value3, description = :value4, image = :value5, state = :value6 WHERE id = :value0';
@@ -657,13 +616,35 @@
             return $this->update($sql, $array);
         }
 
-        public function getEventYears(int $idEvent)
+        /* public function getEventYears(int $idEvent)
         {
             $sql = "SELECT YEAR(e.date) AS year, 
                         COUNT(e.id) AS orders, IFNULL(e2.id, 0) AS ordersBck 
                     FROM events_sec_customers_orders AS e 
                     LEFT JOIN events_sec_customers_orders_bck AS e2 ON e2.id_event = :value0 AND YEAR(e2.date) = YEAR(e.date) 
                     WHERE e.id_event = :value0 GROUP BY YEAR(e.date) ORDER BY YEAR(e.date)";
+
+            $array = array($idEvent);
+            return $this->select($sql, $array);
+        } */
+
+        public function getEventYears(int $idEvent)
+        {
+            $sql = "SELECT eh.year, IFNULL(o.orders, 0) AS orders, IFNULL(em.map_data, 0) AS map_data 
+                    FROM events_header AS eh 
+                    LEFT JOIN (
+                        SELECT YEAR(e.date) AS year, COUNT(e.id) AS orders 
+                        FROM events_sec_customers_orders AS e 
+                        WHERE e.id_event = :value0 
+                        GROUP BY YEAR(e.date) 
+                    ) AS o ON o.year = eh.year 
+                    LEFT JOIN (
+                        SELECT year, COUNT(*) AS map_data 
+                        FROM events_maps 
+                        WHERE id_event = :value0 
+                        GROUP BY year 
+                    ) AS em ON em.year = eh.year 
+                    WHERE id_event = :value0";
 
             $array = array($idEvent);
             return $this->select($sql, $array);
@@ -697,6 +678,39 @@
 
             $array = array($year, $idEvent);
             return $this->select($sql, $array);
+        }
+
+        public function getEventMapByYear(int $idEvent, int $year)
+        {
+            $sql = "SELECT em.*, c.crop, v.variety_code, v.variety 
+                    FROM events_maps AS em 
+                    INNER JOIN events AS e ON e.id = em.id_event 
+                    INNER JOIN varieties AS v ON v.id = em.id_variety 
+                    INNER JOIN crops AS c ON c.id = v.id_crop 
+                    WHERE id_event = :value0 AND year = :value1 
+                    ORDER BY greenhouse, position + 0";
+
+            $array = array($idEvent, $year);
+            return $this->select($sql, $array);
+        }
+
+        public function getIsStartedEvent(int $idEvent, int $year)
+        {
+            $sql = "SELECT e.* 
+                    FROM events_sec_customers AS e 
+                    WHERE e.id_event = :value0 AND YEAR(e.date) = :value1 
+                    LIMIT 1";
+
+            $array = array($idEvent, $year);
+            return $this->selectOne($sql, $array);
+        }
+
+        public function deleteEventMapByYear(int $idEvent, int $year)
+        {
+            $sql = 'DELETE FROM events_maps WHERE id_event = :value0 AND year = :value1 ';
+
+            $array = array($idEvent, $year);
+            return $this->delete($sql, $array);
         }
         //TODO Events--------------------------------------------------------------------------
 

@@ -14,6 +14,30 @@
                         <span id="upload-text">Upload</span>
                     </button>
                 </form>
+
+                <hr><div class="mt-3">
+                    <div class="fs-0-8"><i class="bi bi-clock me-1"></i>Upload logs</div>
+                    <table class="table table-hover fs-0-8">
+                        <tr>
+                            <th>Date</th>
+                            <th>Delivery week min</th>
+                            <th>Delivery week max</th>
+                            <th>Count</th>
+                        </tr>
+                        <tr>
+                            <td>12-23-2343</td>
+                            <td>W12-2023</td>
+                            <td>W13-2023</td>
+                            <td>132</td>
+                        </tr>
+                        <tr>
+                            <td>12-23-2343</td>
+                            <td>W12-2023</td>
+                            <td>W13-2023</td>
+                            <td>132</td>
+                        </tr>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -113,7 +137,7 @@
                             </select>
                         </div>
                         <div class="col-md-4 d-none" id="parameter-all-cont">
-                            <label for="inputState" class="form-label">All varieties</label>
+                            <label class="form-label" for="parameter-all">All varieties</label>
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" role="switch" name="parameter-all" id="parameter-all">
                                 <label class="form-check-label" for="parameter-all"></label>
@@ -129,7 +153,7 @@
                         </div>
 
                         <div class="d-none" id="parameter-options-cont">
-                            <div class="mt-4"><label for="" class="form-label">
+                            <div class="mt-4"><label class="form-label">
                                 Options
                                 <button class="btn btn-sm btn-primary rounded-circle p-0 ms-1" type="button" style="width:20px; height:20px;" onclick="addOptionParameter()">
                                     <i class="bi bi-plus fw-bold"></i>
@@ -140,7 +164,7 @@
                             </div>
                         </div>
                         
-                        <div class="mt-4"><label for="" class="form-label">Assigned crops</label></div>
+                        <div class="mt-4"><p class="form-label">Assigned crops</p></div>
                         <hr class="mt-1">
                         <div class="row overflow-auto px-4" id="parameter-crops" style="max-height:35vh;">
                         </div>
@@ -183,7 +207,7 @@
 
                         <div class="col-md-2">
                             <label for="name" class="form-label">Name</label>
-                            <input type="text" class="form-control" name="name" id="name" required>
+                            <input type="text" class="form-control" name="name" id="name" autocomplete="true" required>
                         </div>
                         <div class="col-md-3">
                             <label for="user-last-name" class="form-label">Last name</label>
@@ -204,7 +228,7 @@
                             </select>
                         </div>
                         
-                        <div class="mt-4"><label for="" class="form-label">Assigned sec cust</label></div>
+                        <div class="mt-4"><p class="form-label">Assigned sec cust</p></div>
                         <hr class="mt-1">
                         <div class="row" id="user-sec-custs"></div>
                     </div>
@@ -235,7 +259,7 @@
                         </div>
 
                         <div class="col-md-3">
-                            <label for="customer-image" class="form-label">Logo</label>
+                            <label class="form-label" for="customer-file">Logo</label>
                             <div class="w-100 img-thumbnail d-flex justify-content-center align-items-center" style="height: 150px; background-size: cover; background-position: center;" id="customer-image">
                                 <i class="bi bi-card-image display-1"></i>
                             </div>
@@ -261,7 +285,7 @@
                         </div>
 
                         <div class="mt-5">
-                            <label for="" class="form-label">Sec customers
+                            <label class="form-label">Sec customers
                                 <button class="btn btn-sm btn-primary rounded-circle p-0 ms-1" type="button" style="width:20px; height:20px;" onclick="addSecCustomer()">
                                     <i class="bi bi-plus fw-bold"></i>
                                 </button>
@@ -375,10 +399,66 @@
             
             <div class="modal-header">
                 <h1 class="modal-title fs-5" id="modalViewEventLabel">Event title</h1>
+
+                <form action="#" class="m-0" id="form-event-add-year">
+                    <input class="d-none" type="number" name="event-add-year-id" id="event-add-year-id" required readonly>
+                    <div class="input-group w-auto ms-3">
+                        <select class="form-select form-select-sm" name="event-add-year-year" id="event-add-year-year"></select>
+                        <button class="btn btn-primary" id="event-add-year-btn">Add year</button>
+                    </div>
+                </form>
+
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="table-responsive" id="event-years">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal view event map -->
+<div class="modal fade" id="modalViewEventMap" tabindex="-1" aria-labelledby="modalViewEventMapLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen p-2 modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content rounded-2">
+            
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="modalViewEventMapLabel">Event title</h1>
+
+                <button type="button" class="btn-close" data-bs-target="#modalViewEvent" data-bs-toggle="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-primary bg-opacity-10 p-1 rounded-3">
+                            <input type="file" class="form-control" id="upload-map">
+                        </div>
+                        <div class="ms-2" id="map-issues"></div>
+                    </div>
+
+                    <div class="dropdown" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="More">
+                        <button class="btn btn-light rounded-pill p-2 shadow-sm" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"><i class="bi bi-three-dots-vertical"></i></button>
+                        <ul class="dropdown-menu position-fixed">
+                            <li>
+                                <div class="dropdown-item-text">
+                                    <div class="form-check">
+                                        <input class="form-check-input cursor-select" type="checkbox" name="editModeMap" id="editModeMap">
+                                        <label class="form-check-label cursor-select" for="editModeMap">
+                                            Edit mode
+                                        </label>
+                                    </div>
+                                </div>
+                            </li>
+                            <li><hr class="dropdown-divider my-2"></li>
+                            <li><a class="dropdown-item" href="http://macbook-pro.local/danapp-web/Format-event.xlsx" target="_blank"><i class="bi bi-file-earmark-excel fs-1-3"></i>Download format</a></li>
+                            <li><a id="generate-qr-btn" class="dropdown-item" href="" target="_blank"><i class="bi bi-qr-code fs-1-3"></i>Generate Qr Codes</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+
+                <div class="table-responsive mt-3 p-1" id="event-year-map">
                 </div>
             </div>
         </div>
@@ -393,11 +473,19 @@
                 <h1 class="modal-title fs-5" id="compareVarietiesModalLabel">Varieties</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body mtm-checkbox-filter">
-                <div class="d-none">
+            <div class="modal-body">
+                <!-- <div class="d-none">
                     <input type="text" placeholder="Buscar...">
-                </div>
-                <div class="d-flex flex-wrap" id="compare-varieties"></div>
+                </div> -->
+               <!--  <div class="mb-2">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="" id="compare-varieties-check-all" checked>
+                        <label class="form-check-label" for="compare-varieties-check-all">
+                            All
+                        </label>
+                    </div>
+                </div> -->
+                <div class="d-flex flex-wrap mtm-checkbox-filter" id="compare-varieties"></div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -415,8 +503,16 @@
                 <h1 class="modal-title fs-5" id="compareParametersModalLabel">Parameters</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body mtm-checkbox-filter">
-                <div class="d-flex flex-wrap" id="compare-parameters"></div>
+            <div class="modal-body">
+                <!-- <div class="mb-2">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="" id="compare-parameters-check-all">
+                        <label class="form-check-label" for="compare-parameters-check-all">
+                            All
+                        </label>
+                    </div>
+                </div> -->
+                <div class="d-flex flex-wrap mtm-checkbox-filter" id="compare-parameters"></div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>

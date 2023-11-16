@@ -1340,6 +1340,10 @@ h6 {
   #miDropdown{
     width: 350px!important;
   }
+
+  .tab-pane-row{
+    height: auto!important;
+  }
 }
 
 input:checked {
@@ -1386,7 +1390,7 @@ input:checked {
 
 .mtm-checkbox-filter input[type="checkbox"]:checked + label {
 	color: #155724;
-    background-color: #bfecca!important;
+  background-color: #bfecca!important;
 	border: 1px solid white;
 }
 
@@ -1425,4 +1429,17 @@ input:checked {
 
 #events .card:hover {
   background: rgb(244, 244, 244)!important;
+}
+
+.tab-pane-row{
+  height: 50vh;
+}
+
+.dataTable tr{
+  z-index: 1;
+}
+
+.dtfc-fixed-left {
+  background: #fff!important;
+  z-index: 2 !important;
 }
