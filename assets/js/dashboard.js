@@ -6,6 +6,9 @@ let stateEvents = false;
 let stateUsers = false;
 let stateCustomers = false;
 
+//*Uploads
+let stateUploadLogs = false;
+
 //* Charts
 const chartsId = ['#nav-customers', '#nav-users', '#nav-crops', '#nav-varieties'];
 let charts = [];
@@ -69,6 +72,8 @@ $(document).ready(async function() {
             }else{
                 alert(objData.res);
             }
+
+            loadUploadLogs();
 
             $('#upload-btn').removeClass('disabled');
             $('#upload-text').html('Upload');
@@ -200,6 +205,59 @@ $(document).ready(async function() {
     await loadParametersCompare();
     await loadTableCompare(false);
 });
+
+const openModalUploads = () => {
+
+    if (stateUploadLogs) return;
+
+    loadUploadLogs();
+
+}
+
+const loadUploadLogs = async () => {
+
+    const container = document.querySelector('#upload-logs');
+
+    return new Promise(resolve => {
+        $.ajax({
+            url: base_url+"/Dashboard/loadUploadLogs",
+            type: 'GET',
+            cache: false,
+
+            beforeSend: function() {
+            },
+    
+            error:  function(xhr) {
+                alert(xhr.status);
+                resolve(false);
+            },
+
+            success: async function(response) {
+                
+                container.innerHTML = null;
+
+                try {
+                    const objData = JSON.parse(response);
+
+                    if(objData.status == true){
+
+                        container.innerHTML = objData.res;
+
+                        stateUploadLogs = true;
+
+                    }else{
+                        alert(objData.res);
+                    }
+                } catch (error) {
+                    alert(error);
+                }
+
+                resolve('resolved');
+            }
+        })
+    });
+
+}
 
 const loadEmptyCharts = () => {
 

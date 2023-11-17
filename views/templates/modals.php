@@ -17,26 +17,7 @@
 
                 <hr><div class="mt-3">
                     <div class="fs-0-8"><i class="bi bi-clock me-1"></i>Upload logs</div>
-                    <table class="table table-hover fs-0-8">
-                        <tr>
-                            <th>Date</th>
-                            <th>Delivery week min</th>
-                            <th>Delivery week max</th>
-                            <th>Count</th>
-                        </tr>
-                        <tr>
-                            <td>12-23-2343</td>
-                            <td>W12-2023</td>
-                            <td>W13-2023</td>
-                            <td>132</td>
-                        </tr>
-                        <tr>
-                            <td>12-23-2343</td>
-                            <td>W12-2023</td>
-                            <td>W13-2023</td>
-                            <td>132</td>
-                        </tr>
-                    </table>
+                    <div id="upload-logs"></div>
                 </div>
             </div>
         </div>

@@ -21,9 +21,9 @@
 
         public function setOrder(int $orderNo, int $idSecCust, int $idType, int $idProduct, int $year, int $week, String $destination, String $remarks, String $visitDay)
         {
-            $sql = 'INSERT INTO orders (order_no, id_sec_cust, id_type, id_product, year, week, destination, remarks, visit_day) VALUES (:value0, :value1, :value2, :value3, :value4, :value5, :value6, :value7, :value8)';
+            $sql = 'INSERT INTO orders (order_no, id_sec_cust, id_type, id_product, year, week, destination, remarks, user_upload, visit_day) VALUES (:value0, :value1, :value2, :value3, :value4, :value5, :value6, :value7, :value8, :value9)';
 
-            $array = array($orderNo, $idSecCust, $idType, $idProduct, $year, $week, $destination, $remarks, $visitDay);
+            $array = array($orderNo, $idSecCust, $idType, $idProduct, $year, $week, $destination, $remarks, $_SESSION["id"], $visitDay);
             return $this->insert($sql, $array);
         }
 
@@ -227,6 +227,28 @@
             $sql = 'UPDATE orders_details SET state = 1 WHERE state = 0';
 
             return $this->update($sql);
+        }
+
+        public function getUploadLogs()
+        {
+            $sql = "SELECT o.date_upload, 
+                        MIN(CONCAT(o.year, '-W', CASE WHEN o.week < 10 THEN CONCAT('0', o.week) ELSE o.week END)) AS week_min, 
+                        MAX(CONCAT(o.year, '-W', CASE WHEN o.week < 10 THEN CONCAT('0', o.week) ELSE o.week END)) AS week_max, 
+                        COUNT(*) AS orders, 
+                        od.rowsData 
+                    FROM orders AS o 
+                    LEFT JOIN (
+                        SELECT date_upload, user_upload, COUNT(*) AS rowsData 
+                        FROM orders_details AS od 
+                        INNER JOIN orders AS o ON o.id = od.id_order 
+                        GROUP BY date_upload, user_upload 
+                    ) AS od ON od.date_upload = o.date_upload AND od.user_upload = o.user_upload 
+                    WHERE order_no > 0 
+                    GROUP BY o.date_upload, o.user_upload 
+                    ORDER BY o.date_upload 
+                    LIMIT 10";
+
+            return $this->select($sql);
         }
 
 

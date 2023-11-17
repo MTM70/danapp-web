@@ -638,6 +638,54 @@
             //echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
         }
 
+        public  function loadUploadLogs()
+        {
+            $response = $this->model->getUploadLogs();
+
+            if (!empty($response)) {
+
+                $this->html .= '
+                    <table class="table table-hover fs-0-8">
+                        <tr>
+                            <th>Date</th>
+                            <th>Delivery week min</th>
+                            <th>Delivery week max</th>
+                            <th>Orders</th>
+                            <th>Rows</th>
+                        </tr>
+                ';
+
+                foreach ($response as $k) {
+
+                    $this->html .= '
+                        <tr>
+                            <td>'.$k["date_upload"].'</td>
+                            <td>'.$k["week_min"].'</td>
+                            <td>'.$k["week_max"].'</td>
+                            <td>'.number_format($k["orders"]).'</td>
+                            <td>'.number_format($k["rowsData"]).'</td>
+                        </tr>
+                    ';
+                }
+
+                $this->html .= '
+                    </table>
+                ';
+
+                $this->arrResponse = array(
+                    'status' => true, 
+                    'res' => $this->html
+                );
+            }else{
+                $this->arrResponse = array(
+                    'status' => true, 
+                    'res' => 'No data!'
+                );
+            }
+
+            echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
+        }
+
         public function loadCharts()
         {
             if (isset($_GET["from"]) AND isset($_GET["to"]) AND isset($_GET["type"]) AND isset($_GET["filters"]) AND $_GET["from"] AND $_GET["to"]) {
@@ -1362,32 +1410,6 @@
 
             echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
         }
-
-        /* public function imageQuality($rutaImagen) {
-            // Crear una nueva imagen desde el archivo original
-            $imagenOriginal = imagecreatefromjpeg($rutaImagen);
-
-            list($width, $heigth) = getimagesize($rutaImagen);
-
-            // Crear una nueva imagen con la calidad deseada
-            $imagenOptimizada = imagecreatetruecolor($width, $heigth);
-            imagecopyresampled($imagenOptimizada, $imagenOriginal, 0, 0, 0, 0, $width, $heigth, $width, $heigth);
-
-            // Redimensionar la imagen
-            $imagenOptimizada = imagescale($imagenOptimizada, $width * 0.2, $heigth * 0.2);
-        
-            // Crear una nueva imagen con la calidad deseada
-            ob_start();
-            $img = imagerotate($imagenOptimizada, 270, 0); 
-            imagejpeg($img, null, 10);
-            $contenidoImagen = ob_get_clean();
-            $enlaceDatos = 'data:image/jpeg;base64,' . base64_encode($contenidoImagen);
-        
-            // Liberar memoria
-            imagedestroy($imagenOriginal);
-        
-            return $enlaceDatos;
-        } */
 
         //TODO Events --------------------------------------------------------------------
         public function loadEvents()

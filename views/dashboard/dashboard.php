@@ -46,7 +46,7 @@
                 </div>
 
                 <div class="me-3">
-                    <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modal-upload-orders"><i class="bi bi-cloud-arrow-up-fill"></i></button>
+                    <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modal-upload-orders" onclick="openModalUploads();"><i class="bi bi-cloud-arrow-up-fill"></i></button>
                 </div>
             </div><!-- End Page Title -->
 
