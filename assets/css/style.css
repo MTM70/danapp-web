@@ -1443,3 +1443,7 @@ input:checked {
   background: #fff!important;
   z-index: 2 !important;
 }
+
+.dataTable tbody td {
+  vertical-align: middle;
+}

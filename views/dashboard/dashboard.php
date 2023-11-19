@@ -87,7 +87,7 @@
                                         </div>
                                         <div class="col col-md-auto mt-2 mt-md-0 text-end">
                                             <div class="dropdown" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="More">
-                                                <button class="btn btn-light border rounded-pill p-2 shadow-sm" type="button" data-bs-toggle="dropdown" aria-expanded="true"><i class="bi bi-three-dots-vertical"></i></button>
+                                                <button class="btn btn-light border rounded-pill p-2" type="button" data-bs-toggle="dropdown" aria-expanded="true"><i class="bi bi-three-dots-vertical"></i></button>
                                                 <ul class="dropdown-menu position-fixed" style="position: absolute; inset: 0px auto auto 0px; margin: 0px; transform: translate3d(1096.5px, 336px, 0px);" data-popper-placement="bottom-start">
                                                     <li><button class="dropdown-item" type="button" onclick="viewReport()"><i class="bi bi-file-earmark-pdf me-2"></i>Report</button></li>
                                                     <li><button class="dropdown-item" type="submit" id="download-btn"><i class="bi bi-file-earmark-excel me-2"></i>Download evaluated</button></li>
@@ -260,10 +260,10 @@
 
                                 <div class="mt-4">
                                     <hr>
-                                    <h6 class="p-2 text-success">Compare varieties<i class="bi bi-caret-down-fill ms-1"></i></h6>
-                                    <hr>
+                                    <h6 class="p-2 text-success d-none">Compare varieties<i class="bi bi-caret-down-fill ms-1"></i></h6>
+                                    <!-- <hr> -->
 
-                                    <div class="row mt-4">
+                                    <!-- <div class="row mt-4 d-none">
                                         <div class="col-6 btn btn-outline-light text-dark m-2 border overflow-auto" id="varieties-compare-btn" style="height: 80px;">
                                             <p class="position-absolute bg-white bg-opacity-50 rounded-3 px-2" style="margin-top: -18px;">Varieties</p>
                                             <div class="py-3 h-100 d-flex flex-wrap justify-content-center align-items-center mtm-checkbox-filter" id="compare-varieties-selected">
@@ -277,13 +277,48 @@
                                                 <h6>Clic here.</h6>
                                             </div>
                                         </div>
-                                    </div>
+                                    </div> -->
 
                                     <div class="row mt-4">
-                                        <nav>
-                                            <div class="nav nav-tabs" id="nav-tab-table-compare" role="tablist">
-                                                <button class="nav-link active" id="nav-resume-tab" data-bs-toggle="tab" data-bs-target="#nav-resume" type="button" role="tab" aria-controls="nav-resume" aria-selected="true" onclick="tableCompareChangeTab()">Resume</button>
-                                                <button class="nav-link" id="nav-detail-tab" data-bs-toggle="tab" data-bs-target="#nav-detail" type="button" role="tab" aria-controls="nav-detail" aria-selected="false" onclick="tableCompareChangeTab()">Detail</button>
+                                        <nav class="row justify-content-between">
+                                            <div class="col-auto">
+                                                <div class="nav nav-tabs" id="nav-tab-table-compare" role="tablist">
+                                                    <button class="nav-link active" id="nav-resume-tab" data-bs-toggle="tab" data-bs-target="#nav-resume" type="button" role="tab" aria-controls="nav-resume" aria-selected="true" onclick="tableCompareChangeTab()">Resume</button>
+                                                    <button class="nav-link" id="nav-detail-tab" data-bs-toggle="tab" data-bs-target="#nav-detail" type="button" role="tab" aria-controls="nav-detail" aria-selected="false" onclick="tableCompareChangeTab()">Detail</button>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-auto">
+                                                <button class="btn btn-light rounded-pill p-2" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                                                    <i class="bi bi-eye"></i>
+                                                    <span class="position-absolute translate-middle p-1 bg-danger border border-light rounded-circle">
+                                                        <span class="visually-hidden">New alerts</span>
+                                                    </span>
+                                                </button>
+
+                                                <div class="dropdown-menu dropdown-menu-end" style="width: 80%;">
+                                                    <div class="container">
+                                                        <div class="row pt-2">
+                                                            <div class="col-12 col-md-6 mt-1 mt-md-0 mb-2 mb-md-0">
+                                                                <div class="btn btn-outline-light w-100 text-dark border overflow-auto" id="varieties-compare-btn" style="min-height:70px; max-height: 200px;">
+                                                                    <p class="position-absolute bg-white bg-opacity fw-semibold rounded-3 px-2" style="margin-top: -18px; margin-left:-5px;"><i class="bi bi-flower3 me-1"></i>Varieties</p>
+                                                                    <div class="py-3 h-auto d-flex flex-wrap justify-content-center align-items-center mtm-checkbox-filter" id="compare-varieties-selected">
+                                                                        <h6>Clic here.</h6>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-12 col-md-6 mt-4 mt-md-0">
+                                                                <div class="btn btn-outline-light w-100 text-dark border overflow-auto" id="parameters-compare-btn" style="min-height:70px; max-height: 200px;">
+                                                                    <p class="position-absolute bg-white bg-opacity fw-semibold rounded-3 px-2" style="margin-top: -18px; margin-left:-5px;"><i class="bi bi-card-list me-1"></i>Parameters</p>
+                                                                    <div class="py-3 h-auto d-flex flex-wrap justify-content-center align-items-center mtm-checkbox-filter" id="compare-parameters-selected">
+                                                                        <h6>Clic here.</h6>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </nav>
                                         <div class="tab-content" id="nav-tabContent">

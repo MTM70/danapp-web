@@ -1268,6 +1268,12 @@ const loadTableCompare = async (modal = true) => {
                         <i class="spiner spinner-border"></i>
                     </div>
                 `);
+
+                $('#nav-resume').html(`
+                    <div class="d-flex flex-column justify-content-center align-items-center h-100">
+                        <i class="spiner spinner-border"></i>
+                    </div>
+                `);
             },
     
             error:  function(xhr) {
@@ -1352,7 +1358,7 @@ const loadTableCompare = async (modal = true) => {
                             }
                         }
 
-                        resizeTable();
+                        resizeTableMain();
                         filterTableCompareWithChartTable();
 
                         //console.log(document.querySelectorAll('#table-compare_wrapper .row'));
@@ -1484,7 +1490,7 @@ const loadTableCompareResume = async () => {
         "scrollX": true,
         "iDisplayLength": 100,
         "stateSave": false,
-        scrollY: '57vh',
+        scrollY: '47vh',
         paging: false,
         searching: false,
         info: false,
@@ -1714,7 +1720,7 @@ const resizeTable = () => {
                 setTimeout(() => {
                     let tableCompare = $(tables[index]).DataTable();
                     tableCompare.columns.adjust().draw();
-                }, 500);
+                }, 300);
             }
 
         }
