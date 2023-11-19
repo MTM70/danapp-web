@@ -1323,7 +1323,7 @@
                                                                     <td class="text-center align-middle">
                                                                         <img 
                                                                             class="cursor-select" 
-                                                                            src="' . /* imageQuality($route) */$route . '" 
+                                                                            src="' . base_url()."/uploads/optimized/".$d["value"] . '" 
                                                                             alt="Imagen" 
                                                                             height="100px"
                                                                             data-url="'.$route.'"
@@ -3552,5 +3552,32 @@
         } */
 
         //TODO Calendar --------------------------------------------------------------------
+
+        //TODO Test optimized images
+        public function optimizedImages($params){
+            
+            $params = explode(',', $params);
+
+            $week1 = explode('-W', $params[0]);
+            $week2 = explode('-W', $params[1]);
+
+            $data = $this->model->getEvaluatedImages($week1[0], $week1[1], $week2[0], $week2[1]);
+
+            if (!empty($data)) {
+
+                foreach ($data as $k) {
+                    $image = imageQuality('uploads/'.$k["value"]);
+
+                    // Guardar la imagen en el servidor
+                    file_put_contents('uploads/optimized/'.$k["value"], base64_decode($image));
+
+                    /*echo '
+                        <img src="'.base_url().'/uploads/optimized/'.$k["value"].'" height="100" alt="'.$k["value"].'">
+                    ';*/
+                }
+
+            }
+
+        }
 
     }

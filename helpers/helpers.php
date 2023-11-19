@@ -41,9 +41,31 @@
         return ucfirst(strtolower($value));
     }
 
-    function imageQuality($rutaImagen, $compressionQuality = 10, $resizeFactor = 0.2, $rotationAngle = 0) {
+    function imageQuality($rutaImagen, $resizeFactor = 0.2, $rotationAngle = 0) {
+        set_time_limit(300);
+        
         // Obtener la extensión del archivo
         $extension = pathinfo($rutaImagen, PATHINFO_EXTENSION);
+
+        //* $compressionQuality ===========================================
+        // Obtener el tamaño del archivo
+        $iamgeSize = filesize($rutaImagen); // En bytes
+
+        // Definir umbrales y valores de calidad correspondientes
+        $umbrals = [2048 * 1024, 1024 * 1024, 512 * 1024, 256 * 1024]; // 2 MB, 1 MB, 512 KB, 256 KB, etc.
+        $QualityValues = [10, 40, 70, 90]; // Puedes ajustar estos valores según tus necesidades
+
+        // Inicializar calidad predeterminada
+        $compressionQuality = 90; // Calidad predeterminada si no se cumple ningún umbral
+
+        // Determinar la calidad en función del tamaño de la imagen
+        foreach ($umbrals as $index => $umbral) {
+            if ($iamgeSize >= $umbral) {
+                $compressionQuality = $QualityValues[$index];
+                break; // Salir del bucle si se encuentra un umbral que se cumple
+            }
+        }
+        //* $compressionQuality ===========================================
     
         // Intentar abrir la imagen según la extensión
         switch (strtolower($extension)) {
@@ -59,12 +81,15 @@
         }
     
         if (!$imagenOriginal) {
+            $imagenOriginal = imagecreatefromstring(file_get_contents($rutaImagen));
             // Manejar el caso en que no se pueda abrir la imagen
+
+            if (!$imagenOriginal)
             throw new Exception("No se pudo abrir la imagen: $rutaImagen");
         }
     
         // Obtener las dimensiones originales de la imagen
-        list($widthOrig, $heightOrig) = getimagesize($rutaImagen);
+        list($heightOrig, $widthOrig) = getimagesize($rutaImagen);
         $width = $widthOrig;
         $height = $heightOrig;
     
@@ -74,13 +99,13 @@
     
         switch ($orientacion) {
             case 3:
-                $imagenOriginal = imagerotate($imagenOriginal, 180, 0);
+                //$imagenOriginal = imagerotate($imagenOriginal, 180, 0);
                 break;
             case 6:
                 $imagenOriginal = imagerotate($imagenOriginal, -90, 0);
                 break;
             case 8:
-                $imagenOriginal = imagerotate($imagenOriginal, 90, 0);
+                //$imagenOriginal = imagerotate($imagenOriginal, 90, 0);
                 break;
             default:
                 $height = $widthOrig;
@@ -101,12 +126,12 @@
         }
     
         $contenidoImagen = ob_get_clean();
-        $enlaceDatos = 'data:image/' . $extension . ';base64,' . base64_encode($contenidoImagen);
+        //$enlaceDatos = 'data:image/' . $extension . ';base64,' . base64_encode($contenidoImagen);
     
         // Liberar memoria
         imagedestroy($imagenOriginal);
         imagedestroy($imagenOptimizada);
     
-        return $enlaceDatos;
+        return base64_encode($contenidoImagen);
     }
     

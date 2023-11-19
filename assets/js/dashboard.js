@@ -1645,6 +1645,9 @@ async function viewReport() {
 
     charts[getChartIndexTab()].dataURI().then(async ({ imgURI, _ }) => {
 
+        const loading = document.querySelector('#full-loading');
+        loading.classList.remove('d-none');
+
         // Crear un objeto XMLHttpRequest
         const xhr = new XMLHttpRequest();
 
@@ -1674,6 +1677,8 @@ async function viewReport() {
                 console.log(xhr.responseText);
                 alert(xhr.responseText);
             }
+
+            loading.classList.add('d-none');
         };
 
     });
@@ -1709,7 +1714,7 @@ const resizeTable = () => {
                 setTimeout(() => {
                     let tableCompare = $(tables[index]).DataTable();
                     tableCompare.columns.adjust().draw();
-                }, 300);
+                }, 500);
             }
 
         }

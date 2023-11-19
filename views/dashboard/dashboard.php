@@ -316,6 +316,13 @@
 
         </main><!-- End #main -->
 
+        <div id="full-loading" class="position-fixed d-flex d-none justify-content-center align-items-center h-100 w-100 start-0 top-0 bg-white bg-opacity-75" style="z-index:1000;">
+            <div class="text-center">
+                <img class="spinner-grow" src="<?= media() ?>/img/icon-512.png" width="70" alt="">
+                <h1 class="fs-1-2 mt-2 lead">Loading...</h1>
+            </div>
+        </div>
+
         <main id="main-events" class="main" style="display:none;">
 
             <div class="pagetitle d-flex justify-content-between align-items-center pe-3">

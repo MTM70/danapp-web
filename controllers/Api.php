@@ -397,6 +397,12 @@ class Api extends Controllers
 
                 fclose($filehandler);
 
+                //TODO Save img optimized======================================
+                $image = imageQuality(base_url().'/uploads/'.$name);
+                // Guardar la imagen en el servidor
+                file_put_contents('uploads/optimized/'.$name, base64_decode($image));
+                //TODO Save img optimized======================================
+
                 $res = $this->model->getOrderParameter($data["id_user"], $data["id_order"], $data["id_variety"], $data["id_parameter"]);
 
                 if ($res) {
@@ -467,8 +473,9 @@ class Api extends Controllers
             $data = json_decode($_POST["data"], true);
 
             $path = "uploads/".$data["idOrder"]."_".$data["idVariety"]."_".$data["idParameter"].".jpg";
+            $path2 = "uploads/optimized/".$data["idOrder"]."_".$data["idVariety"]."_".$data["idParameter"].".jpg";
 
-            if (!unlink($path)) {
+            if (!unlink($path) OR !unlink($path2)) {
                 echo json_encode(array("error" => "Error deleting image on server, please try again!"));
                 exit();
             }

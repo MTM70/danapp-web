@@ -1185,4 +1185,34 @@
 
         //TODO Orders--------------------------------------------------------------------------
 
+        //TODO Test optimized images
+        public function getEvaluatedImages(int $year1, string $week1, int $year2, string $week2)
+        {
+            $sql = "SELECT 
+                        CONCAT( 
+                            YEAR(oc.date), 
+                            CASE 
+                                WHEN WEEK(oc.date) < 10 
+                                    THEN CONCAT('0', WEEK(oc.date)) 
+                                ELSE WEEK(oc.date) 
+                            END 
+                        ) AS weekUnion, 
+                        op.value 
+                    FROM orders_parameters AS op 
+                    INNER JOIN orders_closed AS oc ON oc.id_order = op.id_order AND oc.id_user = op.id_user 
+                    INNER JOIN parameters AS p ON p.id = op.id_parameter 
+                    WHERE p.type = 4 AND 
+                        CONCAT( 
+                            YEAR(oc.date), 
+                            CASE 
+                                WHEN WEEK(oc.date) < 10 
+                                    THEN CONCAT('0', WEEK(oc.date)) 
+                                ELSE WEEK(oc.date) 
+                            END 
+                        ) BETWEEN CONCAT(:value0, :value1) AND CONCAT(:value2, :value3) 
+                    ORDER BY year, week;";
+
+            $array = array($year1, $week1, $year2, $week2);
+            return $this->select($sql, $array);
+        }
     }
