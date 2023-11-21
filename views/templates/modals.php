@@ -117,11 +117,20 @@
                                 <option value="3">bottom</option>
                             </select>
                         </div>
+
                         <div class="col-md-4 d-none" id="parameter-all-cont">
                             <label class="form-label" for="parameter-all">All varieties</label>
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" role="switch" name="parameter-all" id="parameter-all">
                                 <label class="form-check-label" for="parameter-all"></label>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4"">
+                            <label class="form-label" for="parameter-required">Required</label>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" name="parameter-required" id="parameter-required">
+                                <label class="form-check-label" for="parameter-required"></label>
                             </div>
                         </div>
 

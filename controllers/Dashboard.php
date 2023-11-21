@@ -1333,6 +1333,7 @@
                                                                             onclick="viewImage(this)"
                                                                             data-bs-toggle="modal" data-bs-target="#modalImage"
                                                                         >
+                                                                        '.($d["obs"] ? '<div class="mt-1">'.$d["obs"].'</div>' : '').'
                                                                     </td>
                                                                 ';
 
@@ -2514,6 +2515,7 @@
                         AND $_POST["parameter-category"] AND $_POST["crops"] AND $_POST["parameter-position"] AND $_POST["options"]) {
 
                         $all = (isset($_POST["parameter-all"])) ? 1 : 0 ;
+                        $required = (isset($_POST["parameter-required"])) ? 1 : 0 ;
 
                         if ($this->model->getParameterByNameAndType(str_ucfirst($_POST["parameter-name"]), $_POST["parameter-type"])) {
                             $this->arrResponse = array(
@@ -2524,7 +2526,7 @@
                             exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
                         }
                         
-                        $id = $this->model->setParameter(str_ucfirst($_POST["parameter-name"]), $_POST["parameter-type"], $_POST["parameter-category"], str_ucfirst($_POST["parameter-label"]), $_POST["parameter-position"], str_ucfirst($_POST["parameter-remark"]), $all);
+                        $id = $this->model->setParameter(str_ucfirst($_POST["parameter-name"]), $_POST["parameter-type"], $_POST["parameter-category"], str_ucfirst($_POST["parameter-label"]), $_POST["parameter-position"], str_ucfirst($_POST["parameter-remark"]), $all, $required);
 
                         if (!$id) {
                             $this->arrResponse = array(
@@ -2582,6 +2584,7 @@
                         AND $_POST["parameter-name"] AND $_POST["parameter-category"] AND $_POST["crops"] AND $_POST["parameter-position"] AND $_POST["options"]) {
 
                         $all = (isset($_POST["parameter-all"])) ? 1 : 0 ;
+                        $required = (isset($_POST["parameter-required"])) ? 1 : 0 ;
 
                         if ($this->model->getParameterByNameAndType(str_ucfirst($_POST["parameter-name"]), $_POST["parameter-type"], $_POST["parameter-id"])) {
                             $this->arrResponse = array(
@@ -2592,7 +2595,7 @@
                             exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
                         }
                         
-                        $update = $this->model->updateParameter($_POST["parameter-id"], str_ucfirst($_POST["parameter-name"]), $_POST["parameter-type"], $_POST["parameter-category"], str_ucfirst($_POST["parameter-label"]), $_POST["parameter-position"], str_ucfirst($_POST["parameter-remark"]), $all, $_POST["parameter-state"]);
+                        $update = $this->model->updateParameter($_POST["parameter-id"], str_ucfirst($_POST["parameter-name"]), $_POST["parameter-type"], $_POST["parameter-category"], str_ucfirst($_POST["parameter-label"]), $_POST["parameter-position"], str_ucfirst($_POST["parameter-remark"]), $all, $required, $_POST["parameter-state"]);
 
                         if (!$update) {
                             $this->arrResponse = array(

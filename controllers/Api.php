@@ -326,6 +326,17 @@ class Api extends Controllers
         }
     }
 
+    public function getParameters3()
+    {
+        $res = $this->model->getParameters3();
+
+        if (!empty($res)) {
+            echo json_encode(array("error" => false, "datos" => $res));
+        } else {
+            echo json_encode(array("error" => "No data parameters!"));
+        }
+    }
+
     public function getParametersOptions()
     {
         $res = $this->model->getParametersOptions();
@@ -398,7 +409,7 @@ class Api extends Controllers
                 fclose($filehandler);
 
                 //TODO Save img optimized======================================
-                $image = imageQuality(base_url().'/uploads/'.$name);
+                $image = imageQuality('uploads/'.$name);
                 // Guardar la imagen en el servidor
                 file_put_contents('uploads/optimized/'.$name, base64_decode($image));
                 //TODO Save img optimized======================================
@@ -421,6 +432,33 @@ class Api extends Controllers
                 
             }else{
                 echo json_encode(array("error" => "Failed to save image!"));
+                exit();
+            }
+            
+            echo json_encode(array("error" => false));
+        }else{
+            echo json_encode(array("error" => "parameter error!"));
+        }
+    }
+
+    public function syncImagesValues()
+    {
+        if (isset($_POST['data'])) {
+
+            $data = json_decode($_POST["data"], true);
+            
+            $name = $data["id_user"]."_".$data["id_order"]."_".$data["id_variety"]."_".$data["id_parameter"].".jpg";
+
+            $res = $this->model->getOrderParameter($data["id_user"], $data["id_order"], $data["id_variety"], $data["id_parameter"]);
+
+            if (empty($res)) {
+                echo json_encode(array("error" => "Error updating data!"));
+                exit();
+            }
+
+            $res = $this->model->updateDataSync($res["id"], $name, $data["obs"]);
+            if (!$res) {
+                echo json_encode(array("error" => "Error updating data!"));
                 exit();
             }
             
@@ -472,15 +510,15 @@ class Api extends Controllers
 
             $data = json_decode($_POST["data"], true);
 
-            $path = "uploads/".$data["idOrder"]."_".$data["idVariety"]."_".$data["idParameter"].".jpg";
-            $path2 = "uploads/optimized/".$data["idOrder"]."_".$data["idVariety"]."_".$data["idParameter"].".jpg";
+            $path = "uploads/".$data["idUser"]."_".$data["idOrder"]."_".$data["idVariety"]."_".$data["idParameter"].".jpg";
+            $path2 = "uploads/optimized/".$data["idUser"]."_".$data["idOrder"]."_".$data["idVariety"]."_".$data["idParameter"].".jpg";
 
             if (!unlink($path) OR !unlink($path2)) {
                 echo json_encode(array("error" => "Error deleting image on server, please try again!"));
                 exit();
             }
             
-            $res = $this->model->deleteOrderParameter($data["idOrder"], $data["idVariety"], $data["idParameter"]);
+            $res = $this->model->deleteOrderParameter($data["idUser"], $data["idOrder"], $data["idVariety"], $data["idParameter"]);
             if (!$res) {
                 echo json_encode(array("error" => "Error deleting server record, please try again!"));
                 exit();

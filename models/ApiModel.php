@@ -179,7 +179,7 @@ class ApiModel extends Mysql
 
     public function getOrdersParameters($idUser)
     {
-        $path = BASE_URL."uploads/";
+        $path = BASE_URL."/uploads/";
         $sql = "SELECT id_user, id_order, id_variety, id_parameter, 
                         CASE p.type 
                             WHEN 4 THEN CONCAT('$path', value) 
@@ -211,7 +211,14 @@ class ApiModel extends Mysql
 
     public function getParameters2()
     {
-        $sql = "SELECT * FROM parameters WHERE state = 1";
+        $sql = "SELECT id, parameter, type, category, label, position, remark, type_all FROM parameters WHERE state = 1";
+
+        return $this->select($sql);
+    }
+
+    public function getParameters3()
+    {
+        $sql = "SELECT id, parameter, type, category, label, position, remark, type_all, required FROM parameters WHERE state = 1";
 
         return $this->select($sql);
     }
@@ -270,10 +277,10 @@ class ApiModel extends Mysql
         return $this->insert($sql, $array);
     }
 
-    public function deleteOrderParameter(int $idOder, int $idVariety, int $idParameter)
+    public function deleteOrderParameter(int $idUser, int $idOder, int $idVariety, int $idParameter)
     {
-        $sql = "DELETE FROM orders_parameters WHERE id_order = :value0 AND id_variety = :value1 AND id_parameter = :value2";
-        $array = array($idOder, $idVariety, $idParameter);
+        $sql = "DELETE FROM orders_parameters WHERE id_user = :value0 AND id_order = :value1 AND id_variety = :value2 AND id_parameter = :value3";
+        $array = array($idUser, $idOder, $idVariety, $idParameter);
 
         return $this->delete($sql, $array);
     }

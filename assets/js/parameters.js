@@ -326,6 +326,7 @@ async function loadParameterEdit(id) {
                         document.getElementById('parameter-label').value = data['label'];
                         document.getElementById('parameter-remark').value = data['remark'];
                         document.getElementById('parameter-all').checked = data['type_all'];
+                        document.getElementById('parameter-required').checked = data['required'];
                         document.getElementById('parameter-state').value = data['state'];
 
                         if (data['options']) {
@@ -448,6 +449,7 @@ function resetParameterForm(){
     document.getElementById('parameter-label').value = '';
     document.getElementById('parameter-remark').value = '';
     document.getElementById('parameter-all').checked = false;
+    document.getElementById('parameter-required').checked = false;
 
     $('#parameter-crops input[type="checkbox"]').prop('checked', false);
     parameterCrops = [];

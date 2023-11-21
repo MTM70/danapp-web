@@ -785,19 +785,19 @@
             return $this->selectOne($sql, $array);
         }
 
-        public function setParameter(String $parameter, int $type, int $category, String $label, int $position, String $remark, int $typeAll)
+        public function setParameter(String $parameter, int $type, int $category, String $label, int $position, String $remark, int $typeAll, int $required)
         {
-            $sql = 'INSERT INTO parameters (parameter, type, category, label, position, remark, type_all) VALUES (:value0, :value1, :value2, :value3, :value4, :value5, :value6)';
+            $sql = 'INSERT INTO parameters (parameter, type, category, label, position, remark, type_all, required) VALUES (:value0, :value1, :value2, :value3, :value4, :value5, :value6, :value7)';
 
-            $array = array($parameter, $type, $category, $label, $position, $remark, $typeAll);
+            $array = array($parameter, $type, $category, $label, $position, $remark, $typeAll, $required);
             return $this->insert($sql, $array);
         }
 
-        public function updateParameter(int $id, String $parameter, int $type, int $category, String $label, int $position, String $remark, int $typeAll, int $state)
+        public function updateParameter(int $id, String $parameter, int $type, int $category, String $label, int $position, String $remark, int $typeAll, int $required, int $state)
         {
-            $sql = 'UPDATE parameters SET parameter = :value1, type = :value2, category = :value3, label = :value4, position = :value5, remark = :value6, type_all = :value7, state = :value8 WHERE id = :value0';
+            $sql = 'UPDATE parameters SET parameter = :value1, type = :value2, category = :value3, label = :value4, position = :value5, remark = :value6, type_all = :value7, required = :value8, state = :value9 WHERE id = :value0';
 
-            $array = array($id, $parameter, $type, $category, $label, $position, $remark, $typeAll, $state);
+            $array = array($id, $parameter, $type, $category, $label, $position, $remark, $typeAll, $required, $state);
             return $this->update($sql, $array);
         }
 
