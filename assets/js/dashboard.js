@@ -600,9 +600,12 @@ const loadCharts = async () => {
                                 </tr>
                             </thead>
                             <tbody></tbody>
+                            <tfoot></tfoot>
                         `;
 
                         const tbody = table.querySelector('tbody');
+                        const tfoot = table.querySelector('tfoot');
+                        const totalTable = [0,0];
 
                         let trIndex = 0;
                         dataUploads.forEach(item => {
@@ -675,8 +678,20 @@ const loadCharts = async () => {
 
                             tbody.appendChild(row);
 
+                            totalTable[0] += +y1;
+                            totalTable[1] += +y2;
                             trIndex++;
                         });
+
+                        tfoot.innerHTML = `
+                            <tr>
+                                <th></th>
+                                <th>Total</th>
+                                <th class="text-center ${index == 1 ? 'd-none' : ''}">${totalTable[0]}</th>
+                                <th class="text-center">${totalTable[1]}</th>
+                                <th class="text-center ${index == 1 ? 'd-none' : ''}">${((totalTable[1] / totalTable[0]) * 100).toFixed(1)}%</th>
+                            </tr>
+                        `;
 
                         document.querySelector(idTable).appendChild(table);
 

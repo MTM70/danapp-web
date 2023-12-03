@@ -57,8 +57,9 @@
                     $row = 0;
                     $float = array("left", "right");
                     $floatIndex = 0;
-                    $maxRow = 27;
+                    $maxRow = 24;
                     $next = 0;
+                    $totalTable = array(0, 0);
                     
                     foreach ($data['dataChart'] as $values) {
                         
@@ -76,7 +77,7 @@
 
                             if ($next < 2) $next++;
                             else {
-                                $maxRow = 44;
+                                $maxRow = 45;
 
                                 $next = 1;
 
@@ -113,6 +114,9 @@
                             ';
                         }
 
+                        $totalTable[0] += $values[2];
+                        $totalTable[1] += $values[3];
+
                         $this->html .= '</tr>';
 
                         $row++;
@@ -121,6 +125,14 @@
 
                     $this->html .= '
                                 </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th>Total</th>
+                                        <th class="text-center">'.$totalTable[0].'</th>
+                                        <th class="text-center">'.$totalTable[1].'</th>
+                                        <th class="text-center">'.($totalTable[0] != "0" ? round(($totalTable[1]/$totalTable[0]) * 100, 1) : '0').'%</th>
+                                    </tr>
+                                </tfoot>
                             </table>
                         </div>
                     ';
@@ -133,7 +145,7 @@
 
                     $mpdf->WriteHTML($this->html);
                     $this->html = '';
-                    $mpdf->AddPage();
+                    //$mpdf->AddPage();
 
                     $this->html .= '
                         <div style="width:100%;">
