@@ -712,7 +712,7 @@ const loadCharts = async () => {
                             "scrollX": true,
                             "iDisplayLength": 100,
                             "stateSave": true,
-                            scrollY: isMobile ? false : '45vh',
+                            scrollY: isMobile ? false : '42vh',
                             paging: false,
                             info: false,
                             searching: false
