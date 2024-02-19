@@ -121,9 +121,9 @@
                                                     </span>
                                                 </button>
 
-                                                <div class="dropdown-menu dropdown-menu-end dropdown-menu-md-start rounded-3 px-2 py-4" id="miDropdown" style="width: 600px;">
+                                                <div class="dropdown-menu dropdown-menu-end dropdown-menu-md-start bg-light rounded-3 px-2 py-4" id="miDropdown" style="width: 600px;">
                                                     <div class="row" id="filters-chart">
-                                                        <div class="col-4">
+                                                        <div class="col-md-4">
                                                             <div class="border border-dark border-opacity-10 rounded-3" style="height: 150px;">
                                                                 <div>
                                                                     <p class="placeholder-glow m-2 mt-3">
@@ -135,7 +135,31 @@
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        <div class="col-4">
+                                                        <div class="col-md-8">
+                                                            <div class="border border-dark border-opacity-10 rounded-3" style="height: 150px;">
+                                                                <div>
+                                                                    <p class="placeholder-glow m-2 mt-3">
+                                                                        <span class="placeholder rounded-2 col-8 bg-dark bg-opacity-25"></span>
+                                                                    </p>
+                                                                    <p class="placeholder-glow m-2">
+                                                                        <span class="placeholder rounded-2 col-8 bg-dark bg-opacity-25"></span>
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-3 mt-4">
+                                                            <div class="border border-dark border-opacity-10 rounded-3" style="height: 150px;">
+                                                                <div>
+                                                                    <p class="placeholder-glow m-2 mt-3">
+                                                                        <span class="placeholder rounded-2 col-8 bg-dark bg-opacity-25"></span>
+                                                                    </p>
+                                                                    <p class="placeholder-glow m-2">
+                                                                        <span class="placeholder rounded-2 col-8 bg-dark bg-opacity-25"></span>
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-5 mt-4">
                                                             <div class="border border-dark border-opacity-10 rounded-3 overflow-auto" style="height: 150px;">
                                                                 <div>
                                                                     <p class="placeholder-glow m-2 mt-3">
@@ -150,7 +174,7 @@
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        <div class="col-4">
+                                                        <div class="col-md-4 mt-4">
                                                             <div class="border border-dark border-opacity-10 rounded-3 overflow-auto" style="height: 150px;">
                                                                 <div>
                                                                     <p class="placeholder-glow m-2 mt-3">
@@ -165,7 +189,7 @@
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        <div class="col-6 mt-4">
+                                                        <div class="col-md-6 mt-4">
                                                             <div class="border border-dark border-opacity-10 rounded-3 overflow-auto" style="height: 150px;">
                                                                 <div>
                                                                     <p class="placeholder-glow m-2 mt-3">
@@ -186,7 +210,7 @@
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        <div class="col-6 mt-4">
+                                                        <div class="col-md-6 mt-4">
                                                             <div class="border border-dark border-opacity-10 rounded-3 overflow-auto" style="height: 150px;">
                                                                 <div>
                                                                     <p class="placeholder-glow m-2 mt-3">

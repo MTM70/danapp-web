@@ -14,6 +14,7 @@ const chartsId = ['#nav-customers', '#nav-users', '#nav-crops', '#nav-varieties'
 let charts = [];
 let chartsStates = [false, false, false, false];
 let chartsValues = [];
+let checkTypeOrder = true;
 
 //* Table compare
 let tableCompareData = null;
@@ -837,12 +838,12 @@ const loadFiltersChart = async () => {
         $.ajax({
             url: base_url+"/Dashboard/loadFiltersChart",
             type: 'GET',
-            data: {'from' : document.querySelector('#week-from').value, 'to' : document.querySelector('#week-to').value},
+            data: {'from' : document.querySelector('#week-from').value, 'to' : document.querySelector('#week-to').value, 'checkType' : checkTypeOrder},
             cache: false,
 
             beforeSend: function() {
                 $('#filters-chart').html(`
-                    <div class="col-4">
+                    <div class="col-md-4">
                         <div class="border border-dark border-opacity-10 rounded-3" style="height: 150px;">
                             <div>
                                 <p class="placeholder-glow m-2 mt-3">
@@ -854,7 +855,31 @@ const loadFiltersChart = async () => {
                             </div>
                         </div>
                     </div>
-                    <div class="col-4">
+                    <div class="col-md-8">
+                        <div class="border border-dark border-opacity-10 rounded-3" style="height: 150px;">
+                            <div>
+                                <p class="placeholder-glow m-2 mt-3">
+                                    <span class="placeholder rounded-2 col-8 bg-dark bg-opacity-25"></span>
+                                </p>
+                                <p class="placeholder-glow m-2">
+                                    <span class="placeholder rounded-2 col-8 bg-dark bg-opacity-25"></span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mt-4">
+                        <div class="border border-dark border-opacity-10 rounded-3" style="height: 150px;">
+                            <div>
+                                <p class="placeholder-glow m-2 mt-3">
+                                    <span class="placeholder rounded-2 col-8 bg-dark bg-opacity-25"></span>
+                                </p>
+                                <p class="placeholder-glow m-2">
+                                    <span class="placeholder rounded-2 col-8 bg-dark bg-opacity-25"></span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-5 mt-4">
                         <div class="border border-dark border-opacity-10 rounded-3 overflow-auto" style="height: 150px;">
                             <div>
                                 <p class="placeholder-glow m-2 mt-3">
@@ -869,7 +894,7 @@ const loadFiltersChart = async () => {
                             </div>
                         </div>
                     </div>
-                    <div class="col-4">
+                    <div class="col-md-4 mt-4">
                         <div class="border border-dark border-opacity-10 rounded-3 overflow-auto" style="height: 150px;">
                             <div>
                                 <p class="placeholder-glow m-2 mt-3">
@@ -884,7 +909,7 @@ const loadFiltersChart = async () => {
                             </div>
                         </div>
                     </div>
-                    <div class="col-6 mt-4">
+                    <div class="col-md-6 mt-4">
                         <div class="border border-dark border-opacity-10 rounded-3 overflow-auto" style="height: 150px;">
                             <div>
                                 <p class="placeholder-glow m-2 mt-3">
@@ -905,7 +930,7 @@ const loadFiltersChart = async () => {
                             </div>
                         </div>
                     </div>
-                    <div class="col-6 mt-4">
+                    <div class="col-md-6 mt-4">
                         <div class="border border-dark border-opacity-10 rounded-3 overflow-auto" style="height: 150px;">
                             <div>
                                 <p class="placeholder-glow m-2 mt-3">
@@ -950,6 +975,14 @@ const loadFiltersChart = async () => {
                                 checkFiltersChartSelected();
                             });
 
+                            selecteds.users.forEach(value => {
+                                if (element.value == value) element.checked = true;
+                            });
+                            
+                            selecteds.customers.forEach(value => {
+                                if (element.value == value) element.checked = true;
+                            });
+                            
                             selecteds.destinations.forEach(value => {
                                 if (element.value == value) element.checked = true;
                             });
@@ -970,6 +1003,7 @@ const loadFiltersChart = async () => {
                                 if (element.value == value) element.checked = true;
                             });
                         });
+
                     }else{
                         alert(objData.res);
                     }
@@ -1008,28 +1042,40 @@ const getFiltersChartSelected = async () => {
     containers[0].querySelectorAll('input[type="checkbox"]:checked').forEach(element => {
         array.push(element.value);
     });
-    mapObject['destinations'] = array;
+    mapObject['users'] = array;
 
     array = [];
     containers[1].querySelectorAll('input[type="checkbox"]:checked').forEach(element => {
         array.push(element.value);
     });
-    mapObject['types'] = array;
+    mapObject['customers'] = array;
 
     array = [];
     containers[2].querySelectorAll('input[type="checkbox"]:checked').forEach(element => {
         array.push(element.value);
     });
-    mapObject['products'] = array;
+    mapObject['destinations'] = array;
 
     array = [];
     containers[3].querySelectorAll('input[type="checkbox"]:checked').forEach(element => {
         array.push(element.value);
     });
-    mapObject['crops'] = array;
+    mapObject['types'] = array;
 
     array = [];
     containers[4].querySelectorAll('input[type="checkbox"]:checked').forEach(element => {
+        array.push(element.value);
+    });
+    mapObject['products'] = array;
+
+    array = [];
+    containers[5].querySelectorAll('input[type="checkbox"]:checked').forEach(element => {
+        array.push(element.value);
+    });
+    mapObject['crops'] = array;
+
+    array = [];
+    containers[6].querySelectorAll('input[type="checkbox"]:checked').forEach(element => {
         array.push(element.value);
     });
     mapObject['varieties'] = array;
@@ -1273,7 +1319,7 @@ const loadTableCompare = async (modal = true) => {
     return new Promise(resolve => {
         $.ajax({
             url: base_url+"/Dashboard/loadTableCompare",
-            type: 'GET',
+            type: 'POST',
             data: { varieties : JSON.stringify(varieties), parameters : JSON.stringify(parameters), from : document.querySelector('#week-from').value, to : document.querySelector('#week-to').value, 'filters' : JSON.stringify(filters) },
             cache: false,
 
@@ -1331,7 +1377,7 @@ const loadTableCompare = async (modal = true) => {
                             },
                             columnDefs: [
                                 {
-                                    targets: 3, // Índice de la columna que deseas ocultar (columna 2 en este caso)
+                                    targets: 1, // Índice de la columna que deseas ocultar (columna 2 en este caso)
                                     visible: false, // Ocultar la columna
                                 },{
                                     targets: 4, // Índice de la columna que deseas ocultar (columna 2 en este caso)
@@ -1341,6 +1387,9 @@ const loadTableCompare = async (modal = true) => {
                                     visible: false, // Ocultar la columna
                                 },{
                                     targets: 6, // Índice de la columna que deseas ocultar (columna 2 en este caso)
+                                    visible: false, // Ocultar la columna
+                                },{
+                                    targets: 7, // Índice de la columna que deseas ocultar (columna 2 en este caso)
                                     visible: false, // Ocultar la columna
                                 }
                             ],
@@ -1397,6 +1446,7 @@ const loadTableCompareResume = async () => {
     
     const parameters = await getFiltersParametersSelected();
     const data = $('#table-compare').DataTable().rows({ search: 'applied' }).data().toArray();
+    const dataDifferentOrder = new Set();
     const array = {};
 
     parameters.forEach(parameter => {
@@ -1409,6 +1459,8 @@ const loadTableCompareResume = async () => {
     });
 
     data.forEach(row => {
+
+        dataDifferentOrder.add(row[1]);
         
         for (let i = 0; i < parameters.length; i++) {
 
@@ -1416,7 +1468,7 @@ const loadTableCompareResume = async () => {
 
             if(parameter[2] != 0 && parameter[2] != 5 && parameter[2] != 6 && parameter[2] != 7) continue;
 
-            const valor = row[i + 7] ? row[i + 7] : 'Empty' ;
+            const valor = row[i + 8] ? row[i + 8] : 'Empty' ;
 
             // Contar el valor para la columna correspondiente
             if (!array[parameter[1]][valor]) {
@@ -1435,7 +1487,7 @@ const loadTableCompareResume = async () => {
     const container = document.querySelector('#nav-resume');
     container.innerHTML = `
         <div class="text-center my-4">
-            <h1><i class="bi bi-bookmark-check-fill text-success me-2"></i>${data.length} items evaluated</h1>
+            <h1><i class="bi bi-bookmark-check-fill text-success me-2"></i>${dataDifferentOrder.size} orders evaluated</h1>
             <h6><i class="bi bi-calendar-range me-2"></i>Week ${week1[1]}/${week1[0]} to ${week2[1]}/${week2[0]}</h6>
 
             <div class="resume-filters alert alert-primary col-12 col-md-4 d-flex flex-wrap justify-content-center align-items-center" style="margin:0 auto;"></div>
@@ -1557,7 +1609,7 @@ const filterTableCompareWithChartTable = async () => {
     // Filtrar los datos basados en la condición
     const dataFilter = data.filter(row => {
         // Supongamos que la condición es que el valor en la segunda columna sea mayor a 50
-        return filters.includes(row[3 + getChartIndexTab()]);
+        return filters.includes(row[4 + getChartIndexTab()]);
     });
 
     // Limpiar la tabla actual
@@ -1761,7 +1813,7 @@ const resizeTableMain = () => {
         if (document.querySelector(`#table-compare`))
         setTimeout(() => {
             new DataTable(document.querySelector(`#table-compare`)).columns.adjust();
-        }, 300);
+        }, 500);
     }
 
 }

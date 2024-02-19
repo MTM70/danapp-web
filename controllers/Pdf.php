@@ -229,7 +229,8 @@
                                 <td class="text-center" style="padding:3px; vertical-align: middle;">'.$values[$k].'</td>
                             ';
 
-                            if ($k == 2) $k = 6;
+                            if ($k == 0) $k++; //* Esto omite el numero de la orden
+                            if ($k == 3) $k = 7; //* Esto omite los Ids de la tabla, los cuales se usan para los filtros
                         }
 
                         $this->html .= '</tr>';

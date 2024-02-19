@@ -464,9 +464,12 @@
                 $year2 = substr($data2, 0, 4);
                 $week2 = substr($data2, 6, 8);
 
+                $weekFrom = str_replace('-W', '', $params[0]);
+                $weekTo = str_replace('-W', '', $params[1]);
+
                 $parameters = $this->model->getParameters();
-                $data = $this->model->getDataBetweenWeeks2($year1, $week1, $year2, $week2);
-                $response = $this->model->getOrdersParametersBetweenWeeks($year1, $week1, $year2, $week2);
+                $data = $this->model->getDataBetweenWeeks2($weekFrom, $weekTo);
+                $response = $this->model->getOrdersParametersBetweenWeeks($weekFrom, $weekTo);
 
                 $spreadsheet = new Spreadsheet();
                 $sheet = $spreadsheet->getActiveSheet();
@@ -696,14 +699,38 @@
                 $week2 = explode("-W", $_GET["to"])[1];
                 $year2 = explode("-W", $_GET["to"])[0];
 
+                $weekFrom = str_replace('-W', '', $_GET["from"]);
+                $weekTo = str_replace('-W', '', $_GET["to"]);
+
                 $filters = json_decode($_GET["filters"], true);
 
                 $filterUploads = "";
                 $filterCompleted = "";
 
-                if (count($filters["destinations"]) OR count($filters["types"]) OR count($filters["products"]) OR count($filters["crops"]) OR count($filters["varieties"])) {
+                if (count($filters["users"]) OR count($filters["customers"]) OR count($filters["destinations"]) OR count($filters["types"]) 
+                    OR count($filters["products"]) OR count($filters["crops"]) OR count($filters["varieties"])) {
                     
                     $and = "";
+                    $andComplete = "";
+
+                    if (count($filters["users"])) {
+
+                        $array = array_map(function($element) {
+                            return explode(",",$element)[0];
+                        }, $filters["users"]);
+
+                        $andComplete .= "AND oc.id_user IN (".implode(',', $array).") ";
+                    }
+
+                    if (count($filters["customers"])) {
+
+                        $array = array_map(function($element) {
+                            return explode(",",$element)[0];
+                        }, $filters["customers"]);
+
+                        $and .= "AND sc.id_cust IN (".implode(',', $array).") ";
+                        $andComplete .= "AND sc.id_cust IN (".implode(',', $array).") ";
+                    }
 
                     if (count($filters["destinations"])) {
 
@@ -712,6 +739,7 @@
                         }, $filters["destinations"]);
 
                         $and .= "AND o.destination IN (".implode(',', $array).") ";
+                        $andComplete .= "AND o.destination IN (".implode(',', $array).") ";
                     }
 
                     if (count($filters["types"])) {
@@ -721,6 +749,7 @@
                         }, $filters["types"]);
 
                         $and .= "AND o.id_type IN (".implode(',', $array).") ";
+                        $andComplete .= "AND o.id_type IN (".implode(',', $array).") ";
                     }
 
                     if (count($filters["products"])) {
@@ -730,6 +759,7 @@
                         }, $filters["products"]);
 
                         $and .= "AND o.id_product IN (".implode(',', $array).") ";
+                        $andComplete .= "AND o.id_product IN (".implode(',', $array).") ";
                     }
 
                     if (count($filters["crops"])) {
@@ -739,6 +769,7 @@
                         }, $filters["crops"]);
 
                         $and .= "AND c.id IN (".implode(',', $array).") ";
+                        $andComplete .= "AND c.id IN (".implode(',', $array).") ";
                     }
 
                     if (count($filters["varieties"])) {
@@ -748,6 +779,7 @@
                         }, $filters["varieties"]);
 
                         $and .= "AND v.id IN (".implode(',', $array).") ";
+                        $andComplete .= "AND v.id IN (".implode(',', $array).") ";
                     }
 
                     /* if (count($filters["types"])) $and .= "AND o.id_type IN (".implode(',', $filters["types"]).") ";
@@ -760,11 +792,13 @@
                             SELECT DISTINCT od.id_order 
                             FROM orders_details AS od 
                             INNER JOIN orders AS o ON o.id = od.id_order 
+                            INNER JOIN sec_customers AS sc ON sc.id = o.id_sec_cust 
                             INNER JOIN varieties AS v ON v.id = od.id_variety 
                             INNER JOIN crops AS c ON c.id = v.id_crop 
                             WHERE 
-                                (YEAR(visit_day) BETWEEN :value0 AND :value2) AND (WEEK(visit_day) BETWEEN :value1 AND :value3) 
-                                $and
+                                YEARWEEK(visit_day) BETWEEN :value0 AND :value1 
+                                /*(YEAR(visit_day) BETWEEN :value0 AND :value2) AND (WEEK(visit_day) BETWEEN :value1 AND :value3)*/ 
+                                $and 
                         ) AS filter ON filter.id_order = o.id 
                     ";
 
@@ -774,11 +808,13 @@
                             FROM orders_parameters AS op 
                             INNER JOIN orders AS o ON o.id = op.id_order 
                             INNER JOIN orders_closed AS oc ON oc.id_order = op.id_order 
+                            INNER JOIN sec_customers AS sc ON sc.id = o.id_sec_cust 
                             INNER JOIN varieties AS v ON v.id = op.id_variety 
                             INNER JOIN crops AS c ON c.id = v.id_crop 
                             WHERE 
-                                (YEAR(oc.date) BETWEEN :value0 AND :value2) AND (WEEK(oc.date) BETWEEN :value1 AND :value3) 
-                                $and 
+                                YEARWEEK(oc.date) BETWEEN :value0 AND :value1 
+                                /*(YEAR(oc.date) BETWEEN :value0 AND :value2) AND (WEEK(oc.date) BETWEEN :value1 AND :value3)*/ 
+                                $andComplete 
                         ) AS filter ON filter.id_order = o.id 
                     ";
 
@@ -795,19 +831,19 @@
 
                 switch ($_GET["type"]) {
                     case '0':
-                        $response = $this->model->getDataCountBetweenWeeksGroupCust($year1, $week1, $year2, $week2, $filterUploads, $filterCompleted);
+                        $response = $this->model->getDataCountBetweenWeeksGroupCust($weekFrom, $weekTo, $filterUploads, $filterCompleted);
                         break;
 
                     case '1':
-                        $response = $this->model->getDataCountBetweenWeeksGroupUser($year1, $week1, $year2, $week2, $filterCompleted);
+                        $response = $this->model->getDataCountBetweenWeeksGroupUser($weekFrom, $weekTo, $filterCompleted);
                         break;
 
                     case '2':
-                        $response = $this->model->getDataCountBetweenWeeksGroupCrop($year1, $week1, $year2, $week2, $filterUploads, $filterCompleted);
+                        $response = $this->model->getDataCountBetweenWeeksGroupCrop($weekFrom, $weekTo, $filterUploads, $filterCompleted);
                         break;
 
                     case '3':
-                        $response = $this->model->getDataCountBetweenWeeksGroupVariety($year1, $week1, $year2, $week2, $filterUploads, $filterCompleted);
+                        $response = $this->model->getDataCountBetweenWeeksGroupVariety($weekFrom, $weekTo, $filterUploads, $filterCompleted);
                         break;
                 }
 
@@ -828,7 +864,7 @@
 
         public function loadFiltersChart()
         {
-            if (isset($_GET["from"]) AND isset($_GET["to"]) AND $_GET["from"] AND $_GET["to"]) {
+            if (isset($_GET["from"]) AND isset($_GET["to"]) AND isset($_GET["checkType"]) AND $_GET["from"] AND $_GET["to"]) {
 
                 $week1 = explode("-W", $_GET["from"])[1];
                 $year1 = explode("-W", $_GET["from"])[0];
@@ -836,15 +872,82 @@
                 $week2 = explode("-W", $_GET["to"])[1];
                 $year2 = explode("-W", $_GET["to"])[0];
 
-                $destinations = $this->model->getDestinationsBetweenWeeks($year1, $week1, $year2, $week2);
-                $orderTypes = $this->model->getOrderTypesBetweenWeeks($year1, $week1, $year2, $week2);
-                $products = $this->model->getProductsBetweenWeeks($year1, $week1, $year2, $week2);
-                $crops = $this->model->getDataCountBetweenWeeksGroupCrop($year1, $week1, $year2, $week2);
-                $varieties = $this->model->getDataCountBetweenWeeksGroupVariety($year1, $week1, $year2, $week2);
+                $weekFrom = str_replace('-W', '', $_GET["from"]);
+                $weekTo = str_replace('-W', '', $_GET["to"]);
+
+                $users = $this->model->getUsersBetweenWeeks($weekFrom, $weekTo);
+                $customers = $this->model->getCustomersBetweenWeeks($weekFrom, $weekTo);
+                $destinations = $this->model->getDestinationsBetweenWeeks($weekFrom, $weekTo);
+                $orderTypes = $this->model->getOrderTypesBetweenWeeks($weekFrom, $weekTo);
+                $products = $this->model->getProductsBetweenWeeks($weekFrom, $weekTo);
+                $crops = $this->model->getDataCountBetweenWeeksGroupCrop($weekFrom, $weekTo);
+                $varieties = $this->model->getDataCountBetweenWeeksGroupVariety($weekFrom, $weekTo);
 
                 $this->html .= '
-                    <div class="col-12 col-md-3 mt-4 mt-md-0" id="filters-chart-destinations">
-                        <div class="border border-dark border-opacity-10 p-2 rounded-3 overflow-auto" style="max-height: 150px;">
+                    <div class="col-12 col-md-4 mt-4 mt-md-0" id="filters-chart-users">
+                        <div class="border border-dark border-opacity-10 bg-white p-2 rounded-3 overflow-auto" style="max-height: 150px;">
+                            
+                            <p class="position-absolute bg-white fw-semibold" style="margin-top: -18px; margin-left: 2px;"><i class="bi bi-people-fill me-1"></i>Users</p>
+
+                            <div>';
+
+                                if (!empty($users)) {
+
+                                    $top = "mt-2";
+
+                                    foreach ($users as $k) {
+                                        $this->html .= '
+                                            <div class="p-1 '.$top.'">
+                                                <div class="form-check">
+                                                    <input class="form-check-input cursor-select filter-destination" type="checkbox" value="'.$k["id"].','.$k["user"].'" id="checkChartUser'.$k["id"].'">
+                                                    <label class="form-check-label cursor-select" for="checkChartUser'.$k["id"].'">
+                                                        '.$k["user"].'
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        ';
+
+                                        $top = null;
+                                    }
+                                }
+
+                            $this->html .= '
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-8 mt-4 mt-md-0" id="filters-chart-customers">
+                        <div class="border border-dark border-opacity-10 bg-white p-2 rounded-3 overflow-auto" style="max-height: 150px;">
+                            
+                            <p class="position-absolute bg-white fw-semibold" style="margin-top: -18px; margin-left: 2px;"><i class="bi bi-briefcase-fill me-1"></i>Customers</p>
+
+                            <div>';
+
+                                if (!empty($customers)) {
+
+                                    $top = "mt-2";
+
+                                    foreach ($customers as $k) {
+                                        $this->html .= '
+                                            <div class="p-1 '.$top.'">
+                                                <div class="form-check">
+                                                    <input class="form-check-input cursor-select filter-destination" type="checkbox" value="'.$k["id"].','.$k["cust"].'" id="checkChartDest'.$k["id"].'">
+                                                    <label class="form-check-label cursor-select" for="checkChartDest'.$k["id"].'">
+                                                        '.$k["cust"].'
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        ';
+
+                                        $top = null;
+                                    }
+                                }
+
+                            $this->html .= '
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-3 mt-4" id="filters-chart-destinations">
+                        <div class="border border-dark border-opacity-10 bg-white p-2 rounded-3 overflow-auto" style="max-height: 150px;">
                             
                             <p class="position-absolute bg-white fw-semibold" style="margin-top: -18px; margin-left: 2px;"><i class="bi bi-airplane-fill me-1"></i>Destinations</p>
 
@@ -874,8 +977,8 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-12 col-md-5 mt-4 mt-md-0" id="filters-chart-types">
-                        <div class="border border-dark border-opacity-10 p-2 rounded-3 overflow-auto" style="max-height: 150px;">
+                    <div class="col-12 col-md-5 mt-4" id="filters-chart-types">
+                        <div class="border border-dark border-opacity-10 bg-white p-2 rounded-3 overflow-auto" style="max-height: 150px;">
                             
                             <p class="position-absolute px-2 bg-white fw-semibold" style="margin-top: -18px; margin-left: 2px;"><i class="bi bi-building-fill-check me-1"></i>Order types</p>
 
@@ -889,7 +992,7 @@
                                         $this->html .= '
                                             <div class="p-1 '.$top.'">
                                                 <div class="form-check">
-                                                    <input class="form-check-input cursor-select filter-type" type="checkbox" value="'.$k["id"].','.$k["categorie"].'" id="checkChartType'.$k["id"].'" '.($k["id"] == 1 ? 'checked' : '' ).'>
+                                                    <input class="form-check-input cursor-select filter-type" type="checkbox" value="'.$k["id"].','.$k["categorie"].'" id="checkChartType'.$k["id"].'" onchange="checkTypeOrder = false;" '.(($k["id"] == 1 AND $_GET["checkType"] == "true") ? 'checked' : '' ).'>
                                                     <label class="form-check-label cursor-select" for="checkChartType'.$k["id"].'">
                                                         '.$k["categorie"].'
                                                     </label>
@@ -906,8 +1009,8 @@
 
                         </div>
                     </div>
-                    <div class="col-12 col-md-4 mt-4 mt-md-0" id="filters-chart-products">
-                        <div class="border border-dark border-opacity-10 p-2 rounded-3 overflow-auto" style="max-height: 150px;">
+                    <div class="col-12 col-md-4 mt-4" id="filters-chart-products">
+                        <div class="border border-dark border-opacity-10 bg-white p-2 rounded-3 overflow-auto" style="max-height: 150px;">
                             
                             <p class="position-absolute px-2 bg-white fw-semibold" style="margin-top: -18px; margin-left: 2px;"><i class="bi bi-bookmark-fill me-1"></i>Products</p>
 
@@ -939,7 +1042,7 @@
                         </div>
                     </div>
                     <div class="col-12 col-md-6 mt-4" id="filters-chart-crops">
-                        <div class="border border-dark border-opacity-10 p-2 rounded-3 overflow-auto" style="max-height: 400px;">
+                        <div class="border border-dark border-opacity-10 bg-white p-2 rounded-3 overflow-auto" style="max-height: 250px;">
                             
                             <p class="position-absolute px-2 bg-white fw-semibold" style="margin-top: -18px; margin-left: 2px;"><i class="bi bi-flower2 me-1"></i>Crops</p>
 
@@ -971,7 +1074,7 @@
                         </div>
                     </div>
                     <div class="col-12 col-md-6 mt-4" id="filters-chart-varieties">
-                        <div class="border border-dark border-opacity-10 p-2 rounded-3 overflow-auto" style="max-height: 400px;">
+                        <div class="border border-dark border-opacity-10 bg-white p-2 rounded-3 overflow-auto" style="max-height: 250px;">
                             
                             <p class="position-absolute px-2 bg-white fw-semibold" style="margin-top: -18px; margin-left: 2px;"><i class="bi bi-flower3 me-1"></i>Varieties</p>
 
@@ -1029,7 +1132,10 @@
                 $week2 = explode("-W", $_GET["to"])[1];
                 $year2 = explode("-W", $_GET["to"])[0];
 
-                $response = $this->model->getVarietiesBetweenWeeks($year1, $week1, $year2, $week2);
+                $weekFrom = str_replace('-W', '', $_GET["from"]);
+                $weekTo = str_replace('-W', '', $_GET["to"]);
+
+                $response = $this->model->getVarietiesBetweenWeeks($weekFrom, $weekTo);
 
                 $crop = null;
 
@@ -1079,7 +1185,10 @@
                 $week2 = explode("-W", $_GET["to"])[1];
                 $year2 = explode("-W", $_GET["to"])[0];
 
-                $response = $this->model->getParametersBetweenWeeks($year1, $week1, $year2, $week2);
+                $weekFrom = str_replace('-W', '', $_GET["from"]);
+                $weekTo = str_replace('-W', '', $_GET["to"]);
+
+                $response = $this->model->getParametersBetweenWeeks($weekFrom, $weekTo);
 
                 if (!empty($response)) {
 
@@ -1135,16 +1244,19 @@
 
         public  function loadTableCompare()
         {
-            if (isset($_GET["from"]) AND isset($_GET["to"]) AND $_GET["from"] AND $_GET["to"] AND isset($_GET["varieties"]) AND isset($_GET["parameters"]) AND isset($_GET["filters"]) AND $_GET["varieties"] AND $_GET["parameters"]) {
+            if (isset($_POST["from"]) AND isset($_POST["to"]) AND $_POST["from"] AND $_POST["to"] AND isset($_POST["varieties"]) AND isset($_POST["parameters"]) AND isset($_POST["filters"]) AND $_POST["varieties"] AND $_POST["parameters"]) {
 
-                $week1 = explode("-W", $_GET["from"])[1];
-                $year1 = explode("-W", $_GET["from"])[0];
+                $week1 = explode("-W", $_POST["from"])[1];
+                $year1 = explode("-W", $_POST["from"])[0];
 
-                $week2 = explode("-W", $_GET["to"])[1];
-                $year2 = explode("-W", $_GET["to"])[0];
+                $week2 = explode("-W", $_POST["to"])[1];
+                $year2 = explode("-W", $_POST["to"])[0];
 
-                $varieties = json_decode($_GET["varieties"], true);
-                $parameters = json_decode($_GET["parameters"], true);
+                $weekFrom = str_replace('-W', '', $_POST["from"]);
+                $weekTo = str_replace('-W', '', $_POST["to"]);
+
+                $varieties = json_decode($_POST["varieties"], true);
+                $parameters = json_decode($_POST["parameters"], true);
 
                 $varietiesSearch = array();
                 $parametersSearch = array();
@@ -1162,13 +1274,32 @@
 
                 //*===================Filters============================================================
 
-                $filters = json_decode($_GET["filters"], true);
+                $filters = json_decode($_POST["filters"], true);
 
                 $filterCompleted = "";
 
-                if (count($filters["destinations"]) OR count($filters["types"]) OR count($filters["products"]) OR count($filters["crops"]) OR count($filters["varieties"])) {
+                if (count($filters["users"]) OR count($filters["customers"]) OR count($filters["destinations"]) OR count($filters["types"]) 
+                    OR count($filters["products"]) OR count($filters["crops"]) OR count($filters["varieties"])) {
                     
                     $and = "";
+
+                    if (count($filters["users"])) {
+
+                        $array = array_map(function($element) {
+                            return explode(",",$element)[0];
+                        }, $filters["users"]);
+
+                        $and .= "AND oc.id_user IN (".implode(',', $array).") ";
+                    }
+
+                    if (count($filters["customers"])) {
+
+                        $array = array_map(function($element) {
+                            return explode(",",$element)[0];
+                        }, $filters["customers"]);
+
+                        $and .= "AND sc.id_cust IN (".implode(',', $array).") ";
+                    }
 
                     if (count($filters["destinations"])) {
 
@@ -1221,10 +1352,12 @@
                             FROM orders_parameters AS op 
                             INNER JOIN orders AS o ON o.id = op.id_order 
                             INNER JOIN orders_closed AS oc ON oc.id_order = op.id_order 
+                            INNER JOIN sec_customers AS sc ON sc.id = o.id_sec_cust 
                             INNER JOIN varieties AS v ON v.id = op.id_variety 
                             INNER JOIN crops AS c ON c.id = v.id_crop 
                             WHERE 
-                                (YEAR(oc.date) BETWEEN :value0 AND :value2) AND (WEEK(oc.date) BETWEEN :value1 AND :value3) 
+                                YEARWEEK(oc.date) BETWEEN :value0 AND :value1 
+                                /*(YEAR(oc.date) BETWEEN :value0 AND :value2) AND (WEEK(oc.date) BETWEEN :value1 AND :value3)*/ 
                                 $and 
                         ) AS filter ON filter.id_order = o.id 
                     ";
@@ -1233,15 +1366,15 @@
 
                 //*===================Filters============================================================
 
-                $response = $this->model->getVarietiesBetweenWeeksDistinctOrders($year1, $week1, $year2, $week2, $varietiesSearch, $filterCompleted);
-                $data = $this->model->getDataCompareBetweenWeeksOrders($year1, $week1, $year2, $week2, $varietiesSearch, $parametersSearch);
+                $response = $this->model->getVarietiesBetweenWeeksDistinctOrders($weekFrom, $weekTo, $varietiesSearch, $filterCompleted);
+                $data = $this->model->getDataCompareBetweenWeeksOrders($weekFrom, $weekTo, $varietiesSearch, $parametersSearch);
 
                 $this->html .= '
                     <table class="table table-bordered table-hover text-center w-100 fs-0-8" id="table-compare">
                         <thead>
                             <tr>
                                 <th rowspan="2" class="text-center align-middle">Variety</th>
-                                <!--<th rowspan="2" class="text-center align-middle">Order No</th>-->
+                                <th rowspan="2" class="text-center align-middle">Order No</th>
                                 <th rowspan="2" class="text-center align-middle">Sec Cust</th>
                                 <th rowspan="2" class="text-center align-middle">User</th>
                                 <!--<th class="text-center align-middle" rowspan="2">Week</th>-->
@@ -1270,7 +1403,14 @@
 
                                     $stateFilters = false;
 
-                                    if ($filters["varieties"]) {
+                                    if ($filters["users"]) {
+                                        foreach ($filters["users"] as $value) {
+                                            if (explode(",",$value)[0] == $k["id_user"]) {
+                                                $stateFilters = true;
+                                                break;
+                                            }
+                                        }
+                                    }elseif ($filters["varieties"]) {
                                         foreach ($filters["varieties"] as $value) {
                                             if (explode(",",$value)[0] == $k["id_variety"]) {
                                                 $stateFilters = true;
@@ -1292,7 +1432,7 @@
                                     $this->html .= '
                                         <tr>
                                             <th class="align-middle">'.$k["variety"].'</th>
-                                            <!--<td class="align-middle">'.$k["order_no"].'</td>-->
+                                            <td class="align-middle">'.$k["order_no"].'</td>
                                             <td class="align-middle">'.$k["sec_cust"].'</td>
                                             <td class="align-middle">'.$k["user"].'</td>
                                             <!--<td class="text-center align-middle">W'.$k["week"].' '.$k["year"].'</td>-->

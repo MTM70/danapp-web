@@ -11,4 +11,4 @@
 
     //Others
     const STYLES = 1.0;
-    const JS = 1.2;
+    const JS = 1.3;

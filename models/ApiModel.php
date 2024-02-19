@@ -167,10 +167,12 @@ class ApiModel extends Mysql
                     LEFT JOIN visit_days aS vd ON vd.id_user = :value0 AND vd.id_order = od.id_order 
                     WHERE o.id NOT IN (SELECT id_order FROM orders_closed WHERE id_user = :value0) 
                         AND 
+                        o.state = 0 
+                        /*AND 
                         CASE 
                             WHEN id_rol != 1 THEN id_sec_cust IN (SELECT id_sec_cust FROM users_sec_customers AS usc WHERE usc.id_user = u.id) 
                             ELSE id_sec_cust > 0 
-                        END
+                        END*/
                     ORDER BY od.id_order";
 
         $array = array($id);
