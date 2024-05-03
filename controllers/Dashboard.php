@@ -992,7 +992,7 @@
                                         $this->html .= '
                                             <div class="p-1 '.$top.'">
                                                 <div class="form-check">
-                                                    <input class="form-check-input cursor-select filter-type" type="checkbox" value="'.$k["id"].','.$k["categorie"].'" id="checkChartType'.$k["id"].'" onchange="checkTypeOrder = false;" '.(($k["id"] == 1 AND $_GET["checkType"] == "true") ? 'checked' : '' ).'>
+                                                    <input class="form-check-input cursor-select filter-type" type="checkbox" value="'.$k["id"].','.$k["categorie"].'" id="checkChartType'.$k["id"].'" onchange="checkTypeOrder = false;" '.(($k["id"] == 1 AND $_GET["checkType"] == "true") ? 'false' : '' ).'>
                                                     <label class="form-check-label cursor-select" for="checkChartType'.$k["id"].'">
                                                         '.$k["categorie"].'
                                                     </label>

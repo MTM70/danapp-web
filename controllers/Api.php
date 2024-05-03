@@ -452,8 +452,13 @@ class Api extends Controllers
             $res = $this->model->getOrderParameter($data["id_user"], $data["id_order"], $data["id_variety"], $data["id_parameter"]);
 
             if (empty($res)) {
-                echo json_encode(array("error" => "Error updating data!"));
-                exit();
+                $res = $this->model->setDataSync($data["id_user"], $data["id_order"], $data["id_variety"], $data["id_parameter"], $name, $data["obs"], DATE("Y"), DATE("W"));
+                if (!$res) {
+                    echo json_encode(array("error" => "Failed to record data!"));
+                    exit();
+                }
+                //echo json_encode(array("error" => "Error updating data!"));
+                //exit();
             }
 
             $res = $this->model->updateDataSync($res["id"], $name, $data["obs"]);

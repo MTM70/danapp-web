@@ -453,7 +453,8 @@
                     FROM orders_parameters AS op 
                     INNER JOIN orders AS o ON o.id = op.id_order 
                     INNER JOIN parameters AS p ON p.id = op.id_parameter 
-                    WHERE YEARWEEK(op.date) BETWEEN :value0 AND :value1 
+                    INNER JOIN orders_closed AS oc ON oc.id_order = op.id_order AND oc.id_user = op.id_user 
+                    WHERE YEARWEEK(oc.date) BETWEEN :value0 AND :value1 
                         /*(op.year BETWEEN :value0 AND :value2) AND (op.week BETWEEN :value1 AND :value3)*/ 
                     ORDER BY p.category, p.parameter';
 
@@ -585,7 +586,8 @@
                     INNER JOIN orders AS o ON o.id = op.id_order 
                     INNER JOIN varieties AS v ON v.id = op.id_variety 
                     INNER JOIN crops AS c ON c.id = v.id_crop 
-                    WHERE YEARWEEK(op.date) BETWEEN :value0 AND :value1 
+                    INNER JOIN orders_closed AS oc ON oc.id_order = op.id_order AND oc.id_user = op.id_user 
+                    WHERE YEARWEEK(oc.date) BETWEEN :value0 AND :value1 
                         /*(op.year BETWEEN :value0 AND :value2) AND (op.week BETWEEN :value1 AND :value3)*/ 
                     ORDER BY v.id_crop, v.variety";
 
@@ -604,12 +606,13 @@
                         v.id_crop, v.variety 
                     FROM orders_parameters AS op 
                     INNER JOIN orders AS o ON o.id = op.id_order 
+                    INNER JOIN orders_closed AS oc ON oc.id_order = op.id_order AND oc.id_user = op.id_user 
                     INNER JOIN varieties AS v ON v.id = op.id_variety 
                     INNER JOIN crops AS c ON c.id = v.id_crop 
                     INNER JOIN users AS u ON u.id = op.id_user 
                     INNER JOIN sec_customers AS sc ON sc.id = o.id_sec_cust 
                     $filterCompleted 
-                    WHERE YEARWEEK(op.date) BETWEEN :value0 AND :value1 
+                    WHERE YEARWEEK(oc.date) BETWEEN :value0 AND :value1 
                         /*(op.year BETWEEN :value0 AND :value2) AND (op.week BETWEEN :value1 AND :value3)*/ 
                         AND id_variety IN ($varieties) 
                     GROUP BY o.id, op.id_user, v.id 
@@ -622,12 +625,13 @@
         public function getDataCompareBetweenWeeksOrders(string $weekFrom, string $weekTo, string $varieties, string $parameters)
         {
             $sql = "SELECT 
-                        id_user, id_order, id_variety, id_parameter, value, obs 
-                    FROM orders_parameters 
+                        op.id_user, op.id_order, op.id_variety, op.id_parameter, op.value, op.obs 
+                    FROM orders_parameters AS op 
+                    INNER JOIN orders_closed AS oc ON oc.id_order = op.id_order AND oc.id_user = op.id_user 
                     WHERE 
-                        YEARWEEK(date) BETWEEN :value0 AND :value1 
+                        YEARWEEK(oc.date) BETWEEN :value0 AND :value1 
                         /*(year BETWEEN :value0 AND :value2) AND (week BETWEEN :value1 AND :value3)*/ 
-                        AND id_variety IN ($varieties) AND id_parameter IN ($parameters)";
+                        AND op.id_variety IN ($varieties) AND op.id_parameter IN ($parameters)";
 
             $array = array($weekFrom, $weekTo);
             return $this->select($sql, $array);
