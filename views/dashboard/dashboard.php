@@ -244,7 +244,7 @@
                                         
                                     </nav>
                                     <div class="tab-content" id="nav-tabContent">
-                                        <div class="d-none d-sm-block position-absolute end-0" style="z-index: 999; margin-right:50px; margin-top:3px;">
+                                        <div class="d-none d-sm-block position-absolute end-0" style="z-index: 100; margin-right:50px; margin-top:3px;">
                                             <button class="btn btn-sm btn-default p-1" id="fullscreenButton"><i class="bi bi-arrows-fullscreen fs-0-7"></i></button>
                                         </div>
                                         <div class="tab-pane fade show active text-center" id="nav-customers" role="tabpanel" aria-labelledby="nav-home-tab" tabindex="0">

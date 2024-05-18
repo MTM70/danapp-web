@@ -10,11 +10,12 @@ class ApiModel extends Mysql
 
     public function getUser(string $user, string $pass)
     {
-        $sql = "SELECT u.id, u.id_rol, rol, u.id_cust, cust_no, cust, user, ud.name, last_name 
+        $sql = "SELECT u.id, u.id_rol, rol, u.id_cust, cust_no, cust, user, ud.name, last_name, coun.img country_img 
                     FROM users AS u 
                     INNER JOIN users_details AS ud ON ud.id_user = u.id 
                     INNER JOIN customers AS c ON c.id = u.id_cust 
                     INNER JOIN roles AS r ON r.id = u.id_rol 
+                    INNER JOIN countries AS coun ON u.id_country = coun.id 
                     WHERE user = :value0 AND pass = :value1 AND state = 1";
 
         $array = array($user, $pass);
@@ -64,7 +65,7 @@ class ApiModel extends Mysql
         return $this->select($sql);
     }
 
-    public function getOrders()
+    /* public function getOrders()
     {
         $sql = "SELECT od.id_order, od.id_variety, tot_quantity, tot_price, remarks, 
                         o.order_no, o.id_sec_cust, id_type, o.id_product, o.year, o.week, o.destination, 
@@ -118,7 +119,7 @@ class ApiModel extends Mysql
 
         $array = array($id);
         return $this->select($sql, $array);
-    }
+    } */
 
     public function getOrders4(int $id)
     {
@@ -150,7 +151,7 @@ class ApiModel extends Mysql
 
     public function getOrders5(int $id)
     {
-        $sql = "SELECT od.id_order, od.id_variety, tot_quantity, tot_price, remarks, 
+        $sql = "SELECT od.id_order, od.id_variety, tot_quantity, tot_price, '' remarks, 
                         o.order_no, o.id_sec_cust, sc.sec_cust, id_type, o.id_product, o.year, o.week, o.destination, 
                         product, crop, variety, 
                         CASE 
@@ -168,6 +169,7 @@ class ApiModel extends Mysql
                     WHERE o.id NOT IN (SELECT id_order FROM orders_closed WHERE id_user = :value0) 
                         AND 
                         o.state = 0 
+                        AND o.id_country = u.id_country 
                         /*AND 
                         CASE 
                             WHEN id_rol != 1 THEN id_sec_cust IN (SELECT id_sec_cust FROM users_sec_customers AS usc WHERE usc.id_user = u.id) 
@@ -380,6 +382,30 @@ class ApiModel extends Mysql
         return $this->select($sql, $array);
     }
 
+    public function getEventsCustomers(int $user)
+    {
+        $sql = 'SELECT esc.*, 1 state 
+                FROM events_sec_customers esc 
+                JOIN events e ON esc.id_event = e.id 
+                JOIN users u ON u.id = :value0 
+                WHERE e.id_country = u.id_country';
+
+        $array = array($user);
+
+        return $this->select($sql, $array);
+    }
+
+    public function getEventsCustomersOrders(int $user)
+    {
+        $sql = "SELECT *, 1 state 
+                FROM events_sec_customers_orders 
+                WHERE id_user = :value0 AND YEAR(date) = YEAR(NOW())";
+
+        $array = array($user);
+
+        return $this->select($sql, $array);
+    }
+
     public function getEventSecCustByEventBySecCust(int $idUser, int $idEvent, int $idSecCust, String $name, String $table)
     {
         $sql = "SELECT id FROM $table WHERE id_user = :value0 AND id_event = :value1 AND id_sec_cust = :value2 AND YEAR(date) = DATE('Y') AND name = :value3 LIMIT 1";
@@ -388,18 +414,18 @@ class ApiModel extends Mysql
         return $this->selectOne($sql, $array);
     }
 
-    public function setDataEventSecCustSync(int $idUser, int $idEvent, int $idSecCust, String $name, String $email, String $emailName, String $date, String $table)
+    public function setDataEventSecCustSync(int $idUser, int $idEvent, int $idSecCust, String $name, int $numberPhone, String $email, String $emailName, String $date, String $table)
     {
-        $sql = "INSERT INTO $table (id_user, id_event, id_sec_cust, name, email, email_name, date) VALUES (:value0, :value1, :value2, :value3, :value4, :value5, :value6)";
-        $array = array($idUser, $idEvent, $idSecCust, $name, $email, $emailName, $date);
+        $sql = "INSERT INTO $table (id_user, id_event, id_sec_cust, name, number_phone, email, email_name, date) VALUES (:value0, :value1, :value2, :value3, :value4, :value5, :value6, :value7)";
+        $array = array($idUser, $idEvent, $idSecCust, $name, $numberPhone, $email, $emailName, $date);
 
         return $this->insert($sql, $array);
     }
 
-    public function updateDataEventSecCustSync(int $id, String $name, String $email, String $emailName, String $table)
+    public function updateDataEventSecCustSync(int $id, String $name, int $numberPhone, String $email, String $emailName, String $table)
     {
-        $sql = "UPDATE $table SET name = :value1, email = :value2, email_name = :value3 WHERE id = :value0";
-        $array = array($id, $name, $email, $emailName);
+        $sql = "UPDATE $table SET name = :value1, number_phone = :value2, email = :value3, email_name = :value4 WHERE id = :value0";
+        $array = array($id, $name, $numberPhone, $email, $emailName);
 
         return $this->update($sql, $array);
     }

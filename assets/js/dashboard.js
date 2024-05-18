@@ -1468,7 +1468,7 @@ const loadTableCompareResume = async () => {
 
             if(parameter[2] != 0 && parameter[2] != 5 && parameter[2] != 6 && parameter[2] != 7) continue;
 
-            const valor = row[i + 8] ? row[i + 8] : 'Empty' ;
+            const valor = row[i + 8] ? row[i + 8].split('<div')[0] : 'Empty' ;
 
             // Contar el valor para la columna correspondiente
             if (!array[parameter[1]][valor]) {

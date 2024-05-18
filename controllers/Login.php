@@ -42,6 +42,9 @@
                             $_SESSION['last_name'] = $response['last_name'];
                             $_SESSION['idRol'] = $response['id_rol'];
                             $_SESSION['rol'] = $response['rol'];
+                            $_SESSION['id_country'] = $response['id_country'];
+                            $_SESSION['country'] = $response['country'];
+                            $_SESSION['country_img'] = $response['img'];
                             //$_SESSION['cust'] = $response['cust'];
                             $_SESSION['login'] = true;
     

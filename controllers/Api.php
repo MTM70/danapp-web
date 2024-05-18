@@ -99,7 +99,7 @@ class Api extends Controllers
         }
     }
 
-    public function getOrders()
+    /* public function getOrders()
     {
         $res = $this->model->getOrders();
 
@@ -192,7 +192,7 @@ class Api extends Controllers
         } else {
             echo json_encode(array("error" => "No data orders!"));
         }
-    }
+    } */
 
     public function getOrders4()
     {
@@ -673,6 +673,32 @@ class Api extends Controllers
         }
     }
 
+    public function getEventsCustomers()
+    {
+        if (isset($_GET["id"]) AND $_GET["id"]) {
+            $res = $this->model->getEventsCustomers($_GET["id"]);
+
+            if (!empty($res)) {
+                echo json_encode(array("error" => false, "datos" => $res));
+            } else {
+                echo json_encode(array("error" => "No data!"));
+            }
+        }
+    }
+
+    public function getEventsCustomersOrders()
+    {
+        if (isset($_GET["id"]) AND $_GET["id"]) {
+            $res = $this->model->getEventsCustomersOrders($_GET["id"]);
+
+            if (!empty($res)) {
+                echo json_encode(array("error" => false, "datos" => $res));
+            } else {
+                echo json_encode(array("error" => "No data!"));
+            }
+        }
+    }
+
     public function syncEventSecCusts()
     {
         if (isset($_POST['data']) AND isset($_POST['idRol'])) {
@@ -681,16 +707,19 @@ class Api extends Controllers
             $table = ($_POST['idRol'] != 3) ? 'events_sec_customers' : 'events_sec_customers_bck' ;
 
             foreach ($data as $k) {
+
+                $k["number_phone"] = (isset($k["number_phone"])) ? $k["number_phone"] : 0 ;
+
                 $res = $this->model->getEventSecCustByEventBySecCust($k["id_user"], $k["id_event"], $k["id_sec_cust"], $k["name"], $table);
 
                 if ($res) {
-                    $res = $this->model->updateDataEventSecCustSync($res["id"], $k["name"], $k["email"], $k["email_name"], $table);
+                    $res = $this->model->updateDataEventSecCustSync($res["id"], $k["name"], $k["number_phone"], $k["email"], $k["email_name"], $table);
                     if (!$res) {
                         echo json_encode(array("error" => "Error updating data!"));
                         exit();
                     }
                 }else{
-                    $res = $this->model->setDataEventSecCustSync($k["id_user"], $k["id_event"], $k["id_sec_cust"], $k["name"], $k["email"], $k["email_name"], $k["date"], $table);
+                    $res = $this->model->setDataEventSecCustSync($k["id_user"], $k["id_event"], $k["id_sec_cust"], $k["name"], $k["number_phone"], $k["email"], $k["email_name"], $k["date"], $table);
                     if (!$res) {
                         echo json_encode(array("error" => "Failed to record data!"));
                         exit();

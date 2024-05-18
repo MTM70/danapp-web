@@ -323,7 +323,7 @@
 
                                 <div class="mb-3">
                                     <label for="event-name" class="form-label">Name</label>
-                                    <input type="text" class="form-control" name="event-name" id="event-name" required>
+                                    <input type="text" class="form-control" name="event-name" id="event-name" maxlength="30" required>
                                 </div>
 
                                 <div class="col-auto mb-3">

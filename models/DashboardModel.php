@@ -21,9 +21,9 @@
 
         public function setOrder(int $orderNo, int $idSecCust, int $idType, int $idProduct, int $year, int $week, String $destination, String $remarks, String $visitDay)
         {
-            $sql = 'INSERT INTO orders (order_no, id_sec_cust, id_type, id_product, year, week, destination, remarks, user_upload, visit_day) VALUES (:value0, :value1, :value2, :value3, :value4, :value5, :value6, :value7, :value8, :value9)';
+            $sql = 'INSERT INTO orders (order_no, id_country, id_sec_cust, id_type, id_product, year, week, destination, remarks, user_upload, visit_day) VALUES (:value0, :value1, :value2, :value3, :value4, :value5, :value6, :value7, :value8, :value9, :value10)';
 
-            $array = array($orderNo, $idSecCust, $idType, $idProduct, $year, $week, $destination, $remarks, $_SESSION["id"], $visitDay);
+            $array = array($orderNo, $_SESSION["id_country"], $idSecCust, $idType, $idProduct, $year, $week, $destination, $remarks, $_SESSION["id"], $visitDay);
             return $this->insert($sql, $array);
         }
 
@@ -279,7 +279,6 @@
                     FROM orders_parameters AS op 
                     INNER JOIN orders AS o ON o.id = op.id_order 
                     WHERE YEARWEEK(op.date) BETWEEN :value0 AND :value1 
-                        /*(op.year BETWEEN :value0 AND :value2) AND (op.week BETWEEN :value1 AND :value3)*/ 
                     ORDER BY order_no';
 
             $array = array($weekFrom, $weekTo);
@@ -302,7 +301,6 @@
                     INNER JOIN products AS pr ON pr.id = o.id_product 
                     INNER JOIN users_details AS ud ON ud.id_user = op.id_user 
                     WHERE YEARWEEK(op.date) BETWEEN :value0 AND :value1 
-                        /*(op.year BETWEEN :value0 AND :value2) AND (op.week BETWEEN :value1 AND :value3)*/ 
                     GROUP BY id_order, op.id_user, v.id 
                     ORDER BY order_no';
 
@@ -320,8 +318,7 @@
                         INNER JOIN sec_customers AS sc ON sc.id = o.id_sec_cust 
                         INNER JOIN customers AS c ON c.id = sc.id_cust 
                         $filterUploads 
-                        WHERE YEARWEEK(visit_day) BETWEEN :value0 AND :value1 
-                            /*(YEAR(visit_day) BETWEEN :value0 AND :value2) AND (WEEK(visit_day) BETWEEN :value1 AND :value3)*/ 
+                        WHERE id_country = :value2 AND YEARWEEK(visit_day) BETWEEN :value0 AND :value1 
                         GROUP BY c.id 
 
                         UNION ALL 
@@ -334,15 +331,14 @@
                             INNER JOIN sec_customers AS sc ON sc.id = o.id_sec_cust 
                             INNER JOIN customers AS c ON c.id = sc.id_cust 
                             $filterCompleted 
-                            WHERE YEARWEEK(oc.date) BETWEEN :value0 AND :value1 
-                                /*(YEAR(oc.date) BETWEEN :value0 AND :value2) AND (WEEK(oc.date) BETWEEN :value1 AND :value3)*/ 
+                            WHERE id_country = :value2 AND YEARWEEK(oc.date) BETWEEN :value0 AND :value1 
                         ) AS d2 
                         GROUP BY id_cust 
                     ) AS d 
                     GROUP BY id_cust 
                     ORDER BY SUM(completed) DESC, cust";
 
-            $array = array($weekFrom, $weekTo);
+            $array = array($weekFrom, $weekTo, $_SESSION["id_country"]);
             return $this->select($sql, $array);
         }
 
@@ -355,12 +351,11 @@
                     INNER JOIN orders AS o ON o.id = oc.id_order 
                     INNER JOIN users AS u ON u.id = id_user 
                     $filterCompleted 
-                    WHERE YEARWEEK(oc.date) BETWEEN :value0 AND :value1 
-                        /*(YEAR(oc.date) BETWEEN :value0 AND :value2) AND (WEEK(oc.date) BETWEEN :value1 AND :value3)*/ 
+                    WHERE o.id_country = :value2 AND YEARWEEK(oc.date) BETWEEN :value0 AND :value1 
                     GROUP BY id_user 
                     ORDER BY COUNT(*) DESC, u.user";
 
-            $array = array($weekFrom, $weekTo);
+            $array = array($weekFrom, $weekTo, $_SESSION["id_country"]);
             return $this->select($sql, $array);
         }
 
@@ -377,8 +372,7 @@
                             INNER JOIN varieties AS v ON v.id = od.id_variety 
                             INNER JOIN crops AS c ON c.id = v.id_crop 
                             $filterUploads 
-                            WHERE YEARWEEK(visit_day) BETWEEN :value0 AND :value1 
-                                /*(YEAR(visit_day) BETWEEN :value0 AND :value2) AND (WEEK(visit_day) BETWEEN :value1 AND :value3)*/ 
+                            WHERE id_country = :value2 AND YEARWEEK(visit_day) BETWEEN :value0 AND :value1 
                         ) AS d1 
                         GROUP BY d1.id_crop 
 
@@ -393,15 +387,14 @@
                             INNER JOIN varieties AS v ON v.id = op.id_variety 
                             INNER JOIN crops AS c ON c.id = v.id_crop 
                             $filterCompleted 
-                            WHERE YEARWEEK(oc.date) BETWEEN :value0 AND :value1 
-                                /*(YEAR(oc.date) BETWEEN :value0 AND :value2) AND (WEEK(oc.date) BETWEEN :value1 AND :value3)*/ 
+                            WHERE id_country = :value2 AND YEARWEEK(oc.date) BETWEEN :value0 AND :value1 
                         ) AS d2 
                         GROUP BY d2.id_crop 
                     ) AS d 
                     GROUP BY id_crop 
                     ORDER BY SUM(completed) DESC, crop";
 
-            $array = array($weekFrom, $weekTo);
+            $array = array($weekFrom, $weekTo, $_SESSION["id_country"]);
             return $this->select($sql, $array);
         }
 
@@ -417,8 +410,7 @@
                             INNER JOIN orders AS o ON o.id = od.id_order 
                             INNER JOIN varieties AS v ON v.id = od.id_variety 
                             $filterUploads 
-                            WHERE YEARWEEK(visit_day) BETWEEN :value0 AND :value1 
-                                /*(YEAR(visit_day) BETWEEN :value0 AND :value2) AND (WEEK(visit_day) BETWEEN :value1 AND :value3)*/ 
+                            WHERE id_country = :value2 AND YEARWEEK(visit_day) BETWEEN :value0 AND :value1 
                                 AND TRIM(variety) != '' 
                         ) AS d1 
                         GROUP BY d1.id_variety 
@@ -434,8 +426,7 @@
                             INNER JOIN varieties AS v ON v.id = op.id_variety 
                             $filterCompleted 
                             WHERE 
-                                YEARWEEK(oc.date) BETWEEN :value0 AND :value1 
-                                /*(YEAR(oc.date) BETWEEN :value0 AND :value2) AND (WEEK(oc.date) BETWEEN :value1 AND :value3)*/ 
+                            id_country = :value2 AND YEARWEEK(oc.date) BETWEEN :value0 AND :value1 
                                 AND TRIM(variety) != '' 
                         ) AS d2 
                         GROUP BY d2.id_variety 
@@ -443,7 +434,7 @@
                     GROUP BY id_variety 
                     ORDER BY SUM(completed) DESC, variety";
 
-            $array = array($weekFrom, $weekTo);
+            $array = array($weekFrom, $weekTo, $_SESSION["id_country"]);
             return $this->select($sql, $array);
         }
 
@@ -454,11 +445,10 @@
                     INNER JOIN orders AS o ON o.id = op.id_order 
                     INNER JOIN parameters AS p ON p.id = op.id_parameter 
                     INNER JOIN orders_closed AS oc ON oc.id_order = op.id_order AND oc.id_user = op.id_user 
-                    WHERE YEARWEEK(oc.date) BETWEEN :value0 AND :value1 
-                        /*(op.year BETWEEN :value0 AND :value2) AND (op.week BETWEEN :value1 AND :value3)*/ 
+                    WHERE id_country = :value2 AND YEARWEEK(oc.date) BETWEEN :value0 AND :value1 
                     ORDER BY p.category, p.parameter';
 
-            $array = array($weekFrom, $weekTo);
+            $array = array($weekFrom, $weekTo, $_SESSION["id_country"]);
             return $this->select($sql, $array);
         }
 
@@ -469,14 +459,13 @@
                         SELECT DISTINCT id_user 
                         FROM orders_closed AS oc 
                         INNER JOIN orders AS o ON oc.id_order = o.id 
-                        WHERE YEARWEEK(oc.date) BETWEEN :value0 AND :value1 
-                            /*(YEAR(oc.date) BETWEEN :value0 AND :value2) AND (WEEK(oc.date) BETWEEN :value1 AND :value3)*/ 
+                        WHERE id_country = :value2 AND YEARWEEK(oc.date) BETWEEN :value0 AND :value1 
                     ) AS d 
                     INNER JOIN users AS u ON u.id = id_user 
                     GROUP BY id_user 
                     ORDER BY u.user';
 
-            $array = array($weekFrom, $weekTo);
+            $array = array($weekFrom, $weekTo, $_SESSION["id_country"]);
             return $this->select($sql, $array);
         }
 
@@ -486,23 +475,21 @@
                     FROM (
                         SELECT DISTINCT id_sec_cust 
                         FROM orders 
-                        WHERE YEARWEEK(visit_day) BETWEEN :value0 AND :value1 
-                            /*(YEAR(visit_day) BETWEEN :value0 AND :value2) AND (WEEK(visit_day) BETWEEN :value1 AND :value3)*/ 
+                        WHERE id_country = :value2 AND YEARWEEK(visit_day) BETWEEN :value0 AND :value1 
 
                         UNION ALL
 
                         SELECT DISTINCT id_sec_cust 
                         FROM orders_closed AS oc 
                         INNER JOIN orders AS o ON oc.id_order = o.id 
-                        WHERE YEARWEEK(oc.date) BETWEEN :value0 AND :value1 
-                            /*(YEAR(oc.date) BETWEEN :value0 AND :value2) AND (WEEK(oc.date) BETWEEN :value1 AND :value3)*/ 
+                        WHERE id_country = :value2 AND YEARWEEK(oc.date) BETWEEN :value0 AND :value1 
                     ) AS d 
                     INNER JOIN sec_customers AS sc ON sc.id = id_sec_cust 
                     INNER JOIN customers AS c ON c.id = sc.id_cust 
                     GROUP BY c.id 
                     ORDER BY c.cust';
 
-            $array = array($weekFrom, $weekTo);
+            $array = array($weekFrom, $weekTo, $_SESSION["id_country"]);
             return $this->select($sql, $array);
         }
 
@@ -512,20 +499,18 @@
                     FROM (
                         SELECT DISTINCT destination 
                         FROM orders 
-                        WHERE YEARWEEK(visit_day) BETWEEN :value0 AND :value1 
-                            /*(YEAR(visit_day) BETWEEN :value0 AND :value2) AND (WEEK(visit_day) BETWEEN :value1 AND :value3)*/ 
+                        WHERE id_country = :value2 AND YEARWEEK(visit_day) BETWEEN :value0 AND :value1 
 
                         UNION ALL
 
                         SELECT DISTINCT destination 
                         FROM orders_closed AS oc 
                         INNER JOIN orders AS o ON oc.id_order = o.id 
-                        WHERE YEARWEEK(oc.date) BETWEEN :value0 AND :value1 
-                            /*(YEAR(oc.date) BETWEEN :value0 AND :value2) AND (WEEK(oc.date) BETWEEN :value1 AND :value3)*/ 
+                        WHERE id_country = :value2 AND YEARWEEK(oc.date) BETWEEN :value0 AND :value1 
                     ) AS d 
                     GROUP BY destination';
 
-            $array = array($weekFrom, $weekTo);
+            $array = array($weekFrom, $weekTo, $_SESSION["id_country"]);
             return $this->select($sql, $array);
         }
 
@@ -535,22 +520,20 @@
                     FROM (
                         SELECT DISTINCT id_type 
                         FROM orders 
-                        WHERE YEARWEEK(visit_day) BETWEEN :value0 AND :value1 
-                            /*(YEAR(visit_day) BETWEEN :value0 AND :value2) AND (WEEK(visit_day) BETWEEN :value1 AND :value3)*/ 
+                        WHERE id_country = :value2 AND YEARWEEK(visit_day) BETWEEN :value0 AND :value1 
 
                         UNION ALL
 
                         SELECT DISTINCT id_type 
                         FROM orders_closed AS oc 
                         INNER JOIN orders AS o ON oc.id_order = o.id 
-                        WHERE YEARWEEK(oc.date) BETWEEN :value0 AND :value1 
-                            /*(YEAR(oc.date) BETWEEN :value0 AND :value2) AND (WEEK(oc.date) BETWEEN :value1 AND :value3)*/ 
+                        WHERE id_country = :value2 AND YEARWEEK(oc.date) BETWEEN :value0 AND :value1 
                     ) AS d 
                     INNER JOIN orders_types AS ot ON ot.id = id_type 
                     GROUP BY id_type 
                     ORDER BY ot.type';
 
-            $array = array($weekFrom, $weekTo);
+            $array = array($weekFrom, $weekTo, $_SESSION["id_country"]);
             return $this->select($sql, $array);
         }
 
@@ -560,22 +543,20 @@
                     FROM (
                         SELECT DISTINCT id_product 
                         FROM orders 
-                        WHERE YEARWEEK(visit_day) BETWEEN :value0 AND :value1 
-                            /*(YEAR(visit_day) BETWEEN :value0 AND :value2) AND (WEEK(visit_day) BETWEEN :value1 AND :value3)*/ 
+                        WHERE id_country = :value2 AND YEARWEEK(visit_day) BETWEEN :value0 AND :value1 
 
                         UNION ALL
 
                         SELECT DISTINCT id_product 
                         FROM orders_closed AS oc 
                         INNER JOIN orders AS o ON oc.id_order = o.id 
-                        WHERE YEARWEEK(oc.date) BETWEEN :value0 AND :value1 
-                            /*(YEAR(oc.date) BETWEEN :value0 AND :value2) AND (WEEK(oc.date) BETWEEN :value1 AND :value3)*/ 
+                        WHERE id_country = :value2 AND YEARWEEK(oc.date) BETWEEN :value0 AND :value1 
                     ) AS d 
                     INNER JOIN products AS p ON p.id = id_product 
                     GROUP BY id_product 
                     ORDER BY p.product';
 
-            $array = array($weekFrom, $weekTo);
+            $array = array($weekFrom, $weekTo, $_SESSION["id_country"]);
             return $this->select($sql, $array);
         }
 
@@ -587,11 +568,10 @@
                     INNER JOIN varieties AS v ON v.id = op.id_variety 
                     INNER JOIN crops AS c ON c.id = v.id_crop 
                     INNER JOIN orders_closed AS oc ON oc.id_order = op.id_order AND oc.id_user = op.id_user 
-                    WHERE YEARWEEK(oc.date) BETWEEN :value0 AND :value1 
-                        /*(op.year BETWEEN :value0 AND :value2) AND (op.week BETWEEN :value1 AND :value3)*/ 
+                    WHERE id_country = :value2 AND YEARWEEK(oc.date) BETWEEN :value0 AND :value1 
                     ORDER BY v.id_crop, v.variety";
 
-            $array = array($weekFrom, $weekTo);
+            $array = array($weekFrom, $weekTo, $_SESSION["id_country"]);
             return $this->select($sql, $array);
         }
 
@@ -612,13 +592,12 @@
                     INNER JOIN users AS u ON u.id = op.id_user 
                     INNER JOIN sec_customers AS sc ON sc.id = o.id_sec_cust 
                     $filterCompleted 
-                    WHERE YEARWEEK(oc.date) BETWEEN :value0 AND :value1 
-                        /*(op.year BETWEEN :value0 AND :value2) AND (op.week BETWEEN :value1 AND :value3)*/ 
+                    WHERE o.id_country = :value2 AND YEARWEEK(oc.date) BETWEEN :value0 AND :value1 
                         AND id_variety IN ($varieties) 
                     GROUP BY o.id, op.id_user, v.id 
                     ORDER BY v.id_crop, v.variety";
 
-            $array = array($weekFrom, $weekTo);
+            $array = array($weekFrom, $weekTo, $_SESSION["id_country"]);
             return $this->select($sql, $array);
         }
 
@@ -628,12 +607,12 @@
                         op.id_user, op.id_order, op.id_variety, op.id_parameter, op.value, op.obs 
                     FROM orders_parameters AS op 
                     INNER JOIN orders_closed AS oc ON oc.id_order = op.id_order AND oc.id_user = op.id_user 
+                    INNER JOIN orders AS o ON o.id = op.id_order 
                     WHERE 
-                        YEARWEEK(oc.date) BETWEEN :value0 AND :value1 
-                        /*(year BETWEEN :value0 AND :value2) AND (week BETWEEN :value1 AND :value3)*/ 
+                        id_country = :value2 AND YEARWEEK(oc.date) BETWEEN :value0 AND :value1 
                         AND op.id_variety IN ($varieties) AND op.id_parameter IN ($parameters)";
 
-            $array = array($weekFrom, $weekTo);
+            $array = array($weekFrom, $weekTo, $_SESSION["id_country"]);
             return $this->select($sql, $array);
         }
         //TODO Home--------------------------------------------------------------------------
@@ -653,9 +632,10 @@
 
         public function getEvents()
         {
-            $sql = 'SELECT * FROM events';
+            $sql = 'SELECT * FROM events WHERE id_country = :value0';
 
-            return $this->select($sql);
+            $array = array($_SESSION["id_country"]);
+            return $this->select($sql, $array);
         }
 
         public function getEventByNameAndWeek(string $name, int $start, int $end, int $id = 0)
@@ -671,9 +651,9 @@
 
         public function setEvent(string $name, int $start, int $end, String $description, string $image)
         {
-            $sql = 'INSERT INTO events (name, start_week, end_week, description, image) VALUES (:value0, :value1, :value2, :value3, :value4)';
+            $sql = 'INSERT INTO events (id_country, name, start_week, end_week, description, image) VALUES (:value0, :value1, :value2, :value3, :value4, :value5)';
 
-            $array = array($name, $start, $end, $description, $image);
+            $array = array($_SESSION["id_country"], $name, $start, $end, $description, $image);
             return $this->insert($sql, $array);
         }
 
@@ -708,18 +688,6 @@
             $array = array($id, $name, $start, $end, $description, $image, $state);
             return $this->update($sql, $array);
         }
-
-        /* public function getEventYears(int $idEvent)
-        {
-            $sql = "SELECT YEAR(e.date) AS year, 
-                        COUNT(e.id) AS orders, IFNULL(e2.id, 0) AS ordersBck 
-                    FROM events_sec_customers_orders AS e 
-                    LEFT JOIN events_sec_customers_orders_bck AS e2 ON e2.id_event = :value0 AND YEAR(e2.date) = YEAR(e.date) 
-                    WHERE e.id_event = :value0 GROUP BY YEAR(e.date) ORDER BY YEAR(e.date)";
-
-            $array = array($idEvent);
-            return $this->select($sql, $array);
-        } */
 
         public function getEventYears(int $idEvent)
         {
@@ -944,9 +912,11 @@
             $sql = 'SELECT u.id, user, name, last_name, rol, state 
                     FROM users AS u 
                     INNER JOIN users_details AS ud ON ud.id_user = u.id 
-                    INNER JOIN roles AS r ON r.id = u.id_rol';
+                    INNER JOIN roles AS r ON r.id = u.id_rol 
+                    WHERE id_country = :value0';
 
-            return $this->select($sql);
+            $array = array($_SESSION["id_country"]);
+            return $this->select($sql, $array);
         }
 
         public function getSecCusts()
@@ -979,9 +949,9 @@
 
         public function setUser(int $idRol, String $user, String $pass)
         {
-            $sql = 'INSERT INTO users (id_rol, id_cust, user, pass) VALUES (:value0, 1, :value1, :value2)';
+            $sql = 'INSERT INTO users (id_country, id_rol, id_cust, user, pass) VALUES (:value0, 1, :value1, :value2, :value3)';
 
-            $array = array($idRol, $user, $pass);
+            $array = array($_SESSION["id_country"], $idRol, $user, $pass);
             return $this->insert($sql, $array);
         }
 

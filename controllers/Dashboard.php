@@ -1514,7 +1514,7 @@
                                                                     </td>
                                                                 ';
                                                             }
-                                                            else $this->html .= '<td class="text-center align-middle">'.$d["value"].'</td>';
+                                                            else $this->html .= '<td class="text-center align-middle">'.$d["value"].($d["obs"] ? '<div class="mt-1 text-muted fs-0-8"><i>('.$d["obs"].')</i></div>' : '').'</td>';
 
                                                             $isset = true;
                                                         }
