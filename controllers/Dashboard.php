@@ -78,19 +78,23 @@
                     $f++;
                 }
 
-                $orderNoHist = null;    //Guardar ultima orden
+                $orderNoHist = null;                                                                                                        //* Guardar ID ultima orden
 
-                for ($i = 1; $i < count($data); $i++) { //Por cada dato del arreglo de datos
+                for ($i = 1; $i < count($data); $i++) {                                                                                     //* Por cada dato del arreglo de datos
 
-                    if (trim($data[$i][0]) != $orderNoHist) {   //Si la orden actual es indiferente de la orden anterior
+                    $isCreatedOrder = false;                                                                                                //* Saber si la orden se creo
 
-                        $order = $this->model->getOrderByNo(trim($data[$i][0]));    //Comprobar si la orden ya existe
+                    if (trim($data[$i][0]) != $orderNoHist) {                                                                               //* Si la orden actual es indiferente de la orden anterior
 
-                        if (!$order) {  //Si no existe
+                        if (trim($data[$i][7]) == 0 || trim($data[$i][27]) == 0) continue;                                                                              //* Si la orden es igual a 0 pase al siguiente registro
 
-                            $cust = $this->model->getCustByNo(trim($data[$i][7]));  //Comprobar si el cust existe
+                        $order = $this->model->getOrderByNo(trim($data[$i][0]));                                                            //* Comprobar si la orden ya existe
 
-                            if (!$cust) {   //Si no existe se crea
+                        if (empty($order)) {                                                                                                //* Si no existe la orden
+
+                            $cust = $this->model->getCustByNo(trim($data[$i][7]));                                                          //* Comprobar si el cust existe
+
+                            if (empty($cust)) {                                                                                             //* Si no existe el cust se crea
                                 $insert = $this->model->setCustomer(trim($data[$i][7]), trim($data[$i][8]));
                                 if (!$insert) {
                                     $this->arrResponse = array(
@@ -104,15 +108,15 @@
                                 }
                             }
 
-                            $secCust = $this->model->getSecCustByNo($cust["id"], trim($data[$i][9]));   //Comprobar si el secCust existe
+                            $secCust = $this->model->getSecCustByNo($cust["id"], trim($data[$i][9]));                                       //* Comprobar si el secCust existe
 
-                            if (!$secCust) {    //Si no existe se crea
+                            if (empty($secCust)) {                                                                                          //* Si no existe el secCust se crea
                                 $data[$i][10] = (trim($data[$i][10]) != "") ? trim($data[$i][10]) : $cust["cust"];
                                 $insert = $this->model->setSecCustomer($cust["id"], trim($data[$i][9]), trim($data[$i][10]));
                                 if (!$insert) {
                                     $this->arrResponse = array(
                                         'status' => false, 
-                                        'res' => 'Create sec cust fail!'.$insert
+                                        'res' => 'Create sec cust fail! '.$insert
                                     );
         
                                     exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
@@ -121,14 +125,14 @@
                                 }
                             }
 
-                            $orderType = $this->model->getOrderTypeByType(trim($data[$i][22])); //Comprobar si el tipo de orden existe
+                            $orderType = $this->model->getOrderTypeByType(trim($data[$i][22]));                                             //* Comprobar si el tipo de orden existe
 
-                            if (!$orderType) {  //Si no existe se crea
+                            if (empty($orderType)) {                                                                                        //* Si no existe el tipo de orden se crea
                                 $insert = $this->model->setOrderType(trim($data[$i][22]));
                                 if (!$insert) {
                                     $this->arrResponse = array(
                                         'status' => false, 
-                                        'res' => 'Create order type fail!'.$insert
+                                        'res' => 'Create order type fail! '.$insert
                                     );
         
                                     exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
@@ -137,14 +141,14 @@
                                 }
                             }
 
-                            $product = $this->model->getProductByProduct(trim($data[$i][16]));  //Comprobar si el producto existe
+                            $product = $this->model->getProductByProduct(trim($data[$i][16]));                                              //* Comprobar si el producto existe
 
-                            if (!$product) {    //Si no existe se crea
+                            if (empty($product)) {                                                                                          //* Si no existe se crea
                                 $insert = $this->model->setProduct(trim($data[$i][16]));
                                 if (!$insert) {
                                     $this->arrResponse = array(
                                         'status' => false, 
-                                        'res' => 'Create product fail!'.$insert
+                                        'res' => 'Create product fail! '.$insert
                                     );
         
                                     exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
@@ -178,17 +182,18 @@
 
                             //* GET DATE VISIT--------------------------------------------------------------------------
 
-                            //Registramos la orden
+                            //* Registramos la orden
                             $insert = $this->model->setOrder(trim($data[$i][0]), $secCust["id"], $orderType["id"], $product["id"], trim($data[$i][3]), trim($data[$i][4]), trim($data[$i][14]), trim($data[$i][34]), $lunes);
                             if (!$insert) {
                                 $this->arrResponse = array(
                                     'status' => false, 
-                                    'res' => 'Create order fail!'.$insert
+                                    'res' => 'Create order fail! '.$insert
                                 );
     
                                 exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
                             }else{
                                 $order = $this->model->getOrderByNo(trim($data[$i][0]));
+                                $isCreatedOrder = true;
                             }
                             
                         }
@@ -198,9 +203,9 @@
 
                     //TODO Orden detail ----------------------------------------
 
-                    $crop = $this->model->getCropByNo(trim($data[$i][25])); //Comprobar si el cultivo existe
+                    $crop = $this->model->getCropByNo(trim($data[$i][25]));                                                                 //* Comprobar si el cultivo existe
 
-                    if (!$crop) { //Si no existe se crea
+                    if (empty($crop)) {                                                                                                     //* Si no existe se crea
 
                         $cropGeneral = (trim($data[$i][25]) == 20) ? 2 : 3 ;
 
@@ -208,7 +213,7 @@
                         if (!$insert) {
                             $this->arrResponse = array(
                                 'status' => false, 
-                                'res' => 'Create crop fail!'.$insert
+                                'res' => 'Create crop fail! '.$insert
                             );
 
                             exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
@@ -217,14 +222,14 @@
                         }
                     }
 
-                    $variety = $this->model->getVarietyByNo($crop["id"], trim($data[$i][27]));   //Comprobar si la variedad existe
+                    $variety = $this->model->getVarietyByNo($crop["id"], trim($data[$i][27]));                                              //* Comprobar si la variedad existe
 
-                    if (!$variety) {    //Si no existe se crea
+                    if (empty($variety)) {                                                                                                  //* Si no existe la variedad se crea
                         $insert = $this->model->setVariety($crop["id"], trim($data[$i][27]), trim($data[$i][28]));
                         if (!$insert) {
                             $this->arrResponse = array(
                                 'status' => false, 
-                                'res' => 'Create variety fail!'.$insert
+                                'res' => 'Create variety fail! '.$insert
                             );
 
                             exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
@@ -236,24 +241,31 @@
                         $insert = $this->model->updateVariety($variety["id"], trim($data[$i][28]));
                     }
 
-                    $orderDetail = $this->model->getOrderDetail($order["id"], $variety["id"]);  //Comprobar si la orden detalle existe
+                    $orderDetail = $this->model->getOrderDetail($order["id"], $variety["id"]);                                              //* Comprobar si la orden detalle existe
 
-                    if (!$orderDetail) {    //Si no existe se crea
+                    if (empty($orderDetail)) {                                                                                              //* Si no existe la orden detalle se crea
                         $insert = $this->model->setOrderDetail($order["id"], $variety["id"], trim($data[$i][20]), floatval(str_replace(",", ".", trim($data[$i][21]))));
                         if (!$insert) {
                             $this->arrResponse = array(
                                 'status' => false, 
-                                'res' => 'Create detail order fail!'.$insert
+                                'res' => 'Create detail order fail! '.$insert
                             );
 
                             exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
+                        }else if(!$isCreatedOrder && trim($data[$i][0]) != $orderNoHist){                                                   //* Actualizamos date upload
+                            if (!$this->model->updateDateUploadByOrder($order["id"])) {
+                                $this->arrResponse = array(
+                                    'status' => false, 
+                                    'res' => 'update date upload order fail! '.$order["order_no"]
+                                );
+                            }
                         }
-                    }else{  //Si existe se actualiza la cantidad y el total precio
+                    }else{                                                                                                                  //* Si existe se actualiza la cantidad y el total precio
                         $update = $this->model->updateOrderDetail($orderDetail["id"], trim($data[$i][20]), floatval(str_replace(",", ".", trim($data[$i][21]))));
                         if (!$update) {
                             $this->arrResponse = array(
                                 'status' => false, 
-                                'res' => 'update detail order fail!'.$update
+                                'res' => 'update detail order fail! '.$update
                             );
 
                             exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
@@ -263,7 +275,7 @@
                     $orderNoHist = $order["order_no"];  //Guardamos el hist de la orden
                 }
 
-                $update = $this->model->updateOrderDetailState(); //Actualizamos state a 1, para no modificar si subimos de nuevo el archivo
+                $update = $this->model->updateOrderDetailState();                                                                           //* Actualizamos state a 1, para no modificar si subimos de nuevo el archivo
 
                 if (!$update) {
                     $this->arrResponse = array(
@@ -909,7 +921,7 @@
 
                                         $top = null;
                                     }
-                                }
+                                }else $this->html .= '<div class="text-center">No data!</div>';
 
                             $this->html .= '
                             </div>
@@ -1078,19 +1090,26 @@
                             
                             <p class="position-absolute px-2 bg-white fw-semibold" style="margin-top: -18px; margin-left: 2px;"><i class="bi bi-flower3 me-1"></i>Varieties</p>
 
-                            <div>';
+                            <div class="row m-0 '.(!empty($varieties) ? 'mt-5' : '').'">';
 
                                 if (!empty($varieties)) {
 
-                                    $top = "mt-2";
+                                    //$top = "mt-5";
 
-                                    /* if(count($varieties) >= 2) $this->html .= '<div class="pt-3"><input type="text" class="form-control form-control-sm" placeholder="Search..."></div>'; */
+                                    $this->html .= '
+                                        <div class="col-5 position-absolute d-flex" style="margin-top:-33px;">
+                                            <input type="text" class="form-control form-control-sm me-2" onkeyup="searchFilter(this);" placeholder="Search...">
+                                            <button class="btn btn-light rounded-circle p-2 h-auto w-auto ms-1 position-relative" type="button" onclick="unselectFilter(this);" style="width: 60px; height: 60px;">
+                                                <i class="bi bi-square"></i>
+                                            </button>
+                                        </div>
+                                    ';
 
                                     foreach ($varieties as $k) {
                                         $this->html .= '
-                                            <div class="p-1 '.$top.'">
+                                            <div class="col-12 p-1 '.$top.' filter-item">
                                                 <div class="form-check">
-                                                    <input class="form-check-input cursor-select filter-variety" type="checkbox" value="'.$k["id"].','.$k["categorie"].'" id="checkChartVar'.$k["id"].'">
+                                                    <input class="form-check-input cursor-select filter-variety" type="checkbox" value="'.$k["id"].','.$k["categorie"].'" id="checkChartVar'.$k["id"].'" onclick="moveUpFilter(this);">
                                                     <label class="form-check-label cursor-select" for="checkChartVar'.$k["id"].'">
                                                         '.$k["categorie"].'
                                                     </label>
@@ -1100,7 +1119,7 @@
 
                                         $top = null;
                                     }
-                                }
+                                }else $this->html .= '<div class="text-center">No data!</div>';
 
                             $this->html .= '
                             </div>
@@ -1946,27 +1965,27 @@
                 $spreadsheet = new Spreadsheet();
                 $sheet = $spreadsheet->getActiveSheet();
                 $sheet->setCellValue('A1', 'Date');
-                $sheet->setCellValue('B1', 'Delivery Year');
-                $sheet->setCellValue('C1', 'Delivery Week');
-                $sheet->setCellValue('D1', 'User');
-                $sheet->setCellValue('E1', 'Event');
-                $sheet->setCellValue('F1', 'Customer number');
-                $sheet->setCellValue('G1', 'Customer name');
-                $sheet->setCellValue('H1', 'Secondary customer number');
-                $sheet->setCellValue('I1', 'Secondary customer name');
-                $sheet->setCellValue('J1', 'Client name');
-                $sheet->setCellValue('K1', 'Email');
-                $sheet->setCellValue('L1', 'Email name');
-                $sheet->setCellValue('M1', 'Crop name');
-                $sheet->setCellValue('N1', 'Order type');
-                $sheet->setCellValue('O1', 'Product');
-                $sheet->setCellValue('P1', 'Variety number');
-                $sheet->setCellValue('Q1', 'Variety name');
-                $sheet->setCellValue('R1', 'Tot. quantity');
-                $sheet->setCellValue('S1', 'replicas');
-                $sheet->setCellValue('T1', 'Greenhouse');
-                $sheet->setCellValue('U1', 'Position');
-                $sheet->setCellValue('V1', 'Remark');
+                /* $sheet->setCellValue('B1', 'Delivery Year');
+                $sheet->setCellValue('C1', 'Delivery Week'); */
+                $sheet->setCellValue('B1', 'User'); //D
+                $sheet->setCellValue('C1', 'Event'); //E
+                //$sheet->setCellValue('F1', 'Customer number');
+                $sheet->setCellValue('D1', 'Customer name'); //G
+                //$sheet->setCellValue('H1', 'Secondary customer number');
+                $sheet->setCellValue('E1', 'Secondary customer name'); //I
+                $sheet->setCellValue('F1', 'Client name'); //J
+                $sheet->setCellValue('G1', 'Email'); //K
+                //$sheet->setCellValue('L1', 'Email name');
+                $sheet->setCellValue('H1', 'Crop name'); //M
+                $sheet->setCellValue('I1', 'Order type'); //N
+                $sheet->setCellValue('J1', 'Product'); //O
+                //$sheet->setCellValue('P1', 'Variety number');
+                $sheet->setCellValue('K1', 'Variety name'); //Q
+                $sheet->setCellValue('L1', 'Tot. quantity'); //R
+                $sheet->setCellValue('M1', 'replicas'); //S
+                //$sheet->setCellValue('T1', 'Greenhouse');
+                //$sheet->setCellValue('U1', 'Position');
+                $sheet->setCellValue('N1', 'Remark'); //V
 
                 if (!empty($data)) {
 
@@ -1975,29 +1994,29 @@
                     foreach ($data as $k) {
 
                         $sheet->setCellValue('A'.$f, $k["date_first"]);
-                        $sheet->setCellValue('B'.$f, $k["year"]);
-                        $sheet->setCellValue('C'.$f, $k["week"]);
-                        $sheet->setCellValue('D'.$f, $k["name_user"]." ".$k["last_name"]);
-                        $sheet->setCellValue('E'.$f, $k["event"]);
-                        $sheet->setCellValue('F'.$f, $k["cust_no"]);
-                        $sheet->setCellValue('G'.$f, $k["cust"]);
-                        $sheet->setCellValue('H'.$f, $k["sec_cust_no"]);
-                        $sheet->setCellValue('I'.$f, $k["sec_cust"]);
-                        $sheet->setCellValue('J'.$f, $k["name"]);
-                        $sheet->setCellValue('K'.$f, $k["email"]);
-                        $sheet->setCellValue('L'.$f, $k["email_name"]);
+                        //$sheet->setCellValue('B'.$f, $k["year"]);
+                        //$sheet->setCellValue('C'.$f, $k["week"]);
+                        $sheet->setCellValue('B'.$f, $k["name_user"]." ".$k["last_name"]);
+                        $sheet->setCellValue('C'.$f, $k["event"]);
+                        //$sheet->setCellValue('F'.$f, $k["cust_no"]);
+                        $sheet->setCellValue('D'.$f, $k["cust"]);
+                        //$sheet->setCellValue('H'.$f, $k["sec_cust_no"]);
+                        $sheet->setCellValue('E'.$f, $k["sec_cust"]);
+                        $sheet->setCellValue('F'.$f, $k["name"]);
+                        $sheet->setCellValue('G'.$f, $k["email"]);
+                        //$sheet->setCellValue('L'.$f, $k["email_name"]);
                         
-                        $sheet->setCellValue('M'.$f, $k["crop"]);
-                        $sheet->setCellValue('N'.$f, $k["order_type"]);
-                        $sheet->setCellValue('O'.$f, $k["product"]);
-                        $sheet->setCellValue('P'.$f, $k["variety_code"]);
-                        $sheet->setCellValue('Q'.$f, $k["variety"]);
+                        $sheet->setCellValue('H'.$f, $k["crop"]);
+                        $sheet->setCellValue('I'.$f, $k["order_type"]);
+                        $sheet->setCellValue('J'.$f, $k["product"]);
+                        //$sheet->setCellValue('P'.$f, $k["variety_code"]);
+                        $sheet->setCellValue('K'.$f, $k["variety"]);
 
-                        $sheet->setCellValue('R'.$f, $k["tot_quantity"]);
-                        $sheet->setCellValue('S'.$f, $k["replicas"]);
-                        $sheet->setCellValue('T'.$f, $k["greenhouse"]);
-                        $sheet->setCellValue('U'.$f, $k["position"]);
-                        $sheet->setCellValue('V'.$f, $k["remark"]);
+                        $sheet->setCellValue('L'.$f, $k["tot_quantity"]);
+                        $sheet->setCellValue('M'.$f, $k["replicas"]);
+                        //$sheet->setCellValue('T'.$f, $k["greenhouse"]);
+                        //$sheet->setCellValue('U'.$f, $k["position"]);
+                        $sheet->setCellValue('N'.$f, $k["remark"]);
 
                         //$sheet->getStyle("A" . $f)->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_DATE_YYYYMMDDSLASH);
                         
@@ -2013,25 +2032,26 @@
 
                 $sheet->getColumnDimension('A')->setWidth(10.14);
                 $sheet->getRowDimension(1)->setRowHeight(54.75);
-                $sheet->getColumnDimension('B')->setWidth(11);
-                $sheet->getColumnDimension('C')->setWidth(11);
-                $sheet->getColumnDimension('D')->setWidth(18);
-                $sheet->getColumnDimension('E')->setWidth(18);
-                $sheet->getColumnDimension('F')->setWidth(11);
+                //$sheet->getColumnDimension('B')->setWidth(11);
+                //$sheet->getColumnDimension('C')->setWidth(11);
+                $sheet->getColumnDimension('B')->setWidth(18);
+                $sheet->getColumnDimension('C')->setWidth(18);
+                //$sheet->getColumnDimension('F')->setWidth(11);
+                $sheet->getColumnDimension('D')->setWidth(25);
+                //$sheet->getColumnDimension('H')->setWidth(11);
+                $sheet->getColumnDimension('E')->setWidth(25);
+                $sheet->getColumnDimension('F')->setWidth(16);
                 $sheet->getColumnDimension('G')->setWidth(25);
-                $sheet->getColumnDimension('H')->setWidth(11);
-                $sheet->getColumnDimension('I')->setWidth(25);
-                $sheet->getColumnDimension('J')->setWidth(16);
+                //$sheet->getColumnDimension('L')->setWidth(16);
+                $sheet->getColumnDimension('H')->setWidth(16);
+                $sheet->getColumnDimension('I')->setWidth(15);
+                $sheet->getColumnDimension('J')->setWidth(12);
+                //$sheet->getColumnDimension('P')->setWidth(9);
                 $sheet->getColumnDimension('K')->setWidth(25);
-                $sheet->getColumnDimension('L')->setWidth(16);
-                $sheet->getColumnDimension('M')->setWidth(16);
-                $sheet->getColumnDimension('N')->setWidth(15);
-                $sheet->getColumnDimension('O')->setWidth(12);
-                $sheet->getColumnDimension('P')->setWidth(9);
-                $sheet->getColumnDimension('S')->setWidth(25);
-                $sheet->getColumnDimension('T')->setWidth(20);
-                $sheet->getColumnDimension('U')->setWidth(10);
-                $sheet->getColumnDimension('V')->setAutoSize(true);
+                //$sheet->getColumnDimension('T')->setWidth(20);
+                //$sheet->getColumnDimension('U')->setWidth(10);
+                $sheet->getColumnDimension('L')->setAutoSize(true);
+                $sheet->getColumnDimension('N')->setAutoSize(true);
                 
 
                 $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
@@ -2102,7 +2122,7 @@
                 $sheet->getStyle('V1')->getAlignment()->setWrapText(true);
                 
 
-                $spreadsheet->getActiveSheet()->setAutoFilter('A1:V20');
+                $spreadsheet->getActiveSheet()->setAutoFilter('A1:N20');
                 //$spreadsheet->getActiveSheet()->freezePane('F2');
 
                 

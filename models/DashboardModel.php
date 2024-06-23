@@ -229,6 +229,14 @@
             return $this->update($sql);
         }
 
+        public function updateDateUploadByOrder(int $id)
+        {
+            $sql = 'UPDATE orders SET date_upload = NOW() WHERE id = :value0';
+
+            $array = array($id);
+            return $this->update($sql, $array);
+        }
+
         public function getUploadLogs()
         {
             $sql = "SELECT o.date_upload, 
@@ -432,6 +440,7 @@
                         GROUP BY d2.id_variety 
                     ) AS d 
                     GROUP BY id_variety 
+                    HAVING SUM(completed) > 0 
                     ORDER BY SUM(completed) DESC, variety";
 
             $array = array($weekFrom, $weekTo, $_SESSION["id_country"]);

@@ -1000,7 +1000,10 @@ const loadFiltersChart = async () => {
                             });
 
                             selecteds.varieties.forEach(value => {
-                                if (element.value == value) element.checked = true;
+                                if (element.value == value) {
+                                    element.checked = true;
+                                    element.parentNode.parentNode.classList.add('order-first')
+                                }
                             });
                         });
 
@@ -1811,9 +1814,19 @@ const resizeTableMain = () => {
         }, 300);
     }else{
         if (document.querySelector(`#table-compare`))
-        setTimeout(() => {
-            new DataTable(document.querySelector(`#table-compare`)).columns.adjust();
-        }, 500);
+        {
+            setTimeout(() => {
+                new DataTable(document.querySelector(`#table-compare`)).columns.adjust();
+            }, 500);
+
+            setTimeout(() => {
+                new DataTable(document.querySelector(`#table-compare`)).columns.adjust();
+            }, 1500);
+
+            setTimeout(() => {
+                new DataTable(document.querySelector(`#table-compare`)).columns.adjust();
+            }, 2500);
+        }
     }
 
 }
@@ -1833,6 +1846,44 @@ function scrollToTableRow(tableId, trId) {
         behavior: 'auto'
     };
     contenedor.scrollTo(scrollOptions);
+}
+
+const searchFilter = (element) => {
+
+    const filterValue = element.value.toLowerCase();
+    const items = element.parentNode.parentNode.querySelectorAll('.filter-item');
+
+    Array.from(items).forEach(item => {
+        const itemName = item.textContent.toLowerCase();
+
+        if (itemName.includes(filterValue)) {
+            item.style.display = '';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+}
+
+const unselectFilter = (element) => {
+
+    const items = element.parentNode.parentNode.querySelectorAll('.filter-item input[type="checkbox"]:checked');
+
+    items.forEach(element => {
+        element.checked = false;
+        element.parentNode.parentNode.classList.remove('order-first')
+    });
+}
+
+const moveUpFilter = (element) => {
+
+    const item = element.parentNode.parentNode;
+
+    if (element.checked) {
+        setTimeout(() => {
+            item.classList.add('order-first');
+        }, 300);
+    }
+    else item.classList.remove('order-first');;
 }
 
 async function showOption($this, container){
@@ -1883,6 +1934,8 @@ async function showOption($this, container){
             if (!stateEvents) {
                 await loadEvents();
             }
+
+            if (!isMobile) document.querySelector('body').classList.add('toggle-sidebar');
 
             break;
 

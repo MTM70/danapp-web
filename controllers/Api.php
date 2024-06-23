@@ -1,4 +1,9 @@
 <?php
+require_once "vendor/autoload.php";
+
+use Google\Client as Google_Client;
+use Google\Service\Drive as Google_Service_Drive;
+use Google\Service\Drive\DriveFile as Google_Service_Drive_DriveFile;
 
 class Api extends Controllers
 {
@@ -282,6 +287,52 @@ class Api extends Controllers
         }
     }
 
+    public function getOrders6()
+    {
+        if (!isset($_POST["id"]) OR !$_POST["id"] OR !isset($_POST["dateSync"])) {
+            exit(json_encode(array("error" => "No data orders (Parameters)!")));
+        }
+
+        if ($_POST["dateSync"] == "") $_POST["dateSync"] = "2000-01-01 19:36:23";
+
+        $res = $this->model->getOrders6($_POST["id"], $_POST["dateSync"]);
+
+        if (!empty($res)) {
+
+            foreach ($res as $key => $values) {
+
+                $year = $values["year"];
+                $week = $values["week"];
+
+                //Obtener semanas del ano
+                $date = new DateTime;
+                $date->setISODate($year, 53);
+                $weeks = $date->format("W") === "53" ? 53 : 52;
+                //////////////////////////////////////////////////
+                
+                $cycle = ($values["destination"] == "BOG") ? 14 : 12 ;
+
+                $week = $week + ($cycle - 1);
+                if ($week > $weeks) {
+                    $week = $week - $weeks;
+                    $year++;
+                }
+
+                $week = ($week > 9) ? $week : "0".$week ;
+
+                $lunes = date('Y-m-d', strtotime("Y".$year."W".$week."1"));
+                $viernes = date('Y-m-d', strtotime("Y".$year."W".$week."5"));
+
+                $res[$key]["notify"] = $year.",".$week.",".$lunes." 07:00:00,".$viernes." 07:00:00";
+                //$res[$key]["notify"] = "2023-02-27 21:18:00,2023-02-27 21:18:00";
+            }
+
+            echo json_encode(array("error" => false, "datos" => $res));
+        } else {
+            echo json_encode(array("error" => "No data orders!"));
+        }
+    }
+
     public function getOrdersParameters()
     {
         if (!isset($_POST["id"]) OR !$_POST["id"]) {
@@ -429,6 +480,39 @@ class Api extends Controllers
                         exit();
                     }
                 }
+
+                // Subir la imagen a Google Drive
+                /* try {
+                    $client = new Google_Client();
+                    $client->setAuthConfig('path/to/credentials.json'); // Asegúrate de que el path es correcto
+                    $client->addScope(Google_Service_Drive::DRIVE_FILE);
+
+                    // Obtener el token de acceso usando la cuenta de servicio
+                    $client->fetchAccessTokenWithAssertion();
+
+                    $service = new Google_Service_Drive($client);
+
+                    $fileMetadata = new Google_Service_Drive_DriveFile([
+                        'name' => $name,
+                        'parents' => ['your-folder-id'] // Reemplaza 'your-folder-id' con el ID de la carpeta en Google Drive
+                    ]);
+
+                    $content = file_get_contents('uploads/optimized/'.$name);
+
+                    $file = $service->files->create($fileMetadata, [
+                        'data' => $content,
+                        'mimeType' => 'image/jpeg',
+                        'uploadType' => 'multipart',
+                        'fields' => 'id'
+                    ]);
+
+                    $fileId = $file->id;
+                    echo json_encode(array("error" => false, "fileId" => $fileId));
+
+                } catch (Exception $e) {
+                    echo json_encode(array("error" => "Error uploading to Google Drive: " . $e->getMessage()));
+                    exit();
+                } */
                 
             }else{
                 echo json_encode(array("error" => "Failed to save image!"));
@@ -438,6 +522,69 @@ class Api extends Controllers
             echo json_encode(array("error" => false));
         }else{
             echo json_encode(array("error" => "parameter error!"));
+        }
+    }
+
+    public function drive()
+    {
+        // Configura la variable de entorno para las credenciales de Google
+        putenv('GOOGLE_APPLICATION_CREDENTIALS=/Applications/XAMPP/xamppfiles/htdocs/danapp-web/config/danapp-424818-721bfc75e128.json');
+
+        //echo realpath('config/client_secret_106315567045-4vtrunacklqi7ilsmi4u3703rf3f5rr0.apps.googleusercontent.com.json');
+        // Subir la imagen a Google Drive
+        try {
+            $client = new Google_Client();
+
+            // Usa las credenciales de la cuenta de servicio por defecto
+            $client->useApplicationDefaultCredentials();
+            $client->setScopes([Google_Service_Drive::DRIVE_FILE]);
+
+            $service = new Google_Service_Drive($client);
+
+            $fileMetadata = new Google_Service_Drive_DriveFile([
+                'name' => 'qr3.png',
+                'parents' => ['1iRES8aqr_3kdOrEvYUgAafw_wSCm14sX'] // Reemplaza 'your-folder-id' con el ID de la carpeta en Google Drive
+            ]);
+
+            $content = file_get_contents('/Applications/XAMPP/xamppfiles/htdocs/danapp-web/uploads/optimized/qr.png');
+
+            $file = $service->files->create($fileMetadata, [
+                'data' => $content,
+                'mimeType' => 'image/jpeg',
+                'uploadType' => 'multipart',
+                'fields' => 'id'
+            ]);
+
+            $fileId = $file->id;
+            //echo json_encode(array("error" => false, "fileId" => $fileId));
+
+            // Nombre de la imagen que quieres mostrar
+            $imageName = 'qr.png';
+
+            // Busca el archivo de imagen por nombre en Google Drive
+            $files = $service->files->listFiles([
+                'q' => "name='$imageName'",
+                'fields' => 'files(id, webViewLink)'
+            ]);
+
+            // Verifica si se encontró la imagen
+            if (count($files->getFiles()) > 0) {
+                // Obtener el ID del archivo
+                $fileId = $files->getFiles()[0]->getId();
+
+                // Construir la URL directa de la imagen
+                $imageUrl = "https://drive.google.com/uc?id=$fileId";
+
+                // Incrusta la imagen en tu página web
+                echo "<img src='$imageUrl' alt='Imagen desde Google Drive'>";
+            } else {
+                // Si la imagen no se encontró, muestra un mensaje de error o una imagen de reemplazo
+                echo "La imagen no se encontró.";
+            }
+
+        } catch (Exception $e) {
+            echo json_encode(array("error" => "Error uploading to Google Drive: " . $e->getMessage()));
+            exit();
         }
     }
 
