@@ -50,6 +50,13 @@
                             <i class="bi bi-briefcase"></i>
                             <span>Customers</span>
                         </a>
+                    </li><!-- End Profile Page Nav -->
+
+                    <li class="nav-item">
+                        <a class="nav-link cursor-select collapsed" onclick="showOption(this, '."'".'main-varieties'."'".')">
+                            <i class="bi bi-flower1"></i>
+                            <span>Varieties</span>
+                        </a>
                     </li>
                 ';
             }

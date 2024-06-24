@@ -581,6 +581,41 @@
 
         </main><!-- End #main -->
 
+        <main id="main-varieties" class="main" style="display:none;">
+
+            <div class="pagetitle d-flex justify-content-between align-items-center pe-3">
+                <div>
+                    <h1>Varieties
+                        <!-- <button class="btn btn-sm btn-primary rounded-circle p-0 ms-1" style="width:20px; height:20px;" data-bs-toggle="modal" data-bs-target="#modalAddVariety" onclick="openModalVariety()">
+                            <i class="bi bi-plus fw-bold"></i>
+                        </button> -->
+                    </h1>
+                    <nav>
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="<?= base_url() ?>dashboard">Home</a></li>
+                            <li class="breadcrumb-item active">Varieties</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div class="spinner-border spinner-border-sm text-success d-none" role="status" id="varieties-loading">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div><!-- End Page Title -->
+
+            <section class="section">
+                <div class="row">
+                    <div class="col">
+
+                        <div class="card">
+                            <div class="card-body p-2" id="varieties"></div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+        </main><!-- End #main -->
+
         <?= get_view("modals", $data) ?>
 
     </body>

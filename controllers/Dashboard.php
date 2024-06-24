@@ -25,7 +25,7 @@
             $data['page_title'] = "Dashboard";
             $data['page_js'] = array("dashboard.js", "calendar.js");
 
-            if ($_SESSION['idRol'] == 1) array_push($data["page_js"], "parameters.js", "users.js", "events.js", "customers.js");
+            if ($_SESSION['idRol'] == 1) array_push($data["page_js"], "parameters.js", "users.js", "events.js", "customers.js", "varieties.js");
 
             $this->views->getView($this,"dashboard", $data);
         }
@@ -3253,9 +3253,12 @@
         {
             if ($_POST AND isset($_POST["process"]) AND $_POST["process"]) {
 
-                if ($_POST["process"] == 1) {
-                    if (isset($_POST["customer-number"]) AND isset($_POST["customer-name"]) AND isset($_FILES["customer-file"])  AND isset($_POST["sec-customers"]) AND $_POST["customer-number"] AND $_POST["customer-name"]) {
+                $filename = "";
 
+                if ($_POST["process"] == 1) {
+                    if (isset($_POST["customer-number"]) AND isset($_POST["customer-name"]) AND isset($_FILES["customer-file"])  AND isset($_POST["sec-customers"]) AND $_POST["customer-name"]) {
+
+                        $_POST["customer-number"] = $this->model->getNewCustNo()["cust_no"];
                         if ($this->model->getCustomerByNumber($_POST["customer-number"])) {
                             $this->arrResponse = array(
                                 'status' => false, 
@@ -3277,10 +3280,10 @@
                                 );
 
                                 exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE)); */
-                                $filename = "danziger.png";
+                                //$filename = "danziger.png";
                             }
                         }else{
-                            $filename = "danziger.png";
+                            //$filename = "danziger.png";
                         }
                         //*----------------------------------
                         
@@ -3389,6 +3392,240 @@
         }
 
         //TODO Customers --------------------------------------------------------------------
+
+
+        //TODO Varieties --------------------------------------------------------------------
+        public function loadVarieties()
+        {
+            $response = $this->model->getVarieties();
+
+            if (!empty($response)) {
+
+                $this->html.='
+                    <table class="table table-hover w-100 fs-0-8" id="table-varieties">
+                        <thead>
+                            <tr>
+                                <th scope="col">Crop</th>
+                                <th scope="col">Variety Code</th>
+                                <th scope="col">Variety</th>
+                                <th scope="col">Image</th>
+                            </tr>
+                        </thead>
+                        <tbody>';
+
+                foreach ($response as $k) {
+
+                    //$state = ($k["state"]) ? '' : 'bg-danger bg-opacity-10 text-decoration-line-through' ;
+
+                    $this->html .= '
+                        <tr class="cursor-select" onclick="loadVarietyEdit('.$k["id"].')" data-bs-toggle="modal" data-bs-target="#modalAddVariety">
+                            <td class="align-middle">'.$k["crop"].'</td>
+                            <td class="">'.$k["variety_code"].'</td>
+                            <td class="">'.$k["variety"].'</td>
+                            <td class="">'.($k["img"] ? '<img src="'.media()."/img/varieties/".$k["img"].'" height="100">' : '').'</td>
+                        </tr>
+                    ';
+                }
+
+                $this->html .= '
+                        </tbody>
+                    </table>
+                ';
+
+                $this->arrResponse = array(
+                    'status' => true, 
+                    'res' => $this->html
+                );
+            }else{
+                $this->arrResponse = array(
+                    'status' => false, 
+                    'res' => 'No data!'
+                );
+            }
+
+            echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
+        }
+
+        public function loadVarietyEdit()
+        {
+            if (isset($_GET["id"]) AND $_GET["id"]) {
+                $response = $this->model->getVarietyById($_GET["id"]);
+
+                if (!empty($response)) {
+
+                    $this->html = json_encode($response);
+
+                    $this->arrResponse = array(
+                        'status' => true, 
+                        'res' => $this->html
+                    );
+                }else{
+                    $this->arrResponse = array(
+                        'status' => false, 
+                        'res' => 'No data!'
+                    );
+                }
+            }else{
+                $this->arrResponse = array(
+                    'status' => false, 
+                    'res' => 'Parameter fail!'
+                );
+            }
+
+            echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
+        }
+        public function setVariety()
+        {
+            if ($_POST AND isset($_POST["process"]) AND $_POST["process"]) {
+
+                $filename = "";
+
+                if ($_POST["process"] == 1) {
+                    /* if (isset($_POST["customer-number"]) AND isset($_POST["customer-name"]) AND isset($_FILES["customer-file"])  AND isset($_POST["sec-customers"]) AND $_POST["customer-name"]) {
+
+                        $_POST["customer-number"] = $this->model->getNewCustNo()["cust_no"];
+                        if ($this->model->getCustomerByNumber($_POST["customer-number"])) {
+                            $this->arrResponse = array(
+                                'status' => false, 
+                                'res' => 'Customer exist!'
+                            );
+
+                            exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
+                        }
+
+                        //Upload image----------------------
+                        if ($_FILES["customer-file"]) {
+                            $filename = $_POST["customer-number"] . "." . pathinfo($_FILES["customer-file"]["name"], PATHINFO_EXTENSION);
+                            $tempname = $_FILES["customer-file"]["tmp_name"];
+
+                            if (!move_uploaded_file($tempname, __DIR__ . "/../assets/img/customers/" . $filename)) {
+                                /* $this->arrResponse = array(
+                                    'status' => false, 
+                                    'res' => 'Failed to upload image!' . $_FILES["event-file"]["error"]
+                                );
+
+                                exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE)); *
+                                //$filename = "danziger.png";
+                            }
+                        }else{
+                            //$filename = "danziger.png";
+                        }
+                        //----------------------------------
+                        
+                        $id = $this->model->setCustomer($_POST["customer-number"], $_POST["customer-name"], $filename);
+
+                        if (!$id) {
+                            $this->arrResponse = array(
+                                'status' => false, 
+                                'res' => 'Add customer fail!'
+                            );
+
+                            exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
+                        }
+
+                        foreach (json_decode(stripslashes($_POST["sec-customers"])) as $key => $value) {
+
+                            $data = explode(',', $value);
+
+                            if (!$this->model->getSecCustByNo($id, $data[0])) {
+                                if (!$this->model->setSecCustomer($id, $data[0], $data[1])) {
+    
+                                    $this->arrResponse = array(
+                                        'status' => false, 
+                                        'res' => 'Add sec cust fail!'
+                                    );
+            
+                                    exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
+                                }
+                            }
+
+                        }
+
+                        $this->arrResponse = array(
+                            'status' => true, 
+                            'res' => 'Add customer success'
+                        );
+                    }else{
+                        $this->arrResponse = array(
+                            'status' => false, 
+                            'res' => 'No data!'
+                        );
+                    } */
+                }else{
+                    if (isset($_POST["variety-id"]) AND isset($_POST["variety-number"]) AND isset($_POST["variety-name"]) AND isset($_FILES["variety-file"]) AND $_POST["variety-id"] AND $_POST["variety-number"] AND $_POST["variety-name"]) {
+                        
+                        $variety = $this->model->getVarietyById($_POST["variety-id"]);
+
+                        if (empty($variety)) {
+                            $this->arrResponse = array(
+                                'status' => false, 
+                                'res' => 'Variety not exist!'
+                            );
+
+                            exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
+                        }
+
+                        //*Upload image----------------------
+                        if ($_FILES["variety-file"]) {
+                            $filename = $_POST["variety-number"] .date('H_i_s'). "." . pathinfo($_FILES["variety-file"]["name"], PATHINFO_EXTENSION);
+                            
+                            $tempname = $_FILES["variety-file"]["tmp_name"];
+
+                            if (!move_uploaded_file($tempname, __DIR__ . "/../assets/img/varieties/" . $filename)) {
+                                $filename = $_POST["variety-file-path"];
+                            }else{
+                                //TODO Save img optimized======================================
+                                $image = imageQuality("assets/img/varieties/" . $filename, 1);
+                                // Guardar la imagen en el servidor
+                                file_put_contents('assets/img/varieties/'.$filename, base64_decode($image));
+                                //TODO Save img optimized======================================
+                            }
+                        }else{
+                            $filename = $_POST["variety-file-path"];
+                        }
+                        //*----------------------------------
+
+                        if (!$this->model->updateVarietyImg($_POST["variety-id"], $filename)) {
+                            $this->arrResponse = array(
+                                'status' => false, 
+                                'res' => 'Update variety fail!'
+                            );
+
+                            exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
+                        }
+
+                        if($variety["img"]){
+                            $oldImageDir = __DIR__ . "/../assets/img/varieties/" . $variety["img"];
+
+                            // Verificar si el archivo existe antes de intentar eliminarlo
+                            if (file_exists($oldImageDir)) {
+                                !unlink($oldImageDir);
+                            }
+                        }
+
+                        $this->arrResponse = array(
+                            'status' => true, 
+                            'res' => 'Update variety success'
+                        );
+                    }else{
+                        $this->arrResponse = array(
+                            'status' => false, 
+                            'res' => 'No data!'
+                        );
+                    }
+                }
+
+            }else{
+                $this->arrResponse = array(
+                    'status' => false, 
+                    'res' => 'No data!'
+                );
+            }
+
+            echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
+        }
+
+        //TODO Varieties --------------------------------------------------------------------
 
 
         //TODO Calendar --------------------------------------------------------------------

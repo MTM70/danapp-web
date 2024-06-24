@@ -39,6 +39,13 @@ class ApiModel extends Mysql
 
     public function getVarieties()
     {
+        $sql = "SELECT id, id_crop, variety_code, variety, img FROM varieties";
+
+        return $this->select($sql);
+    }
+
+    public function getVarieties2()
+    {
         $sql = "SELECT * FROM varieties";
 
         return $this->select($sql);
@@ -432,11 +439,11 @@ class ApiModel extends Mysql
     {
         $sql = "SELECT *, 1 state 
                 FROM events_sec_customers_orders 
-                WHERE id_user = :value0 AND YEAR(date) = YEAR(NOW())";
+                WHERE /*id_user = :value0 AND*/ YEAR(date) = YEAR(NOW())";
 
-        $array = array($user);
+        //$array = array($user);
 
-        return $this->select($sql, $array);
+    return $this->select($sql/*, $array*/);
     }
 
     public function getEventSecCustByEventBySecCust(int $idUser, int $idEvent, int $idSecCust, String $name, String $table)

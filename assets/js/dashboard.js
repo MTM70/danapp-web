@@ -5,6 +5,7 @@ let stateParameters = false;
 let stateEvents = false;
 let stateUsers = false;
 let stateCustomers = false;
+let stateVarieties = false;
 
 //*Uploads
 let stateUploadLogs = false;
@@ -1962,6 +1963,14 @@ async function showOption($this, container){
             
             if (!stateCustomers) {
                 await loadCustomers();
+            }
+
+            break;
+
+        case 'main-varieties':
+            
+            if (!stateVarieties) {
+                await loadVarieties();
             }
 
             break;

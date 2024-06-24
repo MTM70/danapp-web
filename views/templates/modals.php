@@ -262,11 +262,11 @@
                                 
                                 <div class="col-md-4 mb-3">
                                     <label for="customer-number" class="form-label">Customer Number</label>
-                                    <input type="number" class="form-control" name="customer-number" id="customer-number" min="1" required>
+                                    <input type="number" class="form-control" name="customer-number" id="customer-number">
                                 </div>
                                 
                                 <div>
-                                    <label for="customer-name" class="form-label">Name</label>
+                                    <label for="customer-name" class="form-label">Name *</label>
                                     <input type="text" class="form-control" name="customer-name" id="customer-name" required>
                                 </div>
 
@@ -282,12 +282,63 @@
                             </label>
                         </div>
                         <hr class="mt-1">
-                        <div class="row overflow-auto m-0 py-1" id="customer-sec-cust" style="max-height:15vh;"></div>
+                        <div class="row align-items-center overflow-auto m-0 py-1" id="customer-sec-cust" style="max-height:20vh;"></div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     <button type="submit" class="btn btn-primary" id="customer-btn">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Modal add variety -->
+<div class="modal fade" id="modalAddVariety" tabindex="-1" aria-labelledby="modalAddVarietyLabel" aria-hidden="true">
+    <form action="#" id="form-variety" type="POST">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content rounded-3">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="modalAddVarietyLabel">Add variety</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                <div class="row">
+                        <div class="d-none">
+                            <input type="number" id="variety-id" name="variety-id" readonly>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label" for="variety-file">Image</label>
+                            <div class="w-100 img-thumbnail d-flex justify-content-center align-items-center" style="height: 150px; background-size: cover; background-position: center;" id="variety-image">
+                                <i class="bi bi-card-image display-1"></i>
+                            </div>
+                            <input class="form-control mt-1" type="file" name="variety-file" id="variety-file">
+                            <input type="text" class="d-none" name="variety-file-path" id="variety-file-path" value="">
+                        </div>
+
+                        <div class="col-md-9 ps-md-5">
+                            <div class="row">
+                                
+                                <div class="col-md-4 mb-3">
+                                    <label for="variety-number" class="form-label">Variety Number</label>
+                                    <input type="number" class="form-control" name="variety-number" id="variety-number" readonly>
+                                </div>
+                                
+                                <div>
+                                    <label for="variety-name" class="form-label">Name</label>
+                                    <input type="text" class="form-control" name="variety-name" id="variety-name" readonly>
+                                </div>
+
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary" id="variety-btn">Save changes</button>
                 </div>
             </div>
         </div>

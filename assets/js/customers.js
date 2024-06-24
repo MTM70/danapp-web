@@ -183,6 +183,7 @@ async function loadCustomerEdit(id) {
                         document.getElementById('customer-id').value = data['id'];
                         document.getElementById('customer-number').value = data['cust_no'];
                         document.getElementById('customer-number').readOnly = true;
+                        document.getElementById('customer-number').parentNode.classList.remove('d-none');
                         document.getElementById('customer-name').value = data['cust'];
                         document.getElementById('customer-file-path').value = data['logo'];
 
@@ -226,18 +227,18 @@ function addSecCustomer(no = 0, name = ''){
     let itemCount = countSecCustomers();
 
     let item = 
-        `<div class="col-4 sec-cust-cont">
-            <div class="card shadow-sm border p-2">
-                <div class="row m-0 p-0">
-                    <div class="col-4">`;
+        `<div class="col-auto sec-cust-cont ${!no ? 'order-first' : ''}">
+            <div class="badge p-2 m-1 bg-success bg-opacity-10 text-dark fw-normal border">
+                <div class="d-flex">
+                    <div class="">`;
 
-                        (!no) ? item += `<input class="form-control bg-primary bg-opacity-10" type="number" placeholder="Sec No" min="1">` : item += no;
+                        (!no) ? item += `<input class="form-control form-control-sm bg-warning bg-opacity-10" type="number" placeholder="Sec No" value="${itemCount > 0 ? itemCount + 1 : 0}">` : (no != 0 ? item += `<span class="fs-0-8">(${no})</span>` : '');
 
                     item += `</div>
 
-                    <div class="col-8">`;
+                    <div class="${!name ? 'ms-2' : ''}">`;
 
-                        (!no) ? item += `<input class="form-control bg-primary bg-opacity-10" type="text" placeholder="SecCust Name">` : item += name;
+                        (!no) ? item += `<input class="form-control form-control-sm bg-warning bg-opacity-10" type="text" placeholder="SecCust Name">` : item += `<span class="fs-0-8">${name}</span>`;
                         
                     item += `</div>
                 </div>
@@ -256,7 +257,7 @@ function countSecCustomers(){
     let secCustomers = document.getElementsByClassName('sec-cust-cont');
 
     if (!secCustomers.length) {
-        $("#customer-sec-cust").html('<div class="px-4"><div class="alert alert-warning">Add Sec Customers!</div></div>');
+        $("#customer-sec-cust").html('<div class="px-4"><div class="alert alert-danger">Add Sec Customers!</div></div>');
     }
 
     return secCustomers.length;
@@ -269,6 +270,8 @@ function resetCustomerForm(){
     }); */
 
     document.getElementById('customer-number').value = '';
+    document.getElementById('customer-number').readOnly = false;
+    document.getElementById('customer-number').parentNode.classList.add('d-none');
     document.getElementById('customer-name').value = '';
     document.getElementById('customer-file').value = '';
     document.getElementById('customer-sec-cust').innerHTML = null;

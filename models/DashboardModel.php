@@ -125,6 +125,18 @@
             return $this->insert($sql, $array);
         }
 
+        public function getVarietyById(int $idVariety)
+        {
+            $sql = "SELECT v.*, c.crop 
+                    FROM varieties AS v 
+                    INNER JOIN crops AS c ON c.id = v.id_crop 
+                    WHERE v.id = :value0 
+                    LIMIT 1";
+
+            $array = array($idVariety);
+            return $this->selectOne($sql, $array);
+        }
+        
         public function getVarieties()
         {
             $sql = "SELECT v.*, c.crop 
@@ -190,6 +202,14 @@
             $sql = 'UPDATE varieties SET variety = :value1 WHERE id = :value0';
 
             $array = array($id, $variety);
+            return $this->update($sql, $array);
+        }
+
+        public function updateVarietyImg(int $id, String $fileName)
+        {
+            $sql = 'UPDATE varieties SET img = :value1 WHERE id = :value0';
+
+            $array = array($id, $fileName);
             return $this->update($sql, $array);
         }
 
@@ -1047,6 +1067,16 @@
 
             $array = array($number, $id);
             return $this->selectOne($sql, $array);
+        }
+
+        public function getNewCustNo()
+        {
+            $sql = 'SELECT cust_no - 1 cust_no 
+                    FROM customers 
+                    ORDER BY cust_no 
+                    LIMIT 1';
+
+            return $this->selectOne($sql);
         }
 
         public function getCustomers()

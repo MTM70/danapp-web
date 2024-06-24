@@ -69,6 +69,17 @@ class Api extends Controllers
             echo json_encode(array("error" => "No data Varieties!"));
         }
     }
+    
+    public function getVarieties2()
+    {
+        $res = $this->model->getVarieties2();
+
+        if (!empty($res)) {
+            echo json_encode(array("error" => false, "datos" => $res));
+        } else {
+            echo json_encode(array("error" => "No data Varieties!"));
+        }
+    }
 
 
     public function getProducts()
@@ -525,7 +536,7 @@ class Api extends Controllers
         }
     }
 
-    public function drive()
+    /* public function drive()
     {
         // Configura la variable de entorno para las credenciales de Google
         putenv('GOOGLE_APPLICATION_CREDENTIALS=/Applications/XAMPP/xamppfiles/htdocs/danapp-web/config/danapp-424818-721bfc75e128.json');
@@ -586,7 +597,7 @@ class Api extends Controllers
             echo json_encode(array("error" => "Error uploading to Google Drive: " . $e->getMessage()));
             exit();
         }
-    }
+    } */
 
     public function syncImagesValues()
     {
