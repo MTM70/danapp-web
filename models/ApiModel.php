@@ -448,7 +448,7 @@ class ApiModel extends Mysql
 
     public function getEventSecCustByEventBySecCust(int $idUser, int $idEvent, int $idSecCust, String $name, String $table)
     {
-        $sql = "SELECT id FROM $table WHERE id_user = :value0 AND id_event = :value1 AND id_sec_cust = :value2 AND YEAR(date) = DATE('Y') AND name = :value3 LIMIT 1";
+        $sql = "SELECT id FROM $table WHERE id_user = :value0 AND id_event = :value1 AND id_sec_cust = :value2 AND YEAR(date) = YEAR(NOW()) AND name = :value3 LIMIT 1";
         $array = array($idUser, $idEvent, $idSecCust, $name);
 
         return $this->selectOne($sql, $array);
@@ -496,6 +496,22 @@ class ApiModel extends Mysql
     {
         $sql = "UPDATE $table SET year = :value1, week = :value2, tot_quantity = :value3, replicas = :value4, remark = :value5 WHERE id = :value0";
         $array = array($id, $year, $week, $totQuantity, $replicas, $remark);
+
+        return $this->update($sql, $array);
+    }
+
+    public function setDataEventVarietySync2(int $idUser, int $idEvent, int $idSecCust, String $name, int $idType, int $idProduct, int $idVariety, int $idEventMap = null, int $year, int $week, int $totQuantity, int $replicas, String $remark, int $confirm, String $date, String $table)
+    {
+        $sql = "INSERT INTO $table (id_user, id_event, id_sec_cust, name, id_type, id_product, id_variety, id_event_map, year, week, tot_quantity, replicas, remark, confirm, date) VALUES (:value0, :value1, :value2, :value3, :value4, :value5, :value6, :value7, :value8, :value9, :value10, :value11, :value12, :value13, :value14)";
+        $array = array($idUser, $idEvent, $idSecCust, $name, $idType, $idProduct, $idVariety, $idEventMap, $year, $week, $totQuantity, $replicas, $remark, $confirm, $date);
+
+        return $this->insert($sql, $array);
+    }
+
+    public function updateDataEventVarietySync2(int $id, int $year, int $week, int $totQuantity, int $replicas, String $remark, int $confirm, String $table)
+    {
+        $sql = "UPDATE $table SET year = :value1, week = :value2, tot_quantity = :value3, replicas = :value4, remark = :value5, confirm = :value6 WHERE id = :value0";
+        $array = array($id, $year, $week, $totQuantity, $replicas, $remark, $confirm);
 
         return $this->update($sql, $array);
     }

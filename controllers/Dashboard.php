@@ -3280,10 +3280,10 @@
                                 );
 
                                 exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE)); */
-                                //$filename = "danziger.png";
+                                $filename = "danziger.png";
                             }
                         }else{
-                            //$filename = "danziger.png";
+                            $filename = "danziger.png";
                         }
                         //*----------------------------------
                         

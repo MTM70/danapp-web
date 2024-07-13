@@ -1081,11 +1081,27 @@
 
         public function getCustomers()
         {
-            $sql = 'SELECT * 
+            /* $sql = 'SELECT * 
                     FROM customers 
+                    ORDER BY cust ASC'; */
+
+            $sql = 'SELECT c.id, c.cust_no, c.cust, c.logo 
+                    FROM orders o 
+                    JOIN sec_customers sc ON o.id_sec_cust = sc.id 
+                    JOIN customers c ON sc.id_cust = c.id 
+                    WHERE o.id_country = :value0 
+                    GROUP BY c.id 
+                    
+                    UNION ALL 
+                    
+                    SELECT id, cust_no, cust, logo 
+                    FROM customers 
+                    WHERE cust_no < 0 
+                    
                     ORDER BY cust ASC';
 
-            return $this->select($sql);
+            $array = array($_SESSION["id_country"]);
+            return $this->select($sql, $array);
         }
 
         public function updateSecCustomer(int $id, String $name, String $logo)
