@@ -2229,14 +2229,16 @@
 
                 for ($i = 1; $i < count($data); $i++) { //Por cada dato del arreglo de datos
 
-                    $exist = $this->model->getVarietyByName($data[$i][2]);
+                    $varietyNameFile = trim($data[$i][2]);
+
+                    $exist = $this->model->getVarietyByName($varietyNameFile);
 
                     $options = false;
                     $optionsRadio = null;
                     $isChecked = false;
 
                     if (!$exist) {
-                        $options = $this->model->getVarietyByNameAdvance($data[$i][2]);
+                        $options = $this->model->getVarietyByNameAdvance($varietyNameFile);
 
                         if (!empty($options)) {
 
@@ -2300,7 +2302,7 @@
                                         <div class="col-6 col-md-4 mt-1 mt-md-0">
                                             <div class="input-group input-group-sm">
                                                 <span class="input-group-text">Name</span>
-                                                <input class="form-control form-control-sm" type="text" value="'.$data[$i][2].'" name="add-variety-map-name"  required '.($options ? 'disabled' : '').'>
+                                                <input class="form-control form-control-sm" type="text" value="'.$varietyNameFile.'" name="add-variety-map-name"  required '.($options ? 'disabled' : '').'>
                                             </div>
                                         </div>
 
@@ -2342,13 +2344,13 @@
                     }
 
                     $this->html .= '
-                        <tr class="'.((!$exist AND !$isChecked) ? !$options ? 'bg-danger bg-opacity-25' : 'bg-warning bg-opacity-10' : 'bg-success bg-opacity-10').'">
+                        <tr class="'.((!$exist AND !$isChecked) ? (!$options ? 'bg-danger bg-opacity-25' : 'bg-warning bg-opacity-10') : 'bg-success bg-opacity-10').'">
                             <td class="align-middle">'.$i.'</td>
                             <td class="align-middle">'.$data[$i][0].'</td>
                             <td class="align-middle">'.$data[$i][1].'</td>
-                            <th class="align-middle">'.$data[$i][2].'</th>
+                            <th class="align-middle">'.$varietyNameFile.'</th>
                             <td class="align-middle">'.$data[$i][3].'</td>
-                            <td class="text-center align-middle">'.(!$exist ? !$options ? '<i class="bi bi-x-circle-fill text-danger"> 3</i>' : '<i class="bi bi-info-circle-fill text-warning"> 2</i>' : '<i class="bi bi-check-circle-fill text-success"> 1</i>').'</td>
+                            <td class="text-center align-middle">'.(!$exist ? (!$options ? '<i class="bi bi-x-circle-fill text-danger"> 3</i>' : '<i class="bi bi-info-circle-fill text-warning"> 2</i>') : '<i class="bi bi-check-circle-fill text-success"> 1</i>').'</td>
                             <td class="align-middle" width="50%"><div class="row m-0 px-4 py-0 overflow-auto" style="max-height:120px;">'.$optionsRadio.'</div></td>
                         </tr>
                     ';
@@ -3408,7 +3410,8 @@
                                 <th scope="col">Crop</th>
                                 <th scope="col">Variety Code</th>
                                 <th scope="col">Variety</th>
-                                <th scope="col">Image</th>
+                                <th scope="col">Image Spray</th>
+                                <th scope="col">Image Disbud</th>
                             </tr>
                         </thead>
                         <tbody>';
@@ -3423,6 +3426,7 @@
                             <td class="">'.$k["variety_code"].'</td>
                             <td class="">'.$k["variety"].'</td>
                             <td class="">'.($k["img"] ? '<img src="'.media()."/img/varieties/".$k["img"].'" height="100">' : '').'</td>
+                            <td class="">'.($k["img2"] ? '<img src="'.media()."/img/varieties/".$k["img2"].'" height="100">' : '').'</td>
                         </tr>
                     ';
                 }
@@ -3552,7 +3556,8 @@
                         );
                     } */
                 }else{
-                    if (isset($_POST["variety-id"]) AND isset($_POST["variety-number"]) AND isset($_POST["variety-name"]) AND isset($_FILES["variety-file"]) AND $_POST["variety-id"] AND $_POST["variety-number"] AND $_POST["variety-name"]) {
+                    if (isset($_POST["variety-id"]) AND isset($_POST["variety-number"]) AND isset($_POST["variety-name"]) AND isset($_FILES["variety-file"]) 
+                        AND isset($_FILES["variety-file-2"]) AND $_POST["variety-id"] AND $_POST["variety-number"] AND $_POST["variety-name"]) {
                         
                         $variety = $this->model->getVarietyById($_POST["variety-id"]);
 
@@ -3585,7 +3590,27 @@
                         }
                         //*----------------------------------
 
-                        if (!$this->model->updateVarietyImg($_POST["variety-id"], $filename)) {
+                        //*Upload image 2----------------------
+                        if ($_FILES["variety-file-2"]) {
+                            $filename2 = $_POST["variety-number"] .date('H_i_s'). "_disbud." . pathinfo($_FILES["variety-file-2"]["name"], PATHINFO_EXTENSION);
+                            
+                            $tempname2 = $_FILES["variety-file-2"]["tmp_name"];
+
+                            if (!move_uploaded_file($tempname2, __DIR__ . "/../assets/img/varieties/" . $filename2)) {
+                                $filename2 = $_POST["variety-file-path-2"];
+                            }else{
+                                //TODO Save img optimized======================================
+                                $image2 = imageQuality("assets/img/varieties/" . $filename2, 1);
+                                // Guardar la imagen en el servidor
+                                file_put_contents('assets/img/varieties/'.$filename2, base64_decode($image2));
+                                //TODO Save img optimized======================================
+                            }
+                        }else{
+                            $filename2 = $_POST["variety-file-path-2"];
+                        }
+                        //*----------------------------------
+
+                        if (!$this->model->updateVarietyImg($_POST["variety-id"], $filename, $filename2)) {
                             $this->arrResponse = array(
                                 'status' => false, 
                                 'res' => 'Update variety fail!'
@@ -3594,7 +3619,7 @@
                             exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
                         }
 
-                        if($variety["img"]){
+                        /* if($variety["img"] && $_FILES["variety-file"]){
                             $oldImageDir = __DIR__ . "/../assets/img/varieties/" . $variety["img"];
 
                             // Verificar si el archivo existe antes de intentar eliminarlo
@@ -3602,6 +3627,15 @@
                                 !unlink($oldImageDir);
                             }
                         }
+
+                        if($variety["img2"] && $_FILES["variety-file-2"]){
+                            $oldImageDir2 = __DIR__ . "/../assets/img/varieties/" . $variety["img2"];
+
+                            // Verificar si el archivo existe antes de intentar eliminarlo
+                            if (file_exists($oldImageDir2)) {
+                                !unlink($oldImageDir2);
+                            }
+                        } */
 
                         $this->arrResponse = array(
                             'status' => true, 
@@ -3752,7 +3786,7 @@
 
                                         foreach ($response as $o) {
 
-                                            if (substr($o["visit_day"], 0, 10) != $day) continue;
+                                            //if (substr($o["visit_day"], 0, 10) != $day) continue;
 
                                             $visitDay = new DateTime($o["visit_day"]);
 
@@ -3772,7 +3806,7 @@
                                                 >
                                                     <div class="card-header d-flex justify-content-between align-items-center bg-primary bg-opacity-10 p-1">
                                                         <div class="ps-2">
-                                                            <h6 class="card-text text-secondary"><i class="bi bi-flower2 me-1"></i>'.$o["crop"].'</h6>
+                                                            <h6 class="card-text text-secondary"><i class="bi bi-flower2 me-1"></i>'.$day.'</h6>
                                                         </div>
                                                         <div>
                                                             <h6 class="card-text text-secondary">'.substr($o["type"], 0, 20).'</h6>

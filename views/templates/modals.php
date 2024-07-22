@@ -310,7 +310,7 @@
                         </div>
 
                         <div class="col-md-3">
-                            <label class="form-label" for="variety-file">Image</label>
+                            <label class="form-label" for="variety-file">Image Spray</label>
                             <div class="w-100 img-thumbnail d-flex justify-content-center align-items-center" style="height: 150px; background-size: cover; background-position: center;" id="variety-image">
                                 <i class="bi bi-card-image display-1"></i>
                             </div>
@@ -318,7 +318,16 @@
                             <input type="text" class="d-none" name="variety-file-path" id="variety-file-path" value="">
                         </div>
 
-                        <div class="col-md-9 ps-md-5">
+                        <div class="col-md-3">
+                            <label class="form-label" for="variety-file-2">Image Disbud</label>
+                            <div class="w-100 img-thumbnail d-flex justify-content-center align-items-center" style="height: 150px; background-size: cover; background-position: center;" id="variety-image-2">
+                                <i class="bi bi-card-image display-1"></i>
+                            </div>
+                            <input class="form-control mt-1" type="file" name="variety-file-2" id="variety-file-2">
+                            <input type="text" class="d-none" name="variety-file-path-2" id="variety-file-path-2" value="">
+                        </div>
+
+                        <div class="col-md-6 ps-md-5">
                             <div class="row">
                                 
                                 <div class="col-md-4 mb-3">
@@ -492,7 +501,7 @@
                                 </div>
                             </li>
                             <li><hr class="dropdown-divider my-2"></li>
-                            <li><a class="dropdown-item" href="http://macbook-pro.local/danapp-web/Format-event.xlsx" target="_blank"><i class="bi bi-file-earmark-excel fs-1-3"></i>Download format</a></li>
+                            <li><a class="dropdown-item" href="<?= base_url(); ?>/Format-event.xlsx" target="_blank"><i class="bi bi-file-earmark-excel fs-1-3"></i>Download format</a></li>
                             <li><a id="generate-qr-btn" class="dropdown-item" href="" target="_blank"><i class="bi bi-qr-code fs-1-3"></i>Generate Qr Codes</a></li>
                         </ul>
                     </div>

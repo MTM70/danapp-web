@@ -1,5 +1,5 @@
 let varietyProcess = 1;
-let imgVariety;
+let imgVariety, imgVariety2;
 
 $(document).ready(function() {
     //TODO Varieties
@@ -53,7 +53,6 @@ $(document).ready(function() {
     });
 
     imgVariety = document.querySelector('#variety-image');
-
     document.querySelector('#variety-file').addEventListener('change', function() {
 
         if (this.files && this.files[0]) {
@@ -69,6 +68,25 @@ $(document).ready(function() {
         }else {
             imgVariety.style.backgroundImage = null;
             imgVariety.querySelector('i').classList.remove('d-none');
+        }
+    });
+
+    imgVariety2 = document.querySelector('#variety-image-2');
+    document.querySelector('#variety-file-2').addEventListener('change', function() {
+
+        if (this.files && this.files[0]) {
+
+            imgVariety2.onload = () => {
+                URL.revokeObjectURL(imgVariety2.style.backgroundImage);  // no longer needed, free memory
+            }
+
+            imgVariety2.querySelector('i').classList.add('d-none');
+
+            imgVariety2.style.backgroundImage = `url(${URL.createObjectURL(this.files[0])})`; // set src to blob url
+
+        }else {
+            imgVariety2.style.backgroundImage = null;
+            imgVariety2.querySelector('i').classList.remove('d-none');
         }
     });
 });
@@ -170,7 +188,7 @@ async function loadVarietyEdit(id) {
                         document.getElementById('variety-id').value = data['id'];
                         document.getElementById('variety-number').value = data['variety_code'];
                         document.getElementById('variety-name').value = data['variety'];
-                        document.getElementById('variety-file-path').value = data['img'];
+                        //document.getElementById('variety-file-path').value = data['img'];
 
                         if (data['img']) {
                             imgVariety.querySelector('i').classList.add('d-none');
@@ -180,6 +198,16 @@ async function loadVarietyEdit(id) {
                             imgVariety.style.backgroundImage = null;
                             imgVariety.querySelector('i').classList.remove('d-none');
                             document.getElementById('variety-file-path').value = '';
+                        }
+
+                        if (data['img2']) {
+                            imgVariety2.querySelector('i').classList.add('d-none');
+                            imgVariety2.style.backgroundImage = `url(${base_url}/assets/img/varieties/${data['img2']})`;
+                            document.getElementById('variety-file-path-2').value = data['img2'];
+                        }else {
+                            imgVariety2.style.backgroundImage = null;
+                            imgVariety2.querySelector('i').classList.remove('d-none');
+                            document.getElementById('variety-file-path-2').value = '';
                         }
                     }else{
                         alert(objData.res);
@@ -203,9 +231,14 @@ function resetVarietyForm(){
     document.getElementById('variety-number').value = '';
     document.getElementById('variety-name').value = '';
     document.getElementById('variety-file').value = '';
+    document.getElementById('variety-file-2').value = '';
     
     imgVariety.style.backgroundImage = null;
     imgVariety.querySelector('i').classList.remove('d-none');
     document.getElementById('variety-file-path').value = '';
+
+    imgVariety2.style.backgroundImage = null;
+    imgVariety2.querySelector('i').classList.remove('d-none');
+    document.getElementById('variety-file-path-2').value = '';
 }
 //TODO Varieties

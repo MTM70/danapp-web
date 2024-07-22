@@ -205,11 +205,11 @@
             return $this->update($sql, $array);
         }
 
-        public function updateVarietyImg(int $id, String $fileName)
+        public function updateVarietyImg(int $id, String $fileName, String $fileName2)
         {
-            $sql = 'UPDATE varieties SET img = :value1 WHERE id = :value0';
+            $sql = 'UPDATE varieties SET img = :value1, img2 = :value2 WHERE id = :value0';
 
-            $array = array($id, $fileName);
+            $array = array($id, $fileName, $fileName2);
             return $this->update($sql, $array);
         }
 
@@ -259,7 +259,7 @@
 
         public function getUploadLogs()
         {
-            $sql = "SELECT o.date_upload, 
+            $sql = "SELECT DATE(o.date_upload) date_upload, 
                         MIN(CONCAT(o.year, '-W', CASE WHEN o.week < 10 THEN CONCAT('0', o.week) ELSE o.week END)) AS week_min, 
                         MAX(CONCAT(o.year, '-W', CASE WHEN o.week < 10 THEN CONCAT('0', o.week) ELSE o.week END)) AS week_max, 
                         COUNT(*) AS orders, 
@@ -272,8 +272,8 @@
                         GROUP BY date_upload, user_upload 
                     ) AS od ON od.date_upload = o.date_upload AND od.user_upload = o.user_upload 
                     WHERE order_no > 0 
-                    GROUP BY o.date_upload, o.user_upload 
-                    ORDER BY o.date_upload 
+                    GROUP BY DATE(o.date_upload), o.user_upload 
+                    ORDER BY o.date_upload DESC 
                     LIMIT 10";
 
             return $this->select($sql);
@@ -694,11 +694,11 @@
             return $this->insert($sql, $array);
         }
 
-        public function setEventMap(int $idEvent, int $year, int $idVariety, string $greenhouse, string $position)
+        public function setEventMap(int $idEvent, int $year, int $idVariety, string $greenhouse, string $position, string $management)
         {
-            $sql = 'INSERT INTO events_maps (id_event, year, id_variety, greenhouse, position) VALUES (:value0, :value1, :value2, :value3, :value4)';
+            $sql = 'INSERT INTO events_maps (id_event, year, id_variety, greenhouse, position, management) VALUES (:value0, :value1, :value2, :value3, :value4, :value5)';
 
-            $array = array($idEvent, $year, $idVariety, $greenhouse, $position);
+            $array = array($idEvent, $year, $idVariety, $greenhouse, $position, $management);
             return $this->insert($sql, $array);
         }
 

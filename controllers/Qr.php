@@ -50,8 +50,8 @@ class Qr extends Controllers
                             <div class="position-absolute btn-download d-none" style="margin-left: -3px; margin-top: -3px;">
                                 <button class="btn btn-primary" onclick="convertirADiv('."'".'cont'.$k["id"]."'".', '.$k["id"].')" title="Download"><i class="bi bi-download"></i></button>
                             </div>
-                            <img src="https://quickchart.io/chart?chs=250x250&cht=qr&chl='.$k["id_variety"].','.$k["id"].','.$k["position"].'&choe=UTF-8&chld=L|2" alt="">
-                            <h6 class="mt-1"><b>'.$k["variety"].'</b> - ('.$k["greenhouse"].' | <b class="text-danger">#'.$k["position"].'</b>)</h6>
+                            <img src="https://quickchart.io/chart?chs=250x250&cht=qr&chl='.$k["id_variety"].','.$k["id"].','.$k["position"].','.$k["management"].'&choe=UTF-8&chld=L|2" alt="">
+                            <h6 class="mt-1"><b>'.$k["variety"].'</b> - (<b class="text-danger">#'.$k["position"].'</b> | '.$k["management"].')</h6>
                         </div>
                     ';
 

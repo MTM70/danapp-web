@@ -81,6 +81,16 @@ class Api extends Controllers
         }
     }
 
+    public function getVarieties3()
+    {
+        $res = $this->model->getVarieties3();
+
+        if (!empty($res)) {
+            echo json_encode(array("error" => false, "datos" => $res));
+        } else {
+            echo json_encode(array("error" => "No data Varieties!"));
+        }
+    }
 
     public function getProducts()
     {
@@ -857,6 +867,19 @@ class Api extends Controllers
         }
     }
 
+    public function getEventsCustomersOrders2()
+    {
+        if (isset($_GET["id"]) AND $_GET["id"]) {
+            $res = $this->model->getEventsCustomersOrders2($_GET["id"]);
+
+            if (!empty($res)) {
+                echo json_encode(array("error" => false, "datos" => $res));
+            } else {
+                echo json_encode(array("error" => "No data!"));
+            }
+        }
+    }
+
     public function syncEventSecCusts()
     {
         if (isset($_POST['data']) AND isset($_POST['idRol'])) {
@@ -955,6 +978,50 @@ class Api extends Controllers
                         }
                     }else{
                         $res = $this->model->setDataEventVarietySync2($k["id_user"], $k["id_event"], $k["id_sec_cust"], $k["name"], $k["id_type"], $k["id_product"], $k["id_variety"], $k["id_event_map"], $k["year"], $k["week"], $k["tot_quantity"], $k["replicas"], $k["remark"], $k["confirm"], $k["date"], $table);
+                        if (!$res) {
+                            echo json_encode(array("error" => "Failed to record data!"));
+                            exit();
+                        }
+                    }
+                }else{
+
+                    $res = $this->model->deleteEventVarietyByEventBySecCustByVariety($k["id_user"], $k["id_event"], $k["id_sec_cust"], $k["id_variety"], $k["name"], $k["id_event_map"], $table);
+
+                    if (!$res) {
+                        echo json_encode(array("error" => "Failed to delete data!"));
+                        exit();
+                    }
+
+                }
+
+            }
+            
+            echo json_encode(array("error" => false));
+        }else{
+            echo json_encode(array("error" => "parameter error!"));
+        }
+    }
+
+    public function syncEventSecCustsVarieties3()
+    {
+        if (isset($_POST['data']) AND isset($_POST['idRol'])) {
+
+            $data = json_decode($_POST["data"], true);
+            $table = ($_POST['idRol'] != 3) ? 'events_sec_customers_orders' : 'events_sec_customers_orders_bck' ;
+
+            foreach ($data as $k) {
+
+                if ($k["state"] != 2) {
+                    $res = $this->model->getEventVarietyByEventBySecCustByVariety($k["id_user"], $k["id_event"], $k["id_sec_cust"], $k["id_variety"], $k["name"], $k["id_event_map"], $table);
+                    
+                    if (!empty($res)) {
+                        $res = $this->model->updateDataEventVarietySync3($res["id"], $k["year"], $k["week"], $k["tot_quantity"], $k["replicas"], $k["management"], $k["remark"], $k["confirm"], $table);
+                        if (!$res) {
+                            echo json_encode(array("error" => "Error updating data!"));
+                            exit();
+                        }
+                    }else{
+                        $res = $this->model->setDataEventVarietySync3($k["id_user"], $k["id_event"], $k["id_sec_cust"], $k["name"], $k["id_type"], $k["id_product"], $k["id_variety"], $k["id_event_map"], $k["year"], $k["week"], $k["tot_quantity"], $k["replicas"], $k["management"], $k["remark"], $k["confirm"], $k["date"], $table);
                         if (!$res) {
                             echo json_encode(array("error" => "Failed to record data!"));
                             exit();

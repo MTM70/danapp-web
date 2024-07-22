@@ -46,7 +46,14 @@ class ApiModel extends Mysql
 
     public function getVarieties2()
     {
-        $sql = "SELECT * FROM varieties";
+        $sql = "SELECT id, id_crop, variety_code, variety, img FROM varieties";
+
+        return $this->select($sql);
+    }
+
+    public function getVarieties3()
+    {
+        $sql = "SELECT id, id_crop, variety_code, variety, img, img2 FROM varieties";
 
         return $this->select($sql);
     }
@@ -437,7 +444,20 @@ class ApiModel extends Mysql
 
     public function getEventsCustomersOrders(int $user)
     {
-        $sql = "SELECT *, 1 state 
+        $sql = "SELECT id, id_user, id_event, id_sec_cust, name, id_type, id_product, id_variety, id_event_map, year, week, 
+                    tot_quantity, replicas, remark, confirm, date, 1 state 
+                FROM events_sec_customers_orders 
+                WHERE /*id_user = :value0 AND*/ YEAR(date) = YEAR(NOW())";
+
+        //$array = array($user);
+
+    return $this->select($sql/*, $array*/);
+    }
+
+    public function getEventsCustomersOrders2(int $user)
+    {
+        $sql = "SELECT id, id_user, id_event, id_sec_cust, name, id_type, id_product, id_variety, id_event_map, year, week, 
+                    tot_quantity, replicas, management, remark, confirm, date, 1 state 
                 FROM events_sec_customers_orders 
                 WHERE /*id_user = :value0 AND*/ YEAR(date) = YEAR(NOW())";
 
@@ -512,6 +532,22 @@ class ApiModel extends Mysql
     {
         $sql = "UPDATE $table SET year = :value1, week = :value2, tot_quantity = :value3, replicas = :value4, remark = :value5, confirm = :value6 WHERE id = :value0";
         $array = array($id, $year, $week, $totQuantity, $replicas, $remark, $confirm);
+
+        return $this->update($sql, $array);
+    }
+
+    public function setDataEventVarietySync3(int $idUser, int $idEvent, int $idSecCust, String $name, int $idType, int $idProduct, int $idVariety, int $idEventMap = null, int $year, int $week, int $totQuantity, int $replicas, String $management, String $remark, int $confirm, String $date, String $table)
+    {
+        $sql = "INSERT INTO $table (id_user, id_event, id_sec_cust, name, id_type, id_product, id_variety, id_event_map, year, week, tot_quantity, replicas, management, remark, confirm, date) VALUES (:value0, :value1, :value2, :value3, :value4, :value5, :value6, :value7, :value8, :value9, :value10, :value11, :value12, :value13, :value14, :value15)";
+        $array = array($idUser, $idEvent, $idSecCust, $name, $idType, $idProduct, $idVariety, $idEventMap, $year, $week, $totQuantity, $replicas, $management, $remark, $confirm, $date);
+
+        return $this->insert($sql, $array);
+    }
+
+    public function updateDataEventVarietySync3(int $id, int $year, int $week, int $totQuantity, int $replicas, String $management, String $remark, int $confirm, String $table)
+    {
+        $sql = "UPDATE $table SET year = :value1, week = :value2, tot_quantity = :value3, replicas = :value4, management = :value5, remark = :value6, confirm = :value7 WHERE id = :value0";
+        $array = array($id, $year, $week, $totQuantity, $replicas, $management, $remark, $confirm);
 
         return $this->update($sql, $array);
     }
