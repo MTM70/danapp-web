@@ -120,7 +120,7 @@ async function loadVarieties() {
                             "processing": true,
                             "scrollY": false,
                             "scrollX": (isMobile) ? true : false,
-                            "iDisplayLength": 50,
+                            "iDisplayLength": 25,
                             "stateSave": true,
                             order: [[2, 'asc']],
                             scrollY: '53vh',

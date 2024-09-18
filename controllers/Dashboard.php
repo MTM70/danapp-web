@@ -1588,7 +1588,7 @@
                     $stateImg = ($k["state"]) ? '' : 'opacity: 0.3;' ;
 
                     $this->html .= '
-                        <div class="card cursor-select shadow-none border border-light me-2 '.$state.'" style="height:65vh; max-width:41vh;" onclick="openModalViewEvent('.$k["id"].', '."'".$k["name"]."'".')">
+                        <div class="card cursor-select shadow-none border border-light rounded-top me-2 '.$state.'" style="height:65vh; max-width:41vh;" onclick="openModalViewEvent('.$k["id"].', '."'".$k["name"]."'".')">
                             <div class="img-hover-zoom">
                                 <div class="card-img-top" style="background-image: url('.base_url().'/uploads/events/'.$k["image"].'); background-position-y: center; '.$stateImg.'"></div>
                             </div>
@@ -1601,8 +1601,8 @@
                                 <p class="card-text">'.$k["description"].'</p>
                                 <p class="card-text"><small class="text-success"><i class="bi bi-calendar-range me-1"></i>Week '.$k["start_week"].' to Week '.$k["end_week"].'</small></p>
                             </div>
-                            <div class="card-footer">
-                                <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+                            <div class="card-footer d-none">
+                                <p class="card-text"><small class="text-muted">'.$k["cc"].'</small></p>
                             </div>
                         </div>
                     ';
@@ -1630,9 +1630,24 @@
         {
             if ($_POST AND isset($_POST["process"]) AND $_POST["process"]) {
 
+                if (isset($_POST["event-cc"]) AND $_POST["event-cc"]) {
+                    $arrayEmails = explode(",", $_POST["event-cc"]);
+
+                    foreach ($arrayEmails as $value) {
+                        if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                            $this->arrResponse = [
+                                'status' => false, 
+                                'res' => 'Email invalid!'
+                            ];
+
+                            exit(json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE));
+                        }
+                    }
+                }
+
                 if ($_POST["process"] == 1) {
                     if (isset($_POST["event-name"]) AND isset($_POST["event-start"]) AND isset($_POST["event-end"]) AND isset($_POST["event-description"]) 
-                        AND isset($_FILES["event-file"]) AND $_POST["event-name"] AND $_POST["event-start"] AND $_POST["event-end"] AND $_POST["event-description"]) {
+                        AND isset($_FILES["event-file"]) AND isset($_POST["event-cc"]) AND $_POST["event-name"] AND $_POST["event-start"] AND $_POST["event-end"]) {
 
                         if ($this->model->getEventByNameAndWeek(str_ucfirst($_POST["event-name"]), $_POST["event-start"], $_POST["event-end"], 0)) {
                             $this->arrResponse = array(
@@ -1662,7 +1677,7 @@
                         }
                         //*----------------------------------
                         
-                        $id = $this->model->setEvent(str_ucfirst($_POST["event-name"]), $_POST["event-start"], $_POST["event-end"], str_ucfirst($_POST["event-description"]), $filename);
+                        $id = $this->model->setEvent(str_ucfirst($_POST["event-name"]), $_POST["event-start"], $_POST["event-end"], str_ucfirst($_POST["event-description"]), $_POST["event-cc"], $filename);
 
                         if (!$id) {
                             $this->arrResponse = array(
@@ -1685,7 +1700,7 @@
                     }
                 }else {
                     if (isset($_POST["event-id"]) AND isset($_POST["event-name"]) AND isset($_POST["event-start"]) AND isset($_POST["event-end"]) AND isset($_POST["event-description"]) AND isset($_POST["event-state"]) 
-                        AND isset($_FILES["event-file"]) AND $_POST["event-id"] AND $_POST["event-name"] AND $_POST["event-start"] AND $_POST["event-end"] AND $_POST["event-description"]) {
+                        AND isset($_FILES["event-file"]) AND isset($_POST["event-cc"]) AND $_POST["event-id"] AND $_POST["event-name"] AND $_POST["event-start"] AND $_POST["event-end"]) {
 
                         if ($this->model->getEventByNameAndWeek(str_ucfirst($_POST["event-name"]), $_POST["event-start"], $_POST["event-end"], $_POST["event-id"])) {
                             $this->arrResponse = array(
@@ -1715,7 +1730,7 @@
                         }
                         //*----------------------------------
                         
-                        $update = $this->model->updateEvent($_POST["event-id"], str_ucfirst($_POST["event-name"]), $_POST["event-start"], $_POST["event-end"], str_ucfirst($_POST["event-description"]), $filename, $_POST["event-state"]);
+                        $update = $this->model->updateEvent($_POST["event-id"], str_ucfirst($_POST["event-name"]), $_POST["event-start"], $_POST["event-end"], str_ucfirst($_POST["event-description"]), $_POST["event-cc"], $filename, $_POST["event-state"]);
 
                         if (!$update) {
                             $this->arrResponse = array(
@@ -1982,10 +1997,12 @@
                 //$sheet->setCellValue('P1', 'Variety number');
                 $sheet->setCellValue('K1', 'Variety name'); //Q
                 $sheet->setCellValue('L1', 'Tot. quantity'); //R
-                $sheet->setCellValue('M1', 'replicas'); //S
+                $sheet->setCellValue('M1', 'Replicas'); //S
+                $sheet->setCellValue('N1', 'Farm name');
+                $sheet->setCellValue('O1', 'Management');
                 //$sheet->setCellValue('T1', 'Greenhouse');
                 //$sheet->setCellValue('U1', 'Position');
-                $sheet->setCellValue('N1', 'Remark'); //V
+                $sheet->setCellValue('P1', 'Remark'); //V
 
                 if (!empty($data)) {
 
@@ -2014,9 +2031,11 @@
 
                         $sheet->setCellValue('L'.$f, $k["tot_quantity"]);
                         $sheet->setCellValue('M'.$f, $k["replicas"]);
+                        $sheet->setCellValue('N'.$f, $k["email_name"]);
+                        $sheet->setCellValue('O'.$f, $k["management"]);
                         //$sheet->setCellValue('T'.$f, $k["greenhouse"]);
                         //$sheet->setCellValue('U'.$f, $k["position"]);
-                        $sheet->setCellValue('N'.$f, $k["remark"]);
+                        $sheet->setCellValue('P'.$f, $k["remark"]);
 
                         //$sheet->getStyle("A" . $f)->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_DATE_YYYYMMDDSLASH);
                         
@@ -2051,7 +2070,7 @@
                 //$sheet->getColumnDimension('T')->setWidth(20);
                 //$sheet->getColumnDimension('U')->setWidth(10);
                 $sheet->getColumnDimension('L')->setAutoSize(true);
-                $sheet->getColumnDimension('N')->setAutoSize(true);
+                $sheet->getColumnDimension('P')->setAutoSize(true);
                 
 
                 $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
@@ -3425,8 +3444,8 @@
                             <td class="align-middle">'.$k["crop"].'</td>
                             <td class="">'.$k["variety_code"].'</td>
                             <td class="">'.$k["variety"].'</td>
-                            <td class="">'.($k["img"] ? '<img src="'.media()."/img/varieties/".$k["img"].'" height="100">' : '').'</td>
-                            <td class="">'.($k["img2"] ? '<img src="'.media()."/img/varieties/".$k["img2"].'" height="100">' : '').'</td>
+                            <td class="">'.($k["img"] ? '<img src="'.media()."/img/varieties/optimized/".$k["img"].'" height="100">' : '').'</td>
+                            <td class="">'.($k["img2"] ? '<img src="'.media()."/img/varieties/optimized/".$k["img2"].'" height="100">' : '').'</td>
                         </tr>
                     ';
                 }
@@ -3572,7 +3591,7 @@
 
                         //*Upload image----------------------
                         if ($_FILES["variety-file"]) {
-                            $filename = $_POST["variety-number"] .date('H_i_s'). "." . pathinfo($_FILES["variety-file"]["name"], PATHINFO_EXTENSION);
+                            $filename = $_POST["variety-number"] .date('H_i_s'). "." . strtolower(pathinfo($_FILES["variety-file"]["name"], PATHINFO_EXTENSION));
                             
                             $tempname = $_FILES["variety-file"]["tmp_name"];
 
@@ -3581,8 +3600,10 @@
                             }else{
                                 //TODO Save img optimized======================================
                                 $image = imageQuality("assets/img/varieties/" . $filename, 1);
+                                $imageOpt = imageQuality("assets/img/varieties/" . $filename);
                                 // Guardar la imagen en el servidor
                                 file_put_contents('assets/img/varieties/'.$filename, base64_decode($image));
+                                file_put_contents('assets/img/varieties/optimized/'.$filename, base64_decode($imageOpt));
                                 //TODO Save img optimized======================================
                             }
                         }else{
@@ -3592,7 +3613,7 @@
 
                         //*Upload image 2----------------------
                         if ($_FILES["variety-file-2"]) {
-                            $filename2 = $_POST["variety-number"] .date('H_i_s'). "_disbud." . pathinfo($_FILES["variety-file-2"]["name"], PATHINFO_EXTENSION);
+                            $filename2 = $_POST["variety-number"] .date('H_i_s'). "_disbud." . strtolower(pathinfo($_FILES["variety-file-2"]["name"], PATHINFO_EXTENSION));
                             
                             $tempname2 = $_FILES["variety-file-2"]["tmp_name"];
 
@@ -3601,8 +3622,10 @@
                             }else{
                                 //TODO Save img optimized======================================
                                 $image2 = imageQuality("assets/img/varieties/" . $filename2, 1);
+                                $image2Opt = imageQuality("assets/img/varieties/" . $filename2);
                                 // Guardar la imagen en el servidor
                                 file_put_contents('assets/img/varieties/'.$filename2, base64_decode($image2));
+                                file_put_contents('assets/img/varieties/optimized/'.$filename2, base64_decode($image2Opt));
                                 //TODO Save img optimized======================================
                             }
                         }else{
@@ -3786,7 +3809,7 @@
 
                                         foreach ($response as $o) {
 
-                                            //if (substr($o["visit_day"], 0, 10) != $day) continue;
+                                            if (substr($o["visit_day"], 0, 10) != $day) continue;
 
                                             $visitDay = new DateTime($o["visit_day"]);
 
@@ -3806,7 +3829,7 @@
                                                 >
                                                     <div class="card-header d-flex justify-content-between align-items-center bg-primary bg-opacity-10 p-1">
                                                         <div class="ps-2">
-                                                            <h6 class="card-text text-secondary"><i class="bi bi-flower2 me-1"></i>'.$day.'</h6>
+                                                            <h6 class="card-text text-secondary"><i class="bi bi-flower2 me-1"></i>'.$o["crop"].'</h6>
                                                         </div>
                                                         <div>
                                                             <h6 class="card-text text-secondary">'.substr($o["type"], 0, 20).'</h6>

@@ -1,6 +1,6 @@
 <?php
 
-    const BASE_URL = "http://192.168.1.44/danapp-web";
+    const BASE_URL = "http://192.168.18.94/danapp-web";
     
     //Conexion a DB
     const DB_HOST = "localhost";

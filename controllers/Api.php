@@ -440,7 +440,7 @@ class Api extends Controllers
             foreach ($data as $k) {
                 $res = $this->model->getOrderParameter($k["id_user"], $k["id_order"], $k["id_variety"], $k["id_parameter"]);
 
-                if ($res) {
+                if (!empty($res)) {
                     $res = $this->model->updateDataSync($res["id"], $k["value"], $k["obs"]);
                     if (!$res) {
                         echo json_encode(array("error" => "Error updating data!"));
@@ -832,6 +832,19 @@ class Api extends Controllers
     {
         if (isset($_GET["id"]) AND $_GET["id"]) {
             $res = $this->model->getEvents($_GET["id"]);
+
+            if (!empty($res)) {
+                echo json_encode(array("error" => false, "datos" => $res));
+            } else {
+                echo json_encode(array("error" => "No data!"));
+            }
+        }
+    }
+
+    public function getEvents2()
+    {
+        if (isset($_GET["id"]) AND $_GET["id"]) {
+            $res = $this->model->getEvents2($_GET["id"]);
 
             if (!empty($res)) {
                 echo json_encode(array("error" => false, "datos" => $res));

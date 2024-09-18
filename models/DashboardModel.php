@@ -678,11 +678,11 @@
             return $this->selectOne($sql, $array);
         }
 
-        public function setEvent(string $name, int $start, int $end, String $description, string $image)
+        public function setEvent(string $name, int $start, int $end, String $description, string $cc, string $image)
         {
-            $sql = 'INSERT INTO events (id_country, name, start_week, end_week, description, image) VALUES (:value0, :value1, :value2, :value3, :value4, :value5)';
+            $sql = 'INSERT INTO events (id_country, name, start_week, end_week, description, cc, image) VALUES (:value0, :value1, :value2, :value3, :value4, :value5, :value6)';
 
-            $array = array($_SESSION["id_country"], $name, $start, $end, $description, $image);
+            $array = array($_SESSION["id_country"], $name, $start, $end, $description, $cc, $image);
             return $this->insert($sql, $array);
         }
 
@@ -710,11 +710,11 @@
             return $this->update($sql, $array);
         }
 
-        public function updateEvent(int $id, String $name, int $start, int $end, String $description, string $image = null, int $state)
+        public function updateEvent(int $id, String $name, int $start, int $end, String $description, string $cc, string $image = null, int $state)
         {
-            $sql = 'UPDATE events SET name = :value1, start_week = :value2, end_week = :value3, description = :value4, image = :value5, state = :value6 WHERE id = :value0';
+            $sql = 'UPDATE events SET name = :value1, start_week = :value2, end_week = :value3, description = :value4, cc = :value5, image = :value6, state = :value7 WHERE id = :value0';
 
-            $array = array($id, $name, $start, $end, $description, $image, $state);
+            $array = array($id, $name, $start, $end, $description, $cc, $image, $state);
             return $this->update($sql, $array);
         }
 
@@ -752,6 +752,7 @@
                         v.variety_code, v.variety, 
                         c.crop_no, c.crop, 
                         cust.cust_no, cust.cust, 
+                        d.management, 
                         IFNULL(m.greenhouse, '') AS greenhouse, IFNULL(m.position, '') AS position 
                     FROM events_sec_customers_orders AS d 
                     INNER JOIN events_sec_customers AS esc ON esc.id_event = d.id_event AND esc.id_sec_cust = d.id_sec_cust AND YEAR(esc.date) = YEAR(d.date) AND esc.name = d.name 
@@ -1152,8 +1153,8 @@
                             END 
                             AND 
                         CASE 
-                            WHEN IFNULL(vd.visit_day, 0) != 0 THEN YEAR(vd.visit_day) = :value1 AND WEEK(vd.visit_day) = :value2 
-                            ELSE YEAR(o.visit_day) = :value1 AND WEEK(o.visit_day) = :value2
+                            WHEN IFNULL(vd.visit_day, 0) != 0 THEN YEAR(vd.visit_day) = :value1 AND WEEK(vd.visit_day, 1) = :value2 
+                            ELSE YEAR(o.visit_day) = :value1 AND WEEK(o.visit_day, 1) = :value2
                         END 
                         GROUP BY od.id_order 
                     ) AS vts ON vts.id_order = o.id 
@@ -1165,8 +1166,8 @@
                         END 
                     AND 
                         CASE 
-                            WHEN IFNULL(vd.visit_day, 0) != 0 THEN YEAR(vd.visit_day) = :value1 AND WEEK(vd.visit_day) = :value2 
-                            ELSE YEAR(o.visit_day) = :value1 AND WEEK(o.visit_day) = :value2
+                            WHEN IFNULL(vd.visit_day, 0) != 0 THEN YEAR(vd.visit_day) = :value1 AND WEEK(vd.visit_day, 1) = :value2 
+                            ELSE YEAR(o.visit_day) = :value1 AND WEEK(o.visit_day, 1) = :value2
                         END 
                              
                     GROUP BY o.id 
@@ -1189,7 +1190,7 @@
                             WHEN id_rol != 1 THEN id_sec_cust IN (SELECT id_sec_cust FROM users_sec_customers AS usc WHERE usc.id_user = u.id) 
                             ELSE id_sec_cust > 0 
                         END 
-                        AND YEAR(o.visit_day) = :value1 AND WEEK(o.visit_day) = :value2 
+                        AND YEAR(o.visit_day) = :value1 AND WEEK(o.visit_day, 1) = :value2 
                     GROUP BY o.id_type";
 
             $array = array($_SESSION["id"], $year, $week);
@@ -1208,7 +1209,7 @@
                             WHEN id_rol != 1 THEN id_sec_cust IN (SELECT id_sec_cust FROM users_sec_customers AS usc WHERE usc.id_user = u.id) 
                             ELSE id_sec_cust > 0 
                         END 
-                        AND YEAR(o.visit_day) = :value1 AND WEEK(o.visit_day) = :value2 
+                        AND YEAR(o.visit_day) = :value1 AND WEEK(o.visit_day, 1) = :value2 
                     GROUP BY o.destination";
 
             $array = array($_SESSION["id"], $year, $week);
@@ -1229,7 +1230,7 @@
                             WHEN id_rol != 1 THEN id_sec_cust IN (SELECT id_sec_cust FROM users_sec_customers AS usc WHERE usc.id_user = u.id) 
                             ELSE id_sec_cust > 0 
                         END 
-                        AND YEAR(o.visit_day) = :value1 AND WEEK(o.visit_day) = :value2 
+                        AND YEAR(o.visit_day) = :value1 AND WEEK(o.visit_day, 1) = :value2 
                     GROUP BY c.id";
 
             $array = array($_SESSION["id"], $year, $week);
@@ -1288,9 +1289,9 @@
                         CONCAT( 
                             YEAR(oc.date), 
                             CASE 
-                                WHEN WEEK(oc.date) < 10 
-                                    THEN CONCAT('0', WEEK(oc.date)) 
-                                ELSE WEEK(oc.date) 
+                                WHEN WEEK(oc.date, 1) < 10 
+                                    THEN CONCAT('0', WEEK(oc.date, 1)) 
+                                ELSE WEEK(oc.date, 1) 
                             END 
                         ) AS weekUnion, 
                         op.value 
@@ -1301,9 +1302,9 @@
                         CONCAT( 
                             YEAR(oc.date), 
                             CASE 
-                                WHEN WEEK(oc.date) < 10 
-                                    THEN CONCAT('0', WEEK(oc.date)) 
-                                ELSE WEEK(oc.date) 
+                                WHEN WEEK(oc.date, 1) < 10 
+                                    THEN CONCAT('0', WEEK(oc.date, 1)) 
+                                ELSE WEEK(oc.date, 1) 
                             END 
                         ) BETWEEN CONCAT(:value0, :value1) AND CONCAT(:value2, :value3) 
                     ORDER BY year, week;";

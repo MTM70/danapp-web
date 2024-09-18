@@ -429,6 +429,18 @@ class ApiModel extends Mysql
         return $this->select($sql, $array);
     }
 
+    public function getEvents2(int $user)
+    {
+        $sql = 'SELECT e.id, e.name, start_week, end_week, description, cc, image, e.state 
+                FROM events AS e 
+                INNER JOIN users AS u ON u.id = :value0 
+                WHERE e.id_country = u.id_country';
+
+        $array = array($user);
+
+        return $this->select($sql, $array);
+    }
+
     public function getEventsCustomers(int $user)
     {
         $sql = 'SELECT esc.*, 1 state 
@@ -468,8 +480,8 @@ class ApiModel extends Mysql
 
     public function getEventSecCustByEventBySecCust(int $idUser, int $idEvent, int $idSecCust, String $name, String $table)
     {
-        $sql = "SELECT id FROM $table WHERE id_user = :value0 AND id_event = :value1 AND id_sec_cust = :value2 AND YEAR(date) = YEAR(NOW()) AND name = :value3 LIMIT 1";
-        $array = array($idUser, $idEvent, $idSecCust, $name);
+        $sql = "SELECT id FROM $table WHERE /*id_user = :value0 AND*/ id_event = :value0 AND id_sec_cust = :value1 AND YEAR(date) = YEAR(NOW()) AND name = :value2 LIMIT 1";
+        $array = array(/*$idUser, */$idEvent, $idSecCust, $name);
 
         return $this->selectOne($sql, $array);
     }

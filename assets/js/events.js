@@ -310,6 +310,7 @@ async function loadEventEdit(id, event) {
                         document.getElementById('event-start').value = data['start_week'];
                         document.getElementById('event-end').value = data['end_week'];
                         document.getElementById('event-description').value = data['description'];
+                        document.getElementById('event-cc').value = data['cc'];
                         document.getElementById('event-state').value = data['state'];
 
                         if (data['image']) {

@@ -414,6 +414,11 @@
                                     </select>
                                 </div>
 
+                                <div class="col mb-3">
+                                    <label for="event-state" class="form-label">Emails copied to:</label>
+                                    <textarea class="form-control" name="event-cc" id="event-cc" rows="3" placeholder="example1@company.com,example2@company.com"></textarea>
+                                </div>
+
                                 <div>
                                     <label for="event-state" class="form-label">State</label>
                                     <select class="form-select w-50" name="event-state" id="event-state" required>
@@ -428,7 +433,7 @@
 
                         <div class="col-md-12 pt-md-5">
                             <label for="event-description" class="form-label">Description</label>
-                            <textarea class="form-control" name="event-description" id="event-description" cols="30" rows="5" required></textarea>
+                            <textarea class="form-control" name="event-description" id="event-description" cols="30" rows="5"></textarea>
                         </div>
                     </div>
                 </div>
