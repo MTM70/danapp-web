@@ -422,7 +422,7 @@ class ApiModel extends Mysql
         $sql = 'SELECT e.id, e.name, start_week, end_week, description, image, e.state 
                 FROM events AS e 
                 INNER JOIN users AS u ON u.id = :value0 
-                WHERE e.id_country = u.id_country';
+                WHERE e.id_country = u.id_country AND e.state = 1';
 
         $array = array($user);
 
@@ -434,7 +434,7 @@ class ApiModel extends Mysql
         $sql = 'SELECT e.id, e.name, start_week, end_week, description, cc, image, e.state 
                 FROM events AS e 
                 INNER JOIN users AS u ON u.id = :value0 
-                WHERE e.id_country = u.id_country';
+                WHERE e.id_country = u.id_country AND e.state = 1';
 
         $array = array($user);
 

@@ -45,15 +45,7 @@ class Qr extends Controllers
 
                     if ($cg != $k["crop_general"]) $this->html .= '<div class="col-12 fs-1-3 fw-semibold bg-primary bg-opacity-10 text-primary mt-2 mb-2 p-3 text-center">'.$k["crop_general"].'</div>';
 
-                    $this->html .= '
-                        <div class="border text-center p-1 bg-white" id="cont'.$k["id"].'" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" style="width:270px; height:300px;">
-                            <div class="position-absolute btn-download d-none" style="margin-left: -3px; margin-top: -3px;">
-                                <button class="btn btn-primary" onclick="convertirADiv('."'".'cont'.$k["id"]."'".', '.$k["id"].')" title="Download"><i class="bi bi-download"></i></button>
-                            </div>
-                            <img src="https://quickchart.io/chart?chs=250x250&cht=qr&chl='.$k["id_variety"].','.$k["id"].','.$k["position"].','.$k["management"].'&choe=UTF-8&chld=L|2" alt="">
-                            <h6 class="mt-1"><b>'.$k["variety"].'</b> - (<b class="text-danger">#'.$k["position"].'</b> | '.$k["management"].')</h6>
-                        </div>
-                    ';
+                    $this->html .= $this->generateQr($k);
 
                     $cg= $k["crop_general"];
                 }
@@ -66,15 +58,7 @@ class Qr extends Controllers
 
                     if ($cg != $k["crop_general"]) $this->html .= '<div class="col-12 fs-1-3 fw-semibold bg-primary bg-opacity-10 text-primary mt-2 mb-2 p-3 text-center">Roses</div>';
 
-                    $this->html .= '
-                        <div class="border text-center p-1 bg-white" id="cont'.$k["id"].'" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" style="width:270px; height:300px;">
-                            <div class="position-absolute btn-download d-none" style="margin-left: -3px; margin-top: -3px;">
-                                <button class="btn btn-primary" onclick="convertirADiv('."'".'cont'.$k["id"]."'".', '.$k["id"].')" title="Download"><i class="bi bi-download"></i></button>
-                            </div>
-                            <img src="https://quickchart.io/chart?chs=250x250&cht=qr&chl='.$k["id_variety"].','.$k["id"].','.$k["position"].'&choe=UTF-8&chld=L|2" alt="">
-                            <h6 class="mt-1"><b>'.$k["variety"].'</b> - ('.$k["greenhouse"].' | <b class="text-danger">#'.$k["position"].'</b>)</h6>
-                        </div>
-                    ';
+                    $this->html .= $this->generateQr($k);
 
                     $cg= $k["crop_general"];
                 }
@@ -101,6 +85,18 @@ class Qr extends Controllers
 
         echo json_encode($this->arrResponse, JSON_UNESCAPED_UNICODE);
 
+    }
+
+    public function generateQr(array $k) : string {
+        return '
+            <div class="border text-center p-1 bg-white" id="cont'.$k["id"].'" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" style="width:270px; height:300px;">
+                <div class="position-absolute btn-download d-none" style="margin-left: -3px; margin-top: -3px;">
+                    <button class="btn btn-primary" onclick="convertirADiv('."'".'cont'.$k["id"]."'".', '.$k["id"].')" title="Download"><i class="bi bi-download"></i></button>
+                </div>
+                <img src="https://quickchart.io/chart?chs=250x250&cht=qr&chl='.$k["id_variety"].','.$k["id"].','.$k["position"].','.$k["management"].'&choe=UTF-8&chld=L|2" alt="">
+                <h6 class="mt-1"><b>'.$k["variety"].'</b> - (<b class="text-danger">#'.$k["position"].'</b> | '.$k["management"].')</h6>
+            </div>
+        ';
     }
 
     public function saveQrToServer()

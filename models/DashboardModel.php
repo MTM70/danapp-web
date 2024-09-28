@@ -661,9 +661,17 @@
 
         public function getEvents()
         {
-            $sql = 'SELECT * FROM events WHERE id_country = :value0';
+            $sql = 'SELECT e.*, c.img image_country 
+                    FROM events e 
+                    JOIN countries c ON e.id_country = c.id 
+                    WHERE 
+                    CASE 
+                        WHEN :value0 IN (1, 2) THEN true 
+                        ELSE e.id_country = :value1 
+                    END 
+                    ORDER BY c.id';
 
-            $array = array($_SESSION["id_country"]);
+            $array = array($_SESSION["id"], $_SESSION["id_country"]);
             return $this->select($sql, $array);
         }
 
@@ -939,7 +947,7 @@
 
         public function getUsers()
         {
-            $sql = 'SELECT u.id, user, name, last_name, rol, state 
+            $sql = 'SELECT u.id, user, name, last_name, rol, u.state 
                     FROM users AS u 
                     INNER JOIN users_details AS ud ON ud.id_user = u.id 
                     INNER JOIN roles AS r ON r.id = u.id_rol 
@@ -961,7 +969,7 @@
 
         public function getRoles()
         {
-            $sql = 'SELECT * FROM roles';
+            $sql = 'SELECT * FROM roles WHERE state = 1';
 
             return $this->select($sql);
         }
@@ -979,7 +987,7 @@
 
         public function setUser(int $idRol, String $user, String $pass)
         {
-            $sql = 'INSERT INTO users (id_country, id_rol, id_cust, user, pass) VALUES (:value0, 1, :value1, :value2, :value3)';
+            $sql = 'INSERT INTO users (id_country, id_rol, id_cust, user, pass) VALUES (:value0, :value1, 1, :value2, :value3)';
 
             $array = array($_SESSION["id_country"], $idRol, $user, $pass);
             return $this->insert($sql, $array);

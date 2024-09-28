@@ -1601,8 +1601,8 @@
                                 <p class="card-text">'.$k["description"].'</p>
                                 <p class="card-text"><small class="text-success"><i class="bi bi-calendar-range me-1"></i>Week '.$k["start_week"].' to Week '.$k["end_week"].'</small></p>
                             </div>
-                            <div class="card-footer d-none">
-                                <p class="card-text"><small class="text-muted">'.$k["cc"].'</small></p>
+                            <div class="card-footer">
+                                <p class="card-text"><small class="text-muted"><img src="'.media().'/img/countries/'.$k["image_country"].'" height="20" style="opacity: 0.6;"></small></p>
                             </div>
                         </div>
                     ';
@@ -1649,7 +1649,7 @@
                     if (isset($_POST["event-name"]) AND isset($_POST["event-start"]) AND isset($_POST["event-end"]) AND isset($_POST["event-description"]) 
                         AND isset($_FILES["event-file"]) AND isset($_POST["event-cc"]) AND $_POST["event-name"] AND $_POST["event-start"] AND $_POST["event-end"]) {
 
-                        if ($this->model->getEventByNameAndWeek(str_ucfirst($_POST["event-name"]), $_POST["event-start"], $_POST["event-end"], 0)) {
+                        if ($this->model->getEventByNameAndWeek($_POST["event-name"], $_POST["event-start"], $_POST["event-end"], 0)) {
                             $this->arrResponse = array(
                                 'status' => false, 
                                 'res' => 'Event exist!'
@@ -1677,7 +1677,7 @@
                         }
                         //*----------------------------------
                         
-                        $id = $this->model->setEvent(str_ucfirst($_POST["event-name"]), $_POST["event-start"], $_POST["event-end"], str_ucfirst($_POST["event-description"]), $_POST["event-cc"], $filename);
+                        $id = $this->model->setEvent($_POST["event-name"], $_POST["event-start"], $_POST["event-end"], $_POST["event-description"], $_POST["event-cc"], $filename);
 
                         if (!$id) {
                             $this->arrResponse = array(
@@ -1702,7 +1702,7 @@
                     if (isset($_POST["event-id"]) AND isset($_POST["event-name"]) AND isset($_POST["event-start"]) AND isset($_POST["event-end"]) AND isset($_POST["event-description"]) AND isset($_POST["event-state"]) 
                         AND isset($_FILES["event-file"]) AND isset($_POST["event-cc"]) AND $_POST["event-id"] AND $_POST["event-name"] AND $_POST["event-start"] AND $_POST["event-end"]) {
 
-                        if ($this->model->getEventByNameAndWeek(str_ucfirst($_POST["event-name"]), $_POST["event-start"], $_POST["event-end"], $_POST["event-id"])) {
+                        if ($this->model->getEventByNameAndWeek($_POST["event-name"], $_POST["event-start"], $_POST["event-end"], $_POST["event-id"])) {
                             $this->arrResponse = array(
                                 'status' => false, 
                                 'res' => 'Event exist!'
@@ -1730,7 +1730,7 @@
                         }
                         //*----------------------------------
                         
-                        $update = $this->model->updateEvent($_POST["event-id"], str_ucfirst($_POST["event-name"]), $_POST["event-start"], $_POST["event-end"], str_ucfirst($_POST["event-description"]), $_POST["event-cc"], $filename, $_POST["event-state"]);
+                        $update = $this->model->updateEvent($_POST["event-id"], $_POST["event-name"], $_POST["event-start"], $_POST["event-end"], $_POST["event-description"], $_POST["event-cc"], $filename, $_POST["event-state"]);
 
                         if (!$update) {
                             $this->arrResponse = array(

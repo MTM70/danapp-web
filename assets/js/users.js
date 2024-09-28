@@ -10,10 +10,10 @@ $(document).ready(function() {
            secCusts.push(this.value);
         });
 
-        if (!secCusts.length && document.getElementById('user-rol').value == 2) {
+        /* if (!secCusts.length && document.getElementById('user-rol').value == 2) {
             alert('Add sec cust!');
             return;
-        }
+        } */
 
         let formData = new FormData(document.getElementById("form-user"));
         formData.append('secCusts', JSON.stringify(secCusts));
@@ -112,6 +112,7 @@ async function loadUsers() {
                     }
                 } catch (error) {
                     alert(error);
+                    console.log(response);
                 }
 
                 $('#users-loading').addClass('d-none');

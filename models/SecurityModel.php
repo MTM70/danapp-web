@@ -22,7 +22,7 @@
                     INNER JOIN users_details AS ud ON ud.id_user = u.id 
                     INNER JOIN roles AS r ON r.id = u.id_rol 
                     INNER JOIN countries AS c ON u.id_country = c.id 
-                    WHERE u.token = '$this->token' AND state = 1 
+                    WHERE u.token = '$this->token' AND u.state = 1 
                     LIMIT 1";
 
             return $this->selectOne($sql);
